@@ -1,84 +1,139 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { Component } from 'react'
+import { NavLink, Redirect } from 'react-router-dom'; 
+import { Button, Form, Grid, Segment, Message } from 'semantic-ui-react'
+import AuthContext from '../components/context/AuthContext'
+import { orderApi } from '../components/misc/OrderApi'
+import { parseJwt, handleLogError } from '../components/misc/Helpers'
 
-import ImageLight from '../assets/img/create-account-office.jpeg'
-import ImageDark from '../assets/img/create-account-office-dark.jpeg'
-import { GithubIcon, TwitterIcon } from '../icons'
-import { Input, Label, Button } from '@windmill/react-ui'
 
-function Login() {
-  return (
-    <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
-        <div className="flex flex-col overflow-y-auto md:flex-row">
-          <div className="h-32 md:h-auto md:w-1/2">
-            <img
-              aria-hidden="true"
-              className="object-cover w-full h-full dark:hidden"
-              src={ImageLight}
-              alt="Office"
-            />
-            <img
-              aria-hidden="true"
-              className="hidden object-cover w-full h-full dark:block"
-              src={ImageDark}
-              alt="Office"
-            />
-          </div>
-          <main className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
-            <div className="w-full">
-              <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                Create account
-              </h1>
-              <Label>
-                <span>Email</span>
-                <Input className="mt-1" type="email" placeholder="john@doe.com" />
-              </Label>
-              <Label className="mt-4">
-                <span>Password</span>
-                <Input className="mt-1" placeholder="***************" type="password" />
-              </Label>
-              <Label className="mt-4">
-                <span>Confirm password</span>
-                <Input className="mt-1" placeholder="***************" type="password" />
-              </Label>
+class SignUp extends Component {
+ static contextType = AuthContext;
 
-              <Label className="mt-6" check>
-                <Input type="checkbox" />
-                <span className="ml-2">
-                  I agree to the <span className="underline">privacy policy</span>
-                </span>
-              </Label>
+  state = {
+    username: '',
+    password: '',
+    name: '',
+    email: '',
+    isLoggedIn: false,
+    isError: false,
+    errorMessage: ''
+  }
 
-              <Button tag={Link} to="/login" block className="mt-4">
-                Create account
-              </Button>
+  componentDidMount() {
+    const Auth = this.context;
+    const isLoggedIn = Auth.userIsAuthenticated();
+    this.setState({ isLoggedIn });
+  }
 
-              <hr className="my-8" />
+  handleInputChange = (e, {name, value}) => {
+    this.setState({ [name]: value })
+  }
 
-              <Button block layout="outline">
-                <GithubIcon className="w-4 h-4 mr-2" aria-hidden="true" />
-                Github
-              </Button>
-              <Button block className="mt-4" layout="outline">
-                <TwitterIcon className="w-4 h-4 mr-2" aria-hidden="true" />
-                Twitter
-              </Button>
+  handleSubmit = (e) => {
+    e.preventDefault()
 
-              <p className="mt-4">
-                <Link
-                  className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                  to="/login"
-                >
-                  Already have an account? Login
-                </Link>
-              </p>
-            </div>
-          </main>
-        </div>
-      </div>
-    </div>
-  )
+    const { username, password, name, email } = this.state
+    if (!(username && password && name && email)) {
+      this.setState({
+        isError: true,
+        errorMessage: 'Please, inform all fields!'
+      })
+      return
+    }
+
+    const user = { username, password, name, email }
+    orderApi.signup(user)
+      .then(response => {
+        const { accessToken } = response.data
+        const data = parseJwt(accessToken)
+        const user = { data, accessToken }
+
+        const Auth = this.context
+        Auth.userLogin(user)
+
+        this.setState({
+          username: '',
+          password: '',
+          isLoggedIn: true,
+          isError: false,
+          errorMessage: ''
+        })
+      })
+      .catch(error => {
+        handleLogError(error)
+        if (error.response && error.response.data) {
+          const errorData = error.response.data
+          let errorMessage = 'Invalid fields'
+          if (errorData.status === 409) {
+            errorMessage = errorData.message
+          } else if (errorData.status === 400) {
+            errorMessage = errorData.errors[0].defaultMessage
+          }
+          this.setState({
+            isError: true,
+            errorMessage
+          })
+        }
+      })
+  }
+
+  render() {
+    const { isLoggedIn, isError, errorMessage } = this.state
+
+    if (isLoggedIn) {
+      return <Redirect to='/app' />
+    } else {
+      return (
+        <Grid textAlign='center'>
+          <Grid.Column style={{ maxWidth: 450 }}>
+            <Form size='large' onSubmit={this.handleSubmit}>
+              <Segment>
+                <Form.Input
+                  fluid
+                  autoFocus
+                  name='username'
+                  icon='user'
+                  iconPosition='left'
+                  placeholder='Username'
+                  onChange={this.handleInputChange}
+                />
+                <Form.Input
+                  fluid
+                  name='password'
+                  icon='lock'
+                  iconPosition='left'
+                  placeholder='Password'
+                  type='password'
+                  onChange={this.handleInputChange}
+                />
+                <Form.Input
+                  fluid
+                  name='name'
+                  icon='address card'
+                  iconPosition='left'
+                  placeholder='Name'
+                  onChange={this.handleInputChange}
+                />
+                <Form.Input
+                  fluid
+                  name='email'
+                  icon='at'
+                  iconPosition='left'
+                  placeholder='Email'
+                  onChange={this.handleInputChange}
+                />
+                <Button color='violet' fluid size='large'>Signup</Button>
+              </Segment>
+            </Form>
+            <Message>{`Already have an account? `}
+              <a href='/login' color='violet' as={NavLink} to="/login">Login</a>
+            </Message>
+            {isError && <Message negative>{errorMessage}</Message>}
+          </Grid.Column>
+        </Grid>
+      )
+    }
+  }
 }
 
-export default Login
+export default SignUp

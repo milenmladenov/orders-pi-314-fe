@@ -12,6 +12,11 @@ const Profile = lazy(() => import("../pages/Profile"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Page404 = lazy(() => import("../pages/404"));
 const Blank = lazy(() => import("../pages/Blank"));
+const NewOrderForm = lazy(() => import("../pages/newOrderForm"))
+const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
+const loggedUser = JSON.parse(localStorage.getItem("user"));
+
+console.log(loggedUser)
 
 /**
  * ⚠ These are internal routes!
@@ -23,51 +28,12 @@ const Blank = lazy(() => import("../pages/Blank"));
  * If you're looking for the links rendered in the SidebarContent, go to
  * `routes/sidebar.js`
  */
-const routes = [
-  {
-    path: "/dashboard", // the url
-    component: Dashboard,
-  },
-  {
-    path: "http://asset.myseliton.com/",
-    component: Orders,
-  },
-  {
-    path: "/all-products",
-    component: ProductsAll,
-  },
-  {
-    path: "/add-product",
-    component: AddProduct,
-  },
-  {
-    path: "/product/:id",
-    component: SingleProduct,
-  },
-  {
-    path: "/customers",
-    component: Customers,
-  },
-  {
-    path: "/chats",
-    component: Chats,
-  },
-  {
-    path: "/manage-profile",
-    component: Profile,
-  },
-  {
-    path: "/settings",
-    component: Settings,
-  },
-  {
-    path: "/404",
-    component: Page404,
-  },
-  {
-    path: "/blank",
-    component: Blank,
-  },
-];
 
+  const routes = [
+  
+    {
+      path: "/insert-by-hand",
+      component: NewOrderForm
+    }
+  ]
 export default routes;

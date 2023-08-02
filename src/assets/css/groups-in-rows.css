@@ -1,0 +1,27 @@
+/* Add this CSS to your existing stylesheet or component styles */
+/* Assuming you have defined the appropriate breakpoints for your design */
+/* For example, you can adjust the `md:` breakpoint as per your needs */
+
+/* CSS for 1 column layout on small screens */
+.grid-cols-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* CSS for 3 column layout on medium screens (e.g., tablets and above) */
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Add gap between grid items */
+  .grid {
+    gap: 1rem; /* Adjust as needed */
+  }
+
+  .sticky-top {
+    position: sticky;
+    top: 10px; /* Add a desired value to set the distance from the top */
+    background-color: #fff; /* Set the background color as needed */
+    padding: 10px; /* Add padding to create some space around the sticky content */
+    z-index: 1;
+  }
+  

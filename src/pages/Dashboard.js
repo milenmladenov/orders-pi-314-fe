@@ -16,7 +16,9 @@ import {
 } from "../utils/demo/chartsData";
 import OrdersTable from "../components/OrdersTable";
 
+
 function Dashboard() {
+  
   return (
     <>
       <PageTitle>Dashboard</PageTitle>
@@ -25,7 +27,7 @@ function Dashboard() {
 
       {/* <!-- Cards --> */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard title="Total customers" value="765">
+        <InfoCard title="Брой клиенти" value="765">
           <RoundIcon
             icon={PeopleIcon}
             iconColorClass="text-orange-500 dark:text-orange-100"
@@ -34,7 +36,7 @@ function Dashboard() {
           />
         </InfoCard>
 
-        <InfoCard title="Total income" value="$ 6,760.89">
+        <InfoCard title="Общ доход" value="126,760.89 лв.">
           <RoundIcon
             icon={MoneyIcon}
             iconColorClass="text-green-500 dark:text-green-100"
@@ -43,7 +45,7 @@ function Dashboard() {
           />
         </InfoCard>
 
-        <InfoCard title="New Orders" value="150">
+        <InfoCard title="Нови поръчки" value="150">
           <RoundIcon
             icon={CartIcon}
             iconColorClass="text-blue-500 dark:text-blue-100"
@@ -52,9 +54,9 @@ function Dashboard() {
           />
         </InfoCard>
 
-        <InfoCard title="Unread Chats" value="15">
+        <InfoCard title="Приходи за последните 30 дни" value="12,345 лв.">
           <RoundIcon
-            icon={ChatIcon}
+            icon={MoneyIcon}
             iconColorClass="text-teal-500 dark:text-teal-100"
             bgColorClass="bg-teal-100 dark:bg-teal-500"
             className="mr-4"
