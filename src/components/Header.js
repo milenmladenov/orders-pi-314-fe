@@ -61,20 +61,7 @@ function Header() {
           </div>
         </div>
         <ul className="flex items-center flex-shrink-0 space-x-6">
-          {/* <!-- Theme toggler --> */}
-          <li className="flex">
-            <button
-              className="rounded-md focus:outline-none focus:shadow-outline-purple"
-              onClick={toggleMode}
-              aria-label="Toggle color mode"
-            >
-              {mode === "dark" ? (
-                <SunIcon className="w-5 h-5" aria-hidden="true" />
-              ) : (
-                <MoonIcon className="w-5 h-5" aria-hidden="true" />
-              )}
-            </button>
-          </li>
+         
           {/* <!-- Notifications menu --> */}
           <li className="relative">
             <button

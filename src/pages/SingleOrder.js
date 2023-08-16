@@ -1,0 +1,92 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { TableContainer, Table, TableHeader, TableCell, TableRow, TableBody } from '@windmill/react-ui';
+import PageTitle from "../components/Typography/PageTitle";
+
+const SingleOrder = ({ match }) => {
+    const [order, setOrder] = useState(null);
+    const orderId = match.params.id; // Get the orderId from the route parameter
+    const token = localStorage.getItem('accessToken')
+
+    useEffect(() => {
+        const fetchOrder = async () => {
+
+            try {
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+                const response = await axios.get(`http://localhost:8080/api/orders/${orderId}`, config);
+                setOrder(response.data);
+            } catch (error) {
+                console.error('Error fetching order:', error);
+            }
+        };
+
+        fetchOrder();
+    }, [orderId]);
+
+    if (!order) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        console.log(order),
+        <div className='border'>
+            <div className='text-center border'>
+                <PageTitle>Статус на поръчката :  {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена  " : order.status}
+                </PageTitle>        </div>
+            <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
+            <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма : {order.user.companyName}</div><div className='mb-2'>Град : {order.user.city}</div><div className='mb-2'>Адрес : {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ : {order.user.bulstat}</div><div>МОЛ : {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка : {order.user.companyAdress}</div></div></div>
+            <h1 className='ml-3'>Материал : <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
+            <TableContainer>
+                <Table>
+                    <TableHeader>
+                        <tr>
+                            <TableCell>Модел</TableCell>
+                            <TableCell>Фолио</TableCell>
+                            <TableCell>Профил</TableCell>
+                            <TableCell>Дръжка</TableCell>
+                            <TableCell>Височина,мм</TableCell>
+                            <TableCell>Широчина, мм</TableCell>
+                            <TableCell>Брой</TableCell>
+                            <TableCell>Цена Дръжка, бр.</TableCell>
+                            <TableCell>Цена мат за кв.м</TableCell>
+                            <TableCell>Двустр. ламиниране</TableCell>
+                            <TableCell>Стойност</TableCell>
+
+                            {/* Add more table headers for other fields */}
+                        </tr>
+                    </TableHeader>
+                    <TableBody>
+                    {order.groups.map((group, j) => (
+                    <TableRow key={j}>
+                
+                        <TableCell>{group.model.name}</TableCell>
+                        <TableCell>{group.folio.name}</TableCell>
+                        <TableCell>{group.profil.name}</TableCell>
+                        <TableCell>{group.handle.name}</TableCell>
+                        <TableCell>{group.height}</TableCell>
+                        <TableCell>{group.width}</TableCell>
+                        <TableCell>{group.number}</TableCell>
+                        <TableCell>{group.handle.price}</TableCell>
+                        <TableCell>{group.matPrice}</TableCell>
+                        <TableCell>{group.isBothSidesLaminated}</TableCell>
+                        <TableCell>{group.groupTotalPrice}лв.</TableCell>
+                
+            </TableRow>))}
+        </TableBody>
+                </Table>
+            </TableContainer>
+            <div className=' h-10 grid grid-cols-5  gap-20 content-end '> <div></div>
+                <div></div><div></div><div></div>  <div></div>
+                <div></div>
+
+                <div></div><div></div><div></div>
+                <div><p className='font-semibold content-end '>Обща стойност : {order.totalPrice}лв.</p></div></div>
+        </div>
+    );
+};
+
+export default SingleOrder;

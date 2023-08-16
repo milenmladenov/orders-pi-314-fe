@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import LogoutModal from "../components/LogoutModal";
 
 // use lazy for better code splitting, a.k.a. load faster
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -14,6 +15,8 @@ const Page404 = lazy(() => import("../pages/404"));
 const Blank = lazy(() => import("../pages/Blank"));
 const NewOrderForm = lazy(() => import("../pages/newOrderForm"))
 const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
+const SingleOrder = lazy(() => import("../pages/SingleOrder"))
+// const LogoutModal = lazy(() => import("../components/LogoutModal"))
 
 /**
  * ⚠ These are internal routes!
@@ -29,57 +32,66 @@ const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 
  const adminRoutes = [
     {
-      path: "/dashboard", // the url
-      component: Dashboard,
+        path: "/dashboard", // the url
+        component: Dashboard,
     },
     {
-      path: "/orders",
-      component: Orders,
+        path: "/orders",
+        component: Orders,
     },
     {
-      path: "/insert-by-excel",
-      component: NewExcelOrderForm,
+        path: "/orders/:id",
+        component: SingleOrder,
     },
     {
-      path: "/insert-by-hand",
-      component: NewOrderForm
+        path: "/insert-by-excel",
+        component: NewExcelOrderForm,
     },
     {
-      path: "/all-products",
-      component: ProductsAll,
+        path: "/insert-by-hand",
+        component: NewOrderForm
     },
     {
-      path: "/add-product",
-      component: AddProduct,
+        path: "/all-products",
+        component: ProductsAll,
     },
     {
-      path: "/product/:id",
-      component: SingleProduct,
+        path: "/add-product",
+        component: AddProduct,
     },
     {
-      path: "/customers",
-      component: Customers,
+        path: "/product/:id",
+        component: SingleProduct,
     },
     {
-      path: "/chats",
-      component: Chats,
+        path: "/customers",
+        component: Customers,
     },
     {
-      path: "/manage-profile",
-      component: Profile,
+        path: "/chats",
+        component: Chats,
     },
     {
-      path: "/settings",
-      component: Settings,
+        path: "/manage-profile",
+        component: Profile,
     },
     {
-      path: "/404",
-      component: Page404,
+        path: "/settings",
+        component: Settings,
     },
     {
-      path: "/blank",
-      component: Blank,
-    }]
+        path: "/404",
+        component: Page404,
+    },
+    {
+        path: "/blank",
+        component: Blank,
+    }
+    // {
+    //     path: "/logout",
+    //     component: LogoutModal,
+    // }
+]
 
 
 

@@ -1,23 +1,37 @@
 import React, { Component } from 'react'
-import { NavLink, Redirect } from 'react-router-dom'; 
-import { Button, Form, Grid, Segment, Message } from 'semantic-ui-react'
+import { NavLink, Redirect } from 'react-router-dom';
 import AuthContext from '../components/context/AuthContext'
 import { orderApi } from '../components/misc/OrderApi'
 import { parseJwt, handleLogError } from '../components/misc/Helpers'
+import { Button, Label, Input, Textarea, HelperText } from '@windmill/react-ui';
+import Logo from '../assets/img/logo-white-frame.png'
+import "../assets/css/input-fields-container.css"
+import { Link } from 'react-router-dom'
+
+
 
 
 class SignUp extends Component {
- static contextType = AuthContext;
+  static contextType = AuthContext;
 
   state = {
     username: '',
     password: '',
-    name: '',
     email: '',
+    companyAddress: '',
+    communicationName: '',
+    phone: '',
+    companyName: '',
+    bulstat: '',
+    city: '',
+    isDdsRegistered: false,
+    mol: '',
+    postCode: null,
+    orderAddressList: [],
     isLoggedIn: false,
     isError: false,
     errorMessage: ''
-  }
+  };
 
   componentDidMount() {
     const Auth = this.context;
@@ -25,23 +39,101 @@ class SignUp extends Component {
     this.setState({ isLoggedIn });
   }
 
-  handleInputChange = (e, {name, value}) => {
-    this.setState({ [name]: value })
+  handleInputChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+   
   }
+
+validatePasswords = () => {
+  const { password, 'confirm-password': confirmPassword } = this.state;
+  if (password !== confirmPassword) {
+    this.setState({
+      isError: true,
+      passwordErrorMessage: 'Паролите не съвпадат!',
+    });
+  } else {
+    this.setState({
+      isError: false,
+      passwordErrorMessage: '',
+    });
+  }
+};
 
   handleSubmit = (e) => {
     e.preventDefault()
 
-    const { username, password, name, email } = this.state
-    if (!(username && password && name && email)) {
+    
+    const  {
+      username,
+      password,
+      email,
+      companyAddress,
+      communicationName,
+      phone,
+      companyName,
+      bulstat,
+      city,
+      isDdsRegistered,
+      mol,
+      postCode,
+    } = this.state;
+    console.log(username,
+      password,
+
+      email,
+      companyAddress,
+      communicationName,
+      phone,
+      companyName,
+      bulstat,
+      city,
+      isDdsRegistered,
+      mol,
+      postCode)
+    if (
+      !(
+        username &&
+        password &&
+        email &&
+        companyAddress &&
+        communicationName &&
+        phone &&
+        companyName &&
+        bulstat &&
+        city &&
+        mol &&
+        postCode
+      )
+    ) {
       this.setState({
         isError: true,
-        errorMessage: 'Please, inform all fields!'
-      })
-      return
+        errorMessage: 'Моля попълнете всички задължителни полета !',
+      });
+      return;
     }
+    if (password !== this.state['confirm-password']) {
+      this.setState({
+        isError: true,
+        passwordErrorMessage: 'Паролите не съвпадат!',
+      });
+      return;
+    }
+    const user = {
+      username,
+      password,
+      email,
+      companyAddress,
+      communicationName,
+      phone,
+      companyName,
+      bulstat,
+      city,
+      mol,
+      postCode,
+    };
+    console.log(user)
 
-    const user = { username, password, name, email }
     orderApi.signup(user)
       .then(response => {
         const { accessToken } = response.data
@@ -78,62 +170,209 @@ class SignUp extends Component {
   }
 
   render() {
-    const { isLoggedIn, isError, errorMessage } = this.state
+    const { isLoggedIn, isError, errorMessage,passwordErrorMessage } = this.state
 
     if (isLoggedIn) {
       return <Redirect to='/app' />
     } else {
       return (
-        <Grid textAlign='center'>
-          <Grid.Column style={{ maxWidth: 450 }}>
-            <Form size='large' onSubmit={this.handleSubmit}>
-              <Segment>
-                <Form.Input
-                  fluid
-                  autoFocus
-                  name='username'
-                  icon='user'
-                  iconPosition='left'
-                  placeholder='Username'
-                  onChange={this.handleInputChange}
+        <div className="flex items-center p-6 bg-gray-50 dark:bg-gray-900">
+          <div className="flex-1 h-full max-w-6xl mx-auto bg-white rounded-lg shadow-xl dark:bg-gray-800">
+            <div className="flex flex-col md:flex-row">
+              <div className="h-1 w-auto md:h-auto md:w-1/2 ml-4">
+                <img
+                  aria-hidden="true"
+                  className="object-contain h-full  w-full dark:hidden"
+                  src={Logo}
+                  alt="Logo"
                 />
-                <Form.Input
-                  fluid
-                  name='password'
-                  icon='lock'
-                  iconPosition='left'
-                  placeholder='Password'
-                  type='password'
-                  onChange={this.handleInputChange}
-                />
-                <Form.Input
-                  fluid
-                  name='name'
-                  icon='address card'
-                  iconPosition='left'
-                  placeholder='Name'
-                  onChange={this.handleInputChange}
-                />
-                <Form.Input
-                  fluid
-                  name='email'
-                  icon='at'
-                  iconPosition='left'
-                  placeholder='Email'
-                  onChange={this.handleInputChange}
-                />
-                <Button color='violet' fluid size='large'>Signup</Button>
-              </Segment>
-            </Form>
-            <Message>{`Already have an account? `}
-              <a href='/login' color='violet' as={NavLink} to="/login">Login</a>
-            </Message>
-            {isError && <Message negative>{errorMessage}</Message>}
-          </Grid.Column>
-        </Grid>
+              </div>
+              <main className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
+                <div className="h-full w-full">
+
+                  <HelperText >Полетата отбелязани със <span style={{ color: 'red' }}>*</span> са задължителни </HelperText>
+
+                  <hr className="my-8" />
+
+                  <div className='input-fields-container'>
+                    <div className="grid grid-cols-1 gap-1">
+                      <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                        Потребителски данни
+                      </h1>
+                      <Label>
+                        <span>Име</span>
+                        <Input
+                          className="mt-1"
+                          name="communicationName"
+                          placeholder="Ще бъде използвано за персонална комуникация"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Потребителско име</span>
+                        <HelperText valid={false}> *</HelperText>
+
+                        <Input
+                          className="mt-1"
+                          name="username"
+                          placeholder="Потребителско име"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Email</span>
+                        <Input
+                          className="mt-1"
+                          type="email"
+                          placeholder="example@email.com"
+                          name="email"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Вашата парола</span>
+                        <Input
+                          className="mt-1"
+                          placeholder="***************"
+                          type="password"
+                          name="password"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Потвърдете паролата</span>
+                        <Input
+                          className="mt-1"
+                          placeholder="***************"
+                          type="password"
+                          name="confirm-password"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      {passwordErrorMessage}
+                      <hr className="my-8" />
+                      <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                        Фирмени/Лични данни
+                      </h1>
+                      <Label>
+                        <span>Фирма/Име</span>
+                        <Input
+                          className="mt-1"
+                          name="companyName"
+                          placeholder=""
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Булстат/ЕГН</span>
+                        <Input
+                          className="mt-1"
+                          name="bulstat"
+                          placeholder="Булстат/ЕГН"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+
+                      <Label>
+                        <span>Град</span>
+                        <Input
+                          className="mt-1"
+                          name="city"
+                          placeholder="Град"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>МОЛ</span>
+                        <Input
+                          className="mt-1"
+                          name="mol"
+                          placeholder="МОЛ"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+
+                      <Label>
+                        <span>Пощенски код</span>
+                        <Input
+                          className="mt-1"
+                          name="postCode"
+                          placeholder="Пощенски код"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      <Label>
+                        <span>Адрес</span>
+                        <Textarea
+                          className="mt-1"
+                          name="companyAddress"
+                          placeholder="Адрес"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+
+                      <Label>
+                        <span>Телефон</span>
+                        <Input
+                          className="mt-1"
+                          name="phone"
+                          placeholder="Телефон"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+
+
+
+                      <Label>
+                        <Input type="checkbox"
+                          name="isDdsRegistered"
+                          onChange={this.handleInputChange}
+                        />
+                        <span className="ml-2">Регистрация по ДДС</span>
+
+                      </Label>
+
+
+                      <Label>
+                        <hr className="my-8" />
+
+                        <span>Адрес за доставка</span>
+                        <Input
+                          className="mt-1"
+                          name="orderAddress"
+                          placeholder="Адрес за доставка"
+                          onChange={this.handleInputChange}
+                        />
+                      </Label>
+                      {/* Add other fields here */}
+                    </div>
+                    <hr className="my-8" />
+                    <p style={{color : 'red'}}>{errorMessage}</p>
+
+
+                    <Button
+                      className="mt-4"
+                      block
+                      as={Link}  // Use the Link component
+                      to="/login"
+                      onClick={this.handleSubmit}
+                    >
+                      Регистрация
+                    </Button>
+                    <Link
+                      className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
+                      to="/login"
+                    >
+                      Имате потребител? Влезнете в профила си!
+                    </Link>                </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
       )
     }
   }
 }
 
-export default SignUp
+export default SignUp;

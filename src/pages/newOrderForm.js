@@ -1,43 +1,52 @@
-import React, { useState,useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageTitle from "../components/Typography/PageTitle";
 import "../assets/css/groups-in-rows.css"
 import { orderApi } from '../components/misc/OrderApi'
 import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 
 
 const NewOrderForm = () => {
     const { userLogout } = useAuth()
-
     const logout = () => {
         userLogout()
     }
+
+    const loggedUser = JSON.parse(localStorage.getItem("user"))
+
     const initialFormState = {
         doorName: '',
         modelName: '',
         folioName: '',
-        handleName: '',
-        profilName: '',
+        handleName: 'Без Дръжка',
+        profilName: 'R1',
         height: 400,
         width: 400,
         number: 1,
+        detailType: ''
     };
 
     const [totalPrice, setTotalPrice] = useState('0лв. / Добавени са 30% надценка към крайната цена.');
     const [groupPrices, setGroupPrices] = useState('0');
-    const [newGroupRef, setNewGroupRef] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedMaterial, setSelectedMaterial] = useState('');
+    const [selectedPilastur, setSelectedPilastur] = useState('');
+    const [orderUrl, setOrderUrl] = useState();
+    const [orderPreflightUrl, setOrderPreflightUrl] = useState();
 
+
+    useEffect(() => {
+        setOrderPreflightUrl('http://localhost:8080/api/orders/new-order/preflight');
+        setOrderUrl('http://localhost:8080/api/orders/new-order');
+      }, []);
 
 
     const [groupForms, setGroupForms] = useState([
         { ...initialFormState }
     ]);
 
-    useEffect(() => {
-        if (newGroupRef) {
-            newGroupRef.focus();
-        }
-    }, [groupForms, newGroupRef]);
+
 
     const handleChange = (event, index) => {
         const { name, value } = event.target;
@@ -48,21 +57,36 @@ const NewOrderForm = () => {
             return formData;
         });
         setGroupForms(updatedForms);
-        handleSubmit();
+    };
+
+    const handleChange1 = (event) => {
+        const value = event.target.value;
+        setSelectedMaterial(value);
+        setSelectedPilastur('');
+    };
+
+    useEffect(() => {
+        handlePreflight();
+    }, [groupForms, selectedPilastur]);
+
+    const handlePilasturChange = (event) => {
+        setSelectedPilastur(event.target.value);
     };
 
     const handleAddGroup = () => {
+
         setGroupForms((prevGroupForms) => [
             ...prevGroupForms,
             {
                 doorName: "",
                 modelName: "",
                 folioName: "",
-                handleName: "",
-                profilName: "",
+                handleName: "Без Дръжка",
+                profilName: "R1",
                 height: 400,
                 width: 400,
                 number: 1,
+                detailType: ''
             },
         ]);
     };
@@ -71,9 +95,7 @@ const NewOrderForm = () => {
     //     const { name, value } = event.target;
     //     setFormData({ ...formData, [name]: value });
     // }
-
-    const handleSubmit = (index) => {
-        // Create an array of groups from the groupForms state
+    const handleSubmit = () => {
         const groupsArray = groupForms.map((formData) => ({
             door: {
                 name: formData.doorName,
@@ -93,10 +115,11 @@ const NewOrderForm = () => {
             height: parseInt(formData.height),
             width: parseInt(formData.width),
             number: parseInt(formData.number),
+            detailType: `${selectedMaterial} - ${selectedPilastur}`
         }));
         const token = localStorage.getItem('accessToken')
         // Send the data to the backend using AJAX
-        fetch('http://localhost:8080/api/orders/by-hand/new-order/preflight', {
+        fetch(orderUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -117,8 +140,10 @@ const NewOrderForm = () => {
                 const totalPrice = groupPrices.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
                 // Render the response data
-                setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка към крайната цена.`);
+                setTotalPrice(`${totalPrice}`);
                 setGroupPrices(groupPrices);
+                window.location.reload();
+
 
             })
             .catch((error) => {
@@ -126,22 +151,80 @@ const NewOrderForm = () => {
             });
     };
 
+
+    const handlePreflight = () => {
+        // Create an array of groups from the groupForms state
+        const groupsArray = groupForms.map((formData) => ({
+            door: {
+                name: formData.doorName,
+            },
+            model: {
+                name: formData.modelName,
+            },
+            folio: {
+                name: formData.folioName,
+            },
+            handle: {
+                name: formData.handleName,
+            },
+            profil: {
+                name: formData.profilName,
+            },
+            height: parseInt(formData.height),
+            width: parseInt(formData.width),
+            number: parseFloat(formData.number),
+            detailType: `${selectedMaterial} - ${selectedPilastur}`
+        }));
+        const token = localStorage.getItem('accessToken')
+        // Send the data to the backend using AJAX
+
+        fetch(orderPreflightUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                groups: groupsArray,
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(loggedUser.data.role);
+
+                // Get the groupTotalPrice for every group in the response
+                const groupPrices = data.groups.map((group) => group.groupTotalPrice);
+                setGroupPrices(groupPrices);
+                // Set the total price as the sum of all groupTotalPrices
+                const totalPrice = data.totalPrice;
+                if (loggedUser.data.role === '[ADMIN]') {
+                    setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка към крайната цена.`);
+                } else if (loggedUser.data.role === '[USER]') {
+                    setTotalPrice(`${totalPrice}лв.`);
+
+                }
+                // Render the response data
+
+
+            })
+            .catch((error) => {
+                console.log('Error: ' + error.message);
+            });
+        console.log(orderUrl)
+        console.log(orderPreflightUrl)
+    };
+
+
     return (
 
 
         <>
             <div className="grid gap-2 mb-12 md:grid-cols-2">
-
-                <div className="col-span-12 text-center sticky-top border ">
+                <div className="col-span-12 text-center sticky-top ">
                     <PageTitle>Създаване на нова поръчка</PageTitle>
                     <div> {<p className='flex justify-start'>Обща цена на поръчката : {totalPrice}</p>}
                         <div className="col-span-2 flex justify-end">
-                            <button
-                                className="w-full px-4 py-2 text-white bg-green-600 rounded-md shadow-md hover:bg-green-700"
-                                onClick={logout}
-                                style={{ width: '150px', margin: '10px' }}
-                            >
-                                logout                        </button>
+
                             <button
                                 className="w-full px-4 py-2 text-white bg-green-600 rounded-md shadow-md hover:bg-green-700"
                                 onClick={handleAddGroup}
@@ -153,24 +236,26 @@ const NewOrderForm = () => {
                                 type="button"
                                 style={{ width: '150px', margin: '10px' }}
                                 className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                onClick={handleSubmit}
+                                onClick={() => setModalOpen(true)}
                             >
                                 Създаване
                             </button>
+                            <ConfirmationModal
+                                isOpen={modalOpen}
+                                onClose={() => setModalOpen(false)}
+                                onConfirm={handleSubmit}
+                            />
                         </div>
                     </div>
+                    <hr className="customeDivider mx-4 my-5" />
+
                 </div>
 
                 <div className="grid  md:grid-cols-1 gap-10">
+
                     {groupForms.map((formData, index) => (
-                        <div>
-                            <div key={index} ref={(el) => {
-                                // Set the ref to the newly created div
-                                if (index === groupForms.length - 1) {
-                                    setNewGroupRef(el);
-                                }
-                            }}
-                                tabIndex="0" className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3">
+                        <div >
+                            <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3">
 
                                 <form
                                     id={`orderForm${index}`}
@@ -182,7 +267,6 @@ const NewOrderForm = () => {
                                         <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="doorName"
                                             name="doorName"
-
                                             value={formData.doorName}
                                             onChange={(event) => handleChange(event, index)}
                                             required
@@ -194,6 +278,44 @@ const NewOrderForm = () => {
                                             <option value="Фурнирован МДФ">Фурнирован МДФ</option>
                                         </select>
                                     </div>
+                                    <div>
+                                        <label htmlFor="detailName" className="block font-medium">Вид на материала:</label>
+                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                            id="detailName"
+                                            name="detailName"
+                                            value={selectedMaterial}
+                                            onChange={(event) => handleChange1(event, index)}
+                                            required
+
+                                        >
+                                            <option value="">-Вид на материала-</option>
+                                            <option value="Вратичка">Вратичка</option>
+                                            <option value="Страница">Страница</option>
+                                            <option value="Чекмедже">Чекмедже</option>
+                                            <option value="Пиластър">Пиластър</option>
+                                            <option value="Корниз">Корниз</option>
+
+                                        </select>
+                                        {selectedMaterial === 'Пиластър' && (
+                                            <div>
+                                                <label htmlFor="pilasturSelect">Пиластър:</label>
+                                                <select
+                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id="pilasturSelect"
+                                                    name="pilasturSelect"
+                                                    value={selectedPilastur}
+                                                    onChange={(event) => handlePilasturChange(event)}
+                                                    required
+                                                >
+                                                    <option value="">-Изберете Пиластър-</option>
+                                                    <option value="P1">P1</option>
+                                                    <option value="P2">P2</option>
+                                                    <option value="P3">P3</option>
+                                                    {/* Add more options here */}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Model Name */}
                                     <div>
@@ -203,7 +325,7 @@ const NewOrderForm = () => {
                                             name="modelName"
                                             value={formData.modelName}
                                             onChange={(event) => handleChange(event, index)}
-                                            disabled={formData.doorName === ''}
+                                            disabled={(formData.doorName === '' || selectedMaterial === "Пиластър" || selectedMaterial === "Корниз") || selectedMaterial === "Чекмедже"}
                                             required
                                         >
 
@@ -340,7 +462,7 @@ const NewOrderForm = () => {
                                             name="folioName"
                                             value={formData.folioName}
                                             onChange={(event) => handleChange(event, index)}
-                                            disabled={formData.modelName === ''}
+                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже  '}
                                             required
                                         >
                                             <option value="" selected="selected">-Изберете Фолио-</option>
@@ -483,8 +605,10 @@ const NewOrderForm = () => {
                                             id="handleName"
                                             name="handleName"
                                             value={formData.handleName}
-                                            onChange={(event) => handleChange(event, index)} >
-                                            <option value="">Без дръжка</option>
+                                            onChange={(event) => handleChange(event, index)}
+                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
+                                        >
+                                            <option value="Без дръжка">Без дръжка</option>
                                             <option value="дръжка H1">дръжка H1</option></select></div>
                                     <div>
                                         {/* Profil Name */}
@@ -495,9 +619,11 @@ const NewOrderForm = () => {
                                             name="profilName"
                                             value={formData.profilName}
                                             onChange={(event) => handleChange(event, index)}
-                                            required >
-                                            <option value="Профил R1">Профил R1</option>
-                                            <option value="Профил R2">Профил R2</option>
+                                            required
+                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже  '}
+                                        >
+                                            <option value="R1">Профил R1</option>
+                                            <option value="R2">Профил R2</option>
                                             <option value="Профил R3">Профил R3</option>
                                             <option value="Профил R4">Профил R4</option>
                                             <option value="Профил R5">Профил R5</option></select>
@@ -508,23 +634,26 @@ const NewOrderForm = () => {
 
                                     </div><div>
                                         {/* Height */}
-                                        <label htmlFor="height" className="block font-medium">Дължина:</label>
+                                        <label htmlFor="height" className="block font-medium">Височина, мм:</label>
                                         <input className="mt-1 p-2 border rounded-md shadow-sm"
                                             type="number"
                                             id="height"
                                             name="height"
                                             value={formData.height}
                                             onChange={(event) => handleChange(event, index)}
-                                            required />
+                                            required
+
+                                        />
                                     </div><div>
                                         {/* Width */}
-                                        <label htmlFor="width" className="block font-medium">Широчина:</label>
+                                        <label htmlFor="width" className="block font-medium">Широчина, мм:</label>
                                         <input className="mt-1 p-2 border rounded-md shadow-sm"
                                             type="number"
                                             id="width"
                                             name="width"
                                             value={formData.width}
                                             onChange={(event) => handleChange(event, index)}
+                                            disabled={selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
                                             required />
                                     </div><div>
                                         {/* Number */}
@@ -536,18 +665,20 @@ const NewOrderForm = () => {
                                             name="number"
                                             value={formData.number}
                                             onChange={(event) => handleChange(event, index)}
-                                            required />
+                                            required disabled={selectedMaterial == 'Пиластър'}
+                                        />
                                     </div>
                                     <div>Цена на групата : {groupPrices[index]}лв.</div>
                                 </form>
                             </div>
                         </div>
                     ))}
-                </div></div><div className="grid gap-2 mb-12 md:grid-cols-2">
+                </div></div > <div className="grid gap-2 mb-12 md:grid-cols-2">
                 <div></div>
                 <div className="col-span-2 flex justify-end">
 
                 </div></div></>)
 }
+
 
 export default NewOrderForm;

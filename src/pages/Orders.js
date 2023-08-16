@@ -13,38 +13,40 @@ function Icon({ icon, ...props }) {
 const Orders = () => {
   // pagination setup
   const [resultsPerPage, setResultPerPage] = useState(10);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("всички");
 
   const handleFilter = (filter_name) => {
-    // console.log(filter_name);
-    if (filter_name == "All") {
-      setFilter("all");
+    if (filter_name == "Всички") {
+      setFilter("всички");
     }
-    if (filter_name == "Un-Paid Orders") {
-      setFilter("un-paid");
+    if (filter_name == "Създадена") {
+      setFilter("създадена");
     }
-    if (filter_name == "Paid Orders") {
-      setFilter("paid");
+    if (filter_name == "Изпълнява се") {
+      setFilter("изпълнява се");
     }
-    if (filter_name == "Completed") {
-      setFilter("completed");
+    if (filter_name == "Изпратена") {
+      setFilter("изпратена");
+    }
+    if (filter_name == "Изпълнена") {
+      setFilter("изпълнена");
     }
   };
 
   return (
     <div>
-      <PageTitle>Orders</PageTitle>
+      <PageTitle>Поръчки</PageTitle>
 
       {/* Breadcum */}
       <div className="flex text-gray-800 dark:text-gray-300">
         <div className="flex items-center text-purple-600">
           <Icon className="w-5 h-5" aria-hidden="true" icon={HomeIcon} />
           <NavLink exact to="/app/dashboard" className="mx-2">
-            Dashboard
+            Начало
           </NavLink>
         </div>
         {">"}
-        <p className="mx-2">Orders</p>
+        <p className="mx-2">Поръчки</p>
       </div>
 
       {/* Sort */}
@@ -52,7 +54,7 @@ const Orders = () => {
         <CardBody>
           <div className="flex items-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Filter Orders
+              Филтър
             </p>
 
             <Label className="mx-3">
@@ -60,10 +62,12 @@ const Orders = () => {
                 className="py-3"
                 onChange={(e) => handleFilter(e.target.value)}
               >
-                <option>All</option>
-                <option>Un-Paid Orders</option>
-                <option>Paid Orders</option>
-                <option>Completed</option>
+                <option>Всички</option>
+                <option>Създадена</option>
+                <option>Изпълнява се</option>
+                <option>Изпратена</option>
+                <option>Изпълнена</option>
+
               </Select>
             </Label>
 
@@ -77,7 +81,7 @@ const Orders = () => {
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center mr-3 pointer-events-none">
                   {/* <SearchIcon className="w-5 h-5" aria-hidden="true" /> */}
-                  Results on Table
+                  Показани
                 </div>
               </div>
             </Label>

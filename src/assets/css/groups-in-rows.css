@@ -24,4 +24,6 @@
     padding: 10px; /* Add padding to create some space around the sticky content */
     z-index: 1;
   }
-  
+  form{
+    background-color: #d6ea8f;
+  }

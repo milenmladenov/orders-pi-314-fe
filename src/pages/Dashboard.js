@@ -18,10 +18,10 @@ import OrdersTable from "../components/OrdersTable";
 
 
 function Dashboard() {
-  
+
   return (
     <>
-      <PageTitle>Dashboard</PageTitle>
+      <PageTitle>Контролен Панел</PageTitle>
 
       {/* <CTA /> */}
 
@@ -36,7 +36,7 @@ function Dashboard() {
           />
         </InfoCard>
 
-        <InfoCard title="Общ доход" value="126,760.89 лв.">
+        <InfoCard title="Общa печалба" value="126,760.89 лв.">
           <RoundIcon
             icon={MoneyIcon}
             iconColorClass="text-green-500 dark:text-green-100"
@@ -65,18 +65,18 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-6 mb-8 md:grid-cols-2">
-        <ChartCard title="User Analytics">
+        <ChartCard title="Създадени поръчки по тип потребител">
           <Line {...lineOptions} />
           <ChartLegend legends={lineLegends} />
         </ChartCard>
 
-        <ChartCard title="Revenue">
+        <ChartCard title="Използвани материали">
           <Doughnut {...doughnutOptions} />
           <ChartLegend legends={doughnutLegends} />
         </ChartCard>
       </div>
 
-      <PageTitle>Orders</PageTitle>
+      <PageTitle>Поръчки</PageTitle>
       <OrdersTable resultsPerPage={10} />
     </>
   );

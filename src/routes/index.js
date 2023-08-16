@@ -29,11 +29,21 @@ console.log(loggedUser)
  * `routes/sidebar.js`
  */
 
-  const routes = [
-  
-    {
-      path: "/insert-by-hand",
-      component: NewOrderForm
-    }
-  ]
+const routes = [
+  {
+    path: "/dashboard", // the url
+    component: Dashboard,
+},
+  {
+    path: "/insert-by-hand",
+    component: NewOrderForm
+  }, {
+    path: "/orders",
+    component: Orders,
+  },
+  {
+    path: "/manage-profile",
+    component: Profile,
+  }
+]
 export default routes;

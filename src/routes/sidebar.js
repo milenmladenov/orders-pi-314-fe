@@ -6,11 +6,26 @@
  * `routes/index.js`
  */
 const routes = [
+  {
+    path: "/app/dashboard", // the url
+    icon: "HomeIcon", // the component being exported from icons/index.js
+    name: "Начало", // name that appear in Sidebar
+  },
   
   {
     path: "/app/insert-by-hand",
     icon: "AssetIcon",
     name: "Нова поръчка",
+  },
+  {
+    icon: "AssetIcon",
+    name: "Моите поръчки",
+    path: "/app/orders"
+  },
+  {
+    path: "/app/manage-profile",
+    icon: "UserIcon",
+    name: "Профил",
   }
 ];
 

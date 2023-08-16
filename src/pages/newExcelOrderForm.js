@@ -1,28 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import NewOrderForm from './newOrderForm';
 import PageTitle from "../components/Typography/PageTitle";
 import "../assets/css/groups-in-rows.css"
+import ConfirmationModal from '../components/ConfirmationModal';
+
 
 
 const NewExcelOrderForm = () => {
 
+
     const [response, setResponse] = useState('');
+    const [groupPrices, setGroupPrices] = useState('0');
     const [mainDropdownValue, setMainDropdownValue] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [totalPrice, setTotalPrice] = useState('0лв. / Добавени са 30% надценка към крайната цена.');
+    const [groupForms, setGroupForms] = useState([]);
+
 
 
     const handleMainDropdownChange = (event) => {
         const selectedValue = event.target.value;
         setMainDropdownValue(selectedValue);
-    
+
         // Update the groupForms array with the selected value for all doorName properties
         const updatedGroupForms = groupForms.map((formData) => ({
-          ...formData,
-          doorName: selectedValue,
+            ...formData,
+            doorName: selectedValue,
         }));
         setGroupForms(updatedGroupForms);
-      };
-      const token = localStorage.getItem('accessToken')
+    };
+    const token = localStorage.getItem('accessToken')
     const handleSubmit = () => {
         // Create an array of groups from the groupForms state
         const groupsArray = groupForms.map((formData) => ({
@@ -44,6 +52,8 @@ const NewExcelOrderForm = () => {
             height: parseInt(formData['Височина']),
             width: parseInt(formData['Широчина']),
             number: parseInt(formData['Брой']),
+            detailType: "-"
+
         }));
 
         // Send the data to the backend using AJAX
@@ -61,13 +71,15 @@ const NewExcelOrderForm = () => {
             .then((data) => {
                 // Render the response data
                 setResponse(`Total Price: ${data.totalPrice}`);
+                window.location.reload();
             })
             .catch((error) => {
                 setResponse('Error: ' + error.message);
-            });
-    };
 
-    const [groupForms, setGroupForms] = useState([]);
+            });
+        console.log(response);
+
+    };
 
 
     const handleChange = (event, index) => {
@@ -75,16 +87,72 @@ const NewExcelOrderForm = () => {
         const updatedForms = groupForms.map((formData, i) => {
             if (i === index) {
                 return {
-                    ...formData, 
-                    [name]: value
+                    ...formData, [name]: value
                 };
             }
             return formData;
         });
         setGroupForms(updatedForms);
-        handleMainDropdownChange(event);
 
-        handleSubmit();
+
+    };
+    useEffect(() => {
+        handlePreflight();
+    }, [groupForms]);
+
+    const handlePreflight = () => {
+        // Create an array of groups from the groupForms state
+        const groupsArray = groupForms.map((formData) => ({
+            door: {
+                name: mainDropdownValue,
+            },
+            model: {
+                name: formData['Модел'],
+            },
+            folio: {
+                name: formData['Фолио'],
+            },
+            handle: {
+                name: formData['Дръжка'],
+            },
+            profil: {
+                name: formData['Профил'],
+            },
+            height: parseInt(formData['Височина']),
+            width: parseInt(formData['Широчина']),
+            number: parseFloat(formData['Брой']),
+            detailType: "-"
+        }));
+        const token = localStorage.getItem('accessToken')
+        // Send the data to the backend using AJAX
+        fetch('http://localhost:8080/api/orders/new-order/preflight', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                groups: groupsArray,
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+
+                // Get the groupTotalPrice for every group in the response
+                const groupPrices = data.groups.map((group) => group.groupTotalPrice);
+
+                // Set the total price as the sum of all groupTotalPrices
+                const totalPrice = data.totalPrice;
+
+                // Render the response data
+                setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка към крайната цена.`);
+                setGroupPrices(groupPrices);
+
+            })
+            .catch((error) => {
+                console.log('Error: ' + error.message);
+            });
     };
 
     const handleFileChange = (event) => {
@@ -112,27 +180,36 @@ const NewExcelOrderForm = () => {
             setGroupForms(formData);
         };
         reader.readAsArrayBuffer(file);
-        handleSubmit();
     };
     const handleAddGroup = () => {
         setGroupForms((prevGroupForms) => [...prevGroupForms, { /* Initial form data for the new group */ }]);
-    };
-
-    const handleImportButtonClick = () => {
-        // Check if there are any rows in the imported data
-        if (groupForms.length > 0) {
-            // If there is more than one row, create new groups
-            const newGroups = groupForms.map((formData) => ({ ...formData }));
-            setGroupForms((prevGroupForms) => [...prevGroupForms, ...newGroups]);
-        }
     };
 
     return (
         <>
             <div className="col-span-2">
                 <label htmlFor="fileInput" className="block font-medium">
-                    Импортиране на Excel файл:
+                    <PageTitle> Импортиране на Excel файл </PageTitle>
                 </label>
+                <div> {<p className='flex justify-start'>Обща цена на поръчката : {totalPrice}</p>}
+                    <div className="col-span-2 flex justify-end">
+
+
+                        <button
+                            type="button"
+                            style={{ width: '150px', margin: '10px' }}
+                            className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
+                            onClick={() => setModalOpen(true)}
+                        >
+                            Създаване
+                        </button>
+                        <ConfirmationModal
+                            isOpen={modalOpen}
+                            onClose={() => setModalOpen(false)}
+                            onConfirm={handleSubmit}
+                        />
+                    </div>
+                </div>
                 <input
                     type="file"
                     id="fileInput"
@@ -141,22 +218,14 @@ const NewExcelOrderForm = () => {
                     accept=".xlsx, .xls"
                     className="mt-1"
                 />
-                <button
-                    className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-md shadow-md hover:bg-blue-700"
-                    onClick={handleImportButtonClick}
-                >
-                    Импортирай
-                </button>
-                {response && <p>{response}</p>}
+
                 <div>
                     <label htmlFor="doorName" className="block font-medium">Материал:</label>
                     <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                         id="mainDropdown"
                         name="mainDropdown"
-
                         value={mainDropdownValue}
-
-                        onChange={(event) => handleChange(event)}
+                        onChange={(event) => handleMainDropdownChange(event)}
                         required
 
                     >
@@ -170,9 +239,7 @@ const NewExcelOrderForm = () => {
 
 
             <div className="grid gap-2 mb-12 md:grid-cols-2">
-                <div className="col-span-12 text-center">
-                    <PageTitle>Създаване на нова поръчка</PageTitle>
-                </div>
+
                 <div className="grid  md:grid-cols-1 gap-10">
                     {groupForms.map((formData, index) => (
                         <div>
@@ -492,7 +559,7 @@ const NewExcelOrderForm = () => {
                                             name="handleName"
                                             value={formData.handleName}
                                             onChange={(event) => handleChange(event, index)} >
-                                            <option value="">Без дръжка</option>
+                                            <option value="Без дръжка">Без дръжка</option>
                                             <option value="">дръжка H1</option></select></div>
                                     <div>
                                         {/* Profil Name */}
@@ -504,8 +571,8 @@ const NewExcelOrderForm = () => {
                                             value={formData.profilName}
                                             onChange={(event) => handleChange(event, index)}
                                             required >
-                                            <option value="Профил R1">Профил R1</option>
-                                            <option value="Профил R2">Профил R2</option>
+                                            <option value="R1">Профил R1</option>
+                                            <option value="R2">Профил R2</option>
                                             <option value="Профил R3">Профил R3</option>
                                             <option value="Профил R4">Профил R4</option>
                                             <option value="Профил R5">Профил R5</option></select>
@@ -546,6 +613,8 @@ const NewExcelOrderForm = () => {
                                             onChange={(event) => handleChange(event, index)}
                                             required />
                                     </div>
+                                    <div>Цена на групата : {groupPrices[index]}лв.</div>
+
                                 </form>
                             </div>
                         </div>
