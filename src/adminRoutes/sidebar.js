@@ -5,16 +5,13 @@
  * If you're looking to actual Router routes, go to
  * `routes/index.js`
  */
+    
+
  const adminRoutes = [
     {
       path: "/app/dashboard", // the url
       icon: "HomeIcon", // the component being exported from icons/index.js
-      name: "Dashboard", // name that appear in Sidebar
-    },
-    {
-      path: "/app/logout",
-      icon: "OutlineLogoutIcon",
-      name: "Logout",
+      name: "Контролен панел", // name that appear in Sidebar
     },
     {
       icon: "AssetIcon",
@@ -32,43 +29,24 @@
     },
     {
       icon: "AssetIcon",
-      name: "Assets",
-      routes: [
-        {
-          path: "/app/all-products",
-          name: "All Assets",
-        },
-        {
-          path: "/app/add-product",
-          name: "Add Asset",
-        },
-      ],
+      name: "Всички поръчки",
+      path: "/app/orders"
     },
     {
       path: "/app/customers",
       icon: "GroupIcon",
-      name: "Customers",
-    },
-    {
-      path: "/app/chats",
-      icon: "ChatIcon",
-      name: "Chats",
+      name: "Клиенти",
     },
     {
       path: "/app/manage-profile",
       icon: "UserIcon",
-      name: "Profile",
+      name: "Профил",
     },
     {
       path: "/app/settings",
       icon: "OutlineCogIcon",
-      name: "Settings",
-    },
-    {
-      path: "/app/logout",
-      icon: "OutlineLogoutIcon",
-      name: "Logout",
-    },
+      name: "Настройки",
+    }
   ];
   
   export default adminRoutes;

@@ -6,9 +6,8 @@ import { orderApi } from '../components/misc/OrderApi'
 import { parseJwt, handleLogError } from '../components/misc/Helpers'
 import { Redirect } from 'react-router-dom/cjs/react-router-dom.min'
 import { Link } from 'react-router-dom'
+import Logo from '../assets/img/logo-white-frame.png'
 
-import ImageLight from '../assets/img/login-office.jpeg'
-import ImageDark from '../assets/img/login-office-dark.jpeg'
 import { Label, Input,Button} from '@windmill/react-ui'
 
 class Login extends Component {
@@ -71,31 +70,25 @@ class Login extends Component {
         <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
         <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
           <div className="flex flex-col overflow-y-auto md:flex-row">
-            <div className="h-32 md:h-auto md:w-1/2">
-              <img
-                aria-hidden="true"
-                className="object-cover w-full h-full dark:hidden"
-                src={ImageLight}
-                alt="Office"
-              />
-              <img
-                aria-hidden="true"
-                className="hidden object-cover w-full h-full dark:block"
-                src={ImageDark}
-                alt="Office"
-              />
-            </div>
+          <div className="h-1 w-auto md:h-auto md:w-1/2 ml-4">
+                <img
+                  aria-hidden="true"
+                  className="object-contain h-full  w-full dark:hidden"
+                  src={Logo}
+                  alt="Logo"
+                />
+              </div>
             <main className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
               <div className="w-full">
                 <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                  Login
+                  Вход
                 </h1>
                 <Label>
-                  <span>Email</span>
+                  <span>Потребителско име</span>
                   <Input
                     className="mt-1"
                     type="email"
-                    placeholder="john@doe.com"
+                    placeholder="Потребителско име"
                     name="username"
                     value={this.state.username}
                     onChange={(e) => this.handleInputChange(e, { name: 'username', value: e.target.value })}
@@ -103,7 +96,7 @@ class Login extends Component {
                 </Label>
 
                 <Label className="mt-4">
-                  <span>Password</span>
+                  <span>Парола</span>
                   <Input
                     className="mt-1"
                     type="password"
@@ -121,9 +114,14 @@ class Login extends Component {
                   to="/app"
                   onClick={this.handleSubmit}
                 >
-                  Log in
+                  Вход
                 </Button>
+                <br></br>
 
+                {isError && (
+                  
+            <><div style={{padding :10  }} className = "w-full "><span style={{ color: 'red' }} ><b>Грешно потребителско име или парола</b></span></div></>
+        )}
                 <hr className="my-8" />
 
                 
@@ -133,7 +131,7 @@ class Login extends Component {
                     className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
                     to="/forgot-password"
                   >
-                    Forgot your password?
+                    Забравена парола?
                   </Link>
                 </p>
                 <p className="mt-1">
@@ -141,7 +139,7 @@ class Login extends Component {
                     className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
                     to="/create-account"
                   >
-                    Create account
+                    Не сте се регистрирали?
                   </Link>
                 </p>
               </div>

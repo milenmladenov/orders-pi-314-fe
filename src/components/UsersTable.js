@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
 import {
   TableBody,
   TableContainer,
@@ -7,28 +9,43 @@ import {
   TableCell,
   TableRow,
   TableFooter,
-  Avatar,
-  Badge,
   Pagination,
+ 
 } from "@windmill/react-ui";
-import response from "../utils/demo/usersData";
+import { Link } from 'react-router-dom'
+
 
 const UsersTable = ({ resultsPerPage, filter }) => {
   const [page, setPage] = useState(1);
-  const [data, setData] = useState([]);
+  const token = localStorage.getItem('accessToken')
 
-  // pagination setup
-  const totalResults = response.length;
+  const [data, setData] = useState([]);
+  const [totalResults, setTotalResults] = useState(0);
 
   // pagination change control
   function onPageChange(p) {
     setPage(p);
   }
+  const fetchData = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get("http://localhost:8080/api/customers", config);
+      const userData = response.data
+      setTotalResults(userData.length);
+      setData(userData.slice((page - 1) * resultsPerPage, page * resultsPerPage));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
 
   // on page change, load new sliced data
   // here you would make another server request for new data
   useEffect(() => {
-    setData(response.slice((page - 1) * resultsPerPage, page * resultsPerPage));
+    fetchData();
   }, [page, resultsPerPage, filter]);
 
   return (
@@ -38,38 +55,40 @@ const UsersTable = ({ resultsPerPage, filter }) => {
         <Table>
           <TableHeader>
             <tr>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
+              <TableCell>Име </TableCell>
+              <TableCell>Потребителско име</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Joined on</TableCell>
+              <TableCell>Телефон</TableCell>
+              <TableCell></TableCell>
             </tr>
           </TableHeader>
           <TableBody>
             {data.map((user, i) => (
               <TableRow key={i}>
                 <TableCell>
-                  <div className="flex items-center text-sm">
-                    <Avatar
-                      className="hidden mr-3 md:block"
-                      src={user.avatar}
-                      alt="User image"
-                    />
+                
                     <div>
-                      <p className="font-semibold">{user.first_name}</p>
+                      <p className="font-semibold">{user.companyName}</p>
                     </div>
-                  </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm">{user.last_name}</span>
+                  <span className="text-sm">{user.username}</span>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm">{user.email}</span>
                 </TableCell>
 
                 <TableCell>
-                  <span className="text-sm">
-                    {new Date(user.joined_on).toLocaleDateString()}
+                  <span className="text-sm">{user.phone}
                   </span>
+                </TableCell>
+                <TableCell className="w-1/12 text-center">
+                  <Link
+                    to={`customers/${user.id}`}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
+                    Детайли
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}
