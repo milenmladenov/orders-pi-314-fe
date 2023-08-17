@@ -1,0 +1,2 @@
+(this.webpackJsonpreact_admin_dashboard=this.webpackJsonpreact_admin_dashboard||[]).push([[16],{265:function(t,e,a){"use strict";a.r(e);var n=a(0),r=a.n(n),c=a(40);e.default=function(){return r.a.createElement("div",null,r.a.createElement(c.a,null,"Settings"))}},40:function(t,e,a){"use strict";var n=a(0),r=a.n(n);e.a=function(t){var e=t.children;return r.a.createElement("h1",{className:"my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"},e)}}}]);
+//# sourceMappingURL=16.2af69658.chunk.js.map
