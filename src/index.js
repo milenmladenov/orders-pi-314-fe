@@ -9,8 +9,8 @@ import windmillTheme from "./windmillTheme";
 
 ReactDOM.render(
   <SidebarProvider>
-    <Suspense fallback={<ThemedSuspense />}>
-      <Windmill usePreferences theme={windmillTheme}>
+    <Suspense >
+      <Windmill>
         <App />
       </Windmill>
     </Suspense>
