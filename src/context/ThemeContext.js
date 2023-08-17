@@ -20,7 +20,7 @@ function usePrevious(theme) {
  */
 function useStorageTheme(key) {
   const userPreference =
-    !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    !!window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
 
   const [theme, setTheme] = useState(
     // use stored theme; fallback to user preference
@@ -50,7 +50,7 @@ export const ThemeProvider = ({ children }) => {
   }, [theme, oldTheme])
 
   function toggleTheme() {
-    if (theme === 'light') setTheme('dark')
+    if (theme === 'light') setTheme('light')
     else setTheme('light')
   }
 
