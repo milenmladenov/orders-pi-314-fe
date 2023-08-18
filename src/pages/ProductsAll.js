@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PageTitle from "../components/Typography/PageTitle";
 import { Link, NavLink } from "react-router-dom";
+import axios from "axios";
+
 import {
   EditIcon,
   EyeIcon,
@@ -30,20 +32,21 @@ import {
   ModalBody,
   ModalFooter,
 } from "@windmill/react-ui";
-import response from "../utils/demo/productData";
 import Icon from "../components/Icon";
 import { genRating } from "../utils/genarateRating";
 
 const ProductsAll = () => {
-  const [view, setView] = useState("grid");
+  const [view, setView] = useState("list");
+  const token = localStorage.getItem('accessToken')
 
   // Table and grid data handlling
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
+  const [totalResults, setTotalResults] = useState(0);
+
 
   // pagination setup
   const [resultsPerPage, setResultsPerPage] = useState(10);
-  const totalResults = response.length;
 
   // pagination change control
   function onPageChange(p) {
@@ -52,10 +55,40 @@ const ProductsAll = () => {
 
   // on page change, load new sliced data
   // here you would make another server request for new data
-  useEffect(() => {
-    setData(response.slice((page - 1) * resultsPerPage, page * resultsPerPage));
-  }, [page, resultsPerPage]);
+  const fetchData = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get("http://localhost:8080/api/products", config);
+      const productsData = response.data;
 
+
+      // Apply filters if necessary
+      // let filteredData = ordersData;
+      // if (filter === "изпратена") {
+      //   filteredData = ordersData.filter(order => order.status === "Paid");
+      // } else if (filter === "създадена") {
+      //   filteredData = ordersData.filter(order => order.status === "CREATED");
+      // } else if (filter === "изпълнява се") {
+      //   filteredData = ordersData.filter(order => order.status === "WORKING_ON");
+      // } else if (filter === "изпълнена") {
+      //   filteredData = ordersData.filter(order => order.status === "Paid");
+      // }
+
+      // Flatten the groups and update the totalResults and data state
+      // const flattenedGroups = filteredData.flatMap(product => product);
+      // setTotalResults(flattenedGroups.length);
+setData(productsData)    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [page, resultsPerPage]);
+console.log(data);
   // Delete action model
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDeleteProduct, setSelectedDeleteProduct] = useState(null);
@@ -82,18 +115,18 @@ const ProductsAll = () => {
 
   return (
     <div>
-      <PageTitle>All Products</PageTitle>
+      <PageTitle>Всички продукти</PageTitle>
 
       {/* Breadcum */}
       <div className="flex text-gray-800 dark:text-gray-300">
         <div className="flex items-center text-purple-600">
           <Icon className="w-5 h-5" aria-hidden="true" icon={HomeIcon} />
           <NavLink exact to="/app/dashboard" className="mx-2">
-            Dashboard
+            Контролен панел
           </NavLink>
         </div>
         {">"}
-        <p className="mx-2">All Products</p>
+        <p className="mx-2">Всички продукти</p>
       </div>
 
       {/* Sort */}
@@ -102,8 +135,7 @@ const ProductsAll = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                All Products
-              </p>
+Всички продукти              </p>
 
               <Label className="mx-3">
                 <Select className="py-3">
@@ -133,19 +165,12 @@ const ProductsAll = () => {
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center mr-3 pointer-events-none">
                     {/* <SearchIcon className="w-5 h-5" aria-hidden="true" /> */}
-                    Results on {`${view}`}
+                    Показани продукти
                   </div>
                 </div>
               </Label>
             </div>
-            <div className="">
-              <Button
-                icon={view === "list" ? ListViewIcon : GridViewIcon}
-                className="p-2"
-                aria-label="Edit"
-                onClick={handleChangeView}
-              />
-            </div>
+            
           </div>
         </CardBody>
       </Card>
@@ -155,11 +180,11 @@ const ProductsAll = () => {
         <ModalHeader className="flex items-center">
           {/* <div className="flex items-center"> */}
           <Icon icon={TrashIcon} className="w-6 h-6 mr-3" />
-          Delete Product
+          Изтриване на продукт
           {/* </div> */}
         </ModalHeader>
         <ModalBody>
-          Make sure you want to delete product{" "}
+          Сигурни ли сте, че искате да изтриете {" "}
           {selectedDeleteProduct && `"${selectedDeleteProduct.name}"`}
         </ModalBody>
         <ModalFooter>
@@ -170,7 +195,7 @@ const ProductsAll = () => {
            */}
           <div className="hidden sm:block">
             <Button layout="outline" onClick={closeModal}>
-              Cancel
+              Отказ
             </Button>
           </div>
           <div className="hidden sm:block">
@@ -178,78 +203,102 @@ const ProductsAll = () => {
           </div>
           <div className="block w-full sm:hidden">
             <Button block size="large" layout="outline" onClick={closeModal}>
-              Cancel
+              Отказ
             </Button>
           </div>
           <div className="block w-full sm:hidden">
             <Button block size="large">
-              Delete
+              Изтриване
             </Button>
           </div>
         </ModalFooter>
       </Modal>
 
-      {/* Product Views */}
-      {view === "list" ? (
-        <>
+   
           <TableContainer className="mb-8">
             <Table>
               <TableHeader>
                 <tr>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Stock</TableCell>
-                  <TableCell>Rating</TableCell>
-                  <TableCell>QTY</TableCell>
-                  <TableCell>Price</TableCell>
-                  <TableCell>Action</TableCell>
+                  <TableCell>Име</TableCell>
+                  <TableCell>Наличност</TableCell>
+                  <TableCell>Количество</TableCell>
+                  <TableCell>Цена</TableCell>
                 </tr>
               </TableHeader>
               <TableBody>
-                {data.map((product) => (
-                  <TableRow key={product.id}>
+                <div className="ml-4 ">
+                <Label className='text-xl font-bold text-green-500	'>Материали</Label></div>
+                {data && data.doors && data.doors.map((door, index) => (
+                  <TableRow key={index} >
                     <TableCell>
                       <div className="flex items-center text-sm">
-                        <Avatar
-                          className="hidden mr-4 md:block"
-                          src={product.photo}
-                          alt="Product image"
-                        />
+                       
                         <div>
-                          <p className="font-semibold">{product.name}</p>
+                          <p className="font-semibold">{door.name}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge type={product.qty > 0 ? "success" : "danger"}>
-                        {product.qty > 0 ? "In Stock" : "Out of Stock"}
-                      </Badge>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">da</p>
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-sm">
-                      {genRating(product.rating, product.reviews.length, 5)}
-                    </TableCell>
-                    <TableCell className="text-sm">{product.qty}</TableCell>
-                    <TableCell className="text-sm">{product.price}</TableCell>
                     <TableCell>
-                      <div className="flex">
-                        <Link to={`/app/product/${product.id}`}>
-                          <Button
-                            icon={EyeIcon}
-                            className="mr-3"
-                            aria-label="Preview"
-                          />
-                        </Link>
-                        <Button
-                          icon={EditIcon}
-                          className="mr-3"
-                          layout="outline"
-                          aria-label="Edit"
-                        />
-                        <Button
-                          icon={TrashIcon}
-                          layout="outline"
-                          onClick={() => openModal(product.id)}
-                          aria-label="Delete"
-                        />
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">12</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">{door.price} лв.</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+<div className="ml-4 ">
+                <Label className='text-xl font-bold text-green-500	'>Модели</Label></div>
+                {data && data.models && data.models.map((model, index) => (
+                  <TableRow key={index} >
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">{model.name}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">da</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">12</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">{model.price} лв.</p>
+                        </div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -265,86 +314,8 @@ const ProductsAll = () => {
               />
             </TableFooter>
           </TableContainer>
-        </>
-      ) : (
-        <>
-          {/* Car list */}
-          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
-            {data.map((product) => (
-              <div className="" key={product.id}>
-                <Card>
-                  <img
-                    className="object-cover w-full"
-                    src={product.photo}
-                    alt="product"
-                  />
-                  <CardBody>
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="font-semibold truncate  text-gray-600 dark:text-gray-300">
-                        {product.name}
-                      </p>
-                      <Badge
-                        type={product.qty > 0 ? "success" : "danger"}
-                        className="whitespace-nowrap"
-                      >
-                        <p className="break-normal">
-                          {product.qty > 0 ? `In Stock` : "Out of Stock"}
-                        </p>
-                      </Badge>
-                    </div>
-
-                    <p className="mb-2 text-purple-500 font-bold text-lg">
-                      {product.price}
-                    </p>
-
-                    <p className="mb-8 text-gray-600 dark:text-gray-400">
-                      {product.shortDescription}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Link to={`/app/product/${product.id}`}>
-                          <Button
-                            icon={EyeIcon}
-                            className="mr-3"
-                            aria-label="Preview"
-                            size="small"
-                          />
-                        </Link>
-                      </div>
-                      <div>
-                        <Button
-                          icon={EditIcon}
-                          className="mr-3"
-                          layout="outline"
-                          aria-label="Edit"
-                          size="small"
-                        />
-                        <Button
-                          icon={TrashIcon}
-                          layout="outline"
-                          aria-label="Delete"
-                          onClick={() => openModal(product.id)}
-                          size="small"
-                        />
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              </div>
-            ))}
           </div>
-
-          <Pagination
-            totalResults={totalResults}
-            resultsPerPage={resultsPerPage}
-            label="Table navigation"
-            onChange={onPageChange}
-          />
-        </>
-      )}
-    </div>
-  );
+       ); 
 };
 
 export default ProductsAll;

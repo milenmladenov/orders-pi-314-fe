@@ -73,7 +73,6 @@ function SidebarContent() {
           )
         )}
 
-        <hr className="customeDivider mx-4 my-5" />
 
         {(isAdmin ? adminRoutes : routes).slice(-3).map((route) => (
           <li className="relative px-6 py-3" key={route.name}>

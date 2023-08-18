@@ -11,13 +11,26 @@ import {
   Avatar,
   Badge,
   Pagination,
-  Button,Select
+  Button, Select, Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
 } from "@windmill/react-ui";
+import {
+  EditIcon,
+  EyeIcon,
+  GridViewIcon,
+  HomeIcon,
+  ListViewIcon,
+  TrashIcon,
+} from "../icons";
 import { Link } from 'react-router-dom'
 import json2xls from 'json2xls'; // Import json2xls
 import { saveAs } from "file-saver"; // Import saveAs function
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
+import Icon from "../components/Icon";
+
 
 
 
@@ -28,17 +41,20 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   const [data, setData] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const token = localStorage.getItem('accessToken')
-  const loggedUser =JSON.parse(localStorage.getItem('user'))
+  const loggedUser = JSON.parse(localStorage.getItem('user'))
+  const [selectedStatus, setSelectedStatus] = useState(undefined);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null); // Define selectedOrderId state
 
-  // pagination change control
-  function onPageChange(p) {
-    setPage(p);
-  }
 
-  const formatDateWithoutDashes = (dateString) => {
-    const date = new Date(dateString);
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return date.toLocaleDateString('en-US', options).replace(/\//g, ''); // Remove slashes
+
+  const handleChange = (event,order) => {
+    const newStatus = event.target.value;
+    order.selectedStatus = newStatus;
+    if (newStatus !== selectedStatus) {
+      setSelectedStatus(newStatus);
+      setIsModalOpen(true);
+    }
   };
 
   const fetchData = async () => {
@@ -71,11 +87,40 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
       console.error("Error fetching data:", error);
     }
   };
+  const handleConfirmChange = (order) => {
+    // Make API call to change the order status
+    fetch(`http://localhost:8080/orders/${order.id}/change-status?orderStatus=${selectedStatus}`, {
+      method: 'POST',
+    })
+      .then((response) => {
+        // Handle response as needed
+      })
+      .catch((error) => {
+        // Handle error
+      });
+
+    // Close the confirmation modal
+    closeModal()
+  };
+  function closeModal() {
+    setIsModalOpen(false);
+  }
+  // pagination change control
+  function onPageChange(p) {
+    setPage(p);
+  }
+
+  const formatDateWithoutDashes = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return date.toLocaleDateString('en-US', options).replace(/\//g, ''); // Remove slashes
+  };
+
 
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Orders');
+    const worksheet = workbook.addWorksheet('Справка');
 
     const headerRow = [
       "ПОРЕДЕН НОМЕР", "Група", "ДАТА", "ПОРЪЧКА", "КЛИЕНТ", "ВИД", "ГРАД",
@@ -124,8 +169,8 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
     fetchData();
   }, [page, resultsPerPage, filter]);
   return (
-      <div>
-        {loggedUser.data.role === '[ADMIN]' && (
+    <div>
+      {loggedUser.data.role === '[ADMIN]' && (
         <>
           <div className="mt-4 ">
             <Button layout="outline" onClick={exportToExcel} className="btn btn-primary">
@@ -135,6 +180,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           <hr className="customeDivider mx-4 my-5" />
         </>
       )}
+      
       {/* Table */}
       <TableContainer className="mb-8">
         <Table>
@@ -150,72 +196,105 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
             </tr>
           </TableHeader>
           <TableBody>
-
+          
             {data.map((order, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
+             <TableRow key={i}>
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <p className="font-semibold">{order.createdAt}</p>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <p className="font-semibold">{order.createdAt}</p>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Select>
-                  <option value={order.status}> 
-{order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена  " : order.status}
-                  </option>
-                  <option value="CREATED">Създадена</option>
-                  <option value="PAID">Платена</option>
-                  <option value="WORKING_ON">Изпълнява се</option>
-                 
-                  </Select>
-                 
-                </TableCell>
-                <TableCell>
+                  </TableCell>
+                  <TableCell>
+                    <Modal isOpen={isModalOpen} onClose={closeModal}>
+                      <ModalHeader className="flex items-center">
+                        <Icon icon={EditIcon} className="w-6 h-6 mr-3" />
+                        Промяна на статус
+                      </ModalHeader>
+                      <ModalBody>
+                        Сигурни ли сте, че искате да промените статуса на{" "}
+                        {selectedStatus && `"${selectedStatus}"`}
+                      </ModalBody>
+                      <ModalFooter>
+                        <div className="hidden sm:block">
+                          <Button onClick={() => handleConfirmChange(order)}>
+                            Потвърждаване
+                          </Button>
+                        </div>
+                        <div className="hidden sm:block">
+                          <Button layout="outline" onClick={closeModal}>
+                            Отказ
+                          </Button>
+                        </div>
+                      </ModalFooter>
+                    </Modal>
+                  
+                    <Select value={selectedStatus}  >
+                      <option value={order.status}>
+                        {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена  " : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}
+                      </option>
+                      {order.status !== "CREATED" && (
+                        <option value="CREATED">Създадена</option>
+                      )}
+                      {order.status !== "SEND" && (
+                        <option value="SEND">Изпратена</option>
+                      )}
+                      {order.status !== "WORKING_ON" && (
+                        <option value="WORKING_ON">Изпълнява се</option>
+                      )}
+                      {order.status !== "DONE" && (
+                        <option value="DONE">Изпълнена</option>
+                      )}
 
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <p className="font-semibold">{order.user.companyName}</p>
-                    </div>
-                  </div>
-                </TableCell>
 
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <span className="font-semibold">{order.totalPrice}</span  ><span>лв.</span>
+                    </Select>
+
+                  </TableCell>
+                  <TableCell>
+
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <p className="font-semibold">{order.user.companyName}</p>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <span className="font-semibold">{order.totalPrice}</span><span>лв.</span>
+                      </div>
+                    </div>
+                  </TableCell>
 
 
-                <TableCell>
-                  {order.type === "BY_HAND" ? "Ръчно - от Администратор" : "От клиент"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <span className="font-semibold">0</span  ><span>%</span>
+                  <TableCell>
+                    {order.type === "BY_HAND" ? "Ръчно - от Администратор" : "От клиент"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <span className="font-semibold">0</span><span>%</span>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell className="w-1/12 text-center">
-                  <Link
-                    to={`orders/${order.id}`}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Детайли
-                  </Link>
-                </TableCell>
-              </TableRow>
+                  </TableCell>
+                  <TableCell className="w-1/12 text-center">
+                    <Link
+                      to={`orders/${order.id}`}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Детайли
+                    </Link>
+                  </TableCell>
+                </TableRow>
             ))}
           </TableBody>
         </Table>

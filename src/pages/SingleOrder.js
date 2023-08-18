@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TableContainer, Table, TableHeader, TableCell, TableRow, TableBody } from '@windmill/react-ui';
+import { Button, TableContainer, Table, TableHeader, TableCell, TableRow, TableBody } from '@windmill/react-ui';
 import PageTitle from "../components/Typography/PageTitle";
+import labelsFile from "../assets/xlxs/за етикети.xlsx";
+import json2xls from 'json2xls'; // Import json2xls
+import { saveAs } from "file-saver"; // Import saveAs function
+import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 const SingleOrder = ({ match }) => {
     const [order, setOrder] = useState(null);
     const orderId = match.params.id; // Get the orderId from the route parameter
     const token = localStorage.getItem('accessToken')
+    const loggedUser = JSON.parse(localStorage.getItem('user'))
+    const formatDateWithoutDashes = (dateString) => {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return date.toLocaleDateString('en-US', options).replace(/\//g, ''); // Remove slashes
+    };
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -30,6 +41,33 @@ const SingleOrder = ({ match }) => {
     if (!order) {
         return <div>Loading...</div>;
     }
+    const exportToExcel = async () => {
+        try {
+            const response = await axios.get(labelsFile, { responseType: 'arraybuffer' });
+            const existingWorkbook = new ExcelJS.Workbook();
+            await existingWorkbook.xlsx.load(response.data)
+
+            const dataWorksheet = existingWorkbook.getWorksheet('Data')
+            order.groups.forEach(group => {
+                
+                const rowData = ["",
+                order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, order.id + "-"];
+
+                const newRow = dataWorksheet.addRow(rowData);
+           })
+        
+         
+
+            const buffer = await existingWorkbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+            saveAs(blob, 'етикети - ' + order.id + '.xlsx');
+        
+
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+        }
+    };
 
     return (
         console.log(order),
@@ -39,8 +77,18 @@ const SingleOrder = ({ match }) => {
                 </PageTitle>        </div>
             <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
             <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма : {order.user.companyName}</div><div className='mb-2'>Град : {order.user.city}</div><div className='mb-2'>Адрес : {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ : {order.user.bulstat}</div><div>МОЛ : {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка : {order.user.companyAdress}</div></div></div>
-            <h1 className='ml-3'>Материал : <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
+            <div className='grid grid-cols-2'><h1 className='ml-3'>Материал : <span className='font-semibold'> {order.groups[0].door.name}</span></h1>{loggedUser.data.role === '[ADMIN]' && (
+                <>
+                    <div className='text-right mr-3 mb-4'>
+                        <Button onClick={exportToExcel} className="">
+                            Генериране на етикети
+                        </Button>
+
+                    </div>
+                </>
+            )}</div>
             <TableContainer>
+
                 <Table>
                     <TableHeader>
                         <tr>
@@ -60,31 +108,34 @@ const SingleOrder = ({ match }) => {
                         </tr>
                     </TableHeader>
                     <TableBody>
-                    {order.groups.map((group, j) => (
-                    <TableRow key={j}>
-                
-                        <TableCell>{group.model.name}</TableCell>
-                        <TableCell>{group.folio.name}</TableCell>
-                        <TableCell>{group.profil.name}</TableCell>
-                        <TableCell>{group.handle.name}</TableCell>
-                        <TableCell>{group.height}</TableCell>
-                        <TableCell>{group.width}</TableCell>
-                        <TableCell>{group.number}</TableCell>
-                        <TableCell>{group.handle.price}</TableCell>
-                        <TableCell>{group.matPrice}</TableCell>
-                        <TableCell>{group.isBothSidesLaminated}</TableCell>
-                        <TableCell>{group.groupTotalPrice}лв.</TableCell>
-                
-            </TableRow>))}
-        </TableBody>
+                        {order.groups.map((group, j) => (
+                            <TableRow key={j}>
+
+                                <TableCell>{group.model.name}</TableCell>
+                                <TableCell>{group.folio.name}</TableCell>
+                                <TableCell>{group.profil.name}</TableCell>
+                                <TableCell>{group.handle.name}</TableCell>
+                                <TableCell>{group.height}</TableCell>
+                                <TableCell>{group.width}</TableCell>
+                                <TableCell>{group.number}</TableCell>
+                                <TableCell>{group.handle.price}</TableCell>
+                                <TableCell>{group.matPrice}</TableCell>
+                                <TableCell>{group.isBothSidesLaminated}</TableCell>
+                                <TableCell>{group.groupTotalPrice}лв.</TableCell>
+
+                            </TableRow>))}
+
+                    </TableBody>
+
                 </Table>
+                <div ><p className='font-semibold content-end text-right mr-3 mt-3 mb-3'>Обща стойност : {order.totalPrice}лв.</p></div>
             </TableContainer>
             <div className=' h-10 grid grid-cols-5  gap-20 content-end '> <div></div>
-                <div></div><div></div><div></div>  <div></div>
+                <div> </div><div></div><div></div>  <div></div>
                 <div></div>
 
                 <div></div><div></div><div></div>
-                <div><p className='font-semibold content-end '>Обща стойност : {order.totalPrice}лв.</p></div></div>
+            </div>
         </div>
     );
 };

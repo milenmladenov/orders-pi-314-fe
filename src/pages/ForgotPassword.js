@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import ImageLight from '../assets/img/forgot-password-office.jpeg'
+import ImageLight from '../assets/img/logo-white-frame.png'
 import ImageDark from '../assets/img/forgot-password-office-dark.jpeg'
 import { Label, Input, Button } from '@windmill/react-ui'
 
@@ -17,27 +17,20 @@ function ForgotPassword() {
               src={ImageLight}
               alt="Office"
             />
-            <img
-              aria-hidden="true"
-              className="hidden object-cover w-full h-full dark:block"
-              src={ImageDark}
-              alt="Office"
-            />
+            
           </div>
           <main className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
             <div className="w-full">
               <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                Forgot password
-              </h1>
+Забравена парола              </h1>
 
               <Label>
                 <span>Email</span>
-                <Input className="mt-1" placeholder="Jane Doe" />
+                <Input className="mt-1" placeholder="Въведете Email" />
               </Label>
 
               <Button tag={Link} to="/login" block className="mt-4">
-                Recover password
-              </Button>
+Възстановяване на парола              </Button>
             </div>
           </main>
         </div>
