@@ -30,6 +30,8 @@ import { saveAs } from "file-saver"; // Import saveAs function
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import Icon from "../components/Icon";
+import { config } from '../Constants';
+
 
 
 
@@ -45,6 +47,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   const [selectedStatus, setSelectedStatus] = useState(undefined);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null); // Define selectedOrderId state
+  const apiBaseUrl = config.url.API_BASE_URL;
 
 
 
@@ -64,7 +67,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get("http://localhost:8080/api/orders/all", config);
+      const response = await axios.get(apiBaseUrl + "/api/orders/all", config);
       const ordersData = response.data;
 
       // Apply filters if necessary
@@ -89,7 +92,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   };
   const handleConfirmChange = (order) => {
     // Make API call to change the order status
-    fetch(`http://localhost:8080/orders/${order.id}/change-status?orderStatus=${selectedStatus}`, {
+    fetch(apiBaseUrl + `/orders/${order.id}/change-status?orderStatus=${selectedStatus}`, {
       method: 'POST',
     })
       .then((response) => {
