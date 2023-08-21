@@ -4,6 +4,8 @@ import "../assets/css/groups-in-rows.css"
 import { orderApi } from '../components/misc/OrderApi'
 import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
+import InfoCard from "../components/Cards/InfoCard";
+
 
 
 
@@ -27,7 +29,7 @@ const NewOrderForm = () => {
         detailType: ''
     };
 
-    const [totalPrice, setTotalPrice] = useState('0лв. / Добавени са 30% надценка към крайната цена.');
+    const [totalPrice, setTotalPrice] = useState('0лв.');
     const [groupPrices, setGroupPrices] = useState('0');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState('');
@@ -255,7 +257,7 @@ const NewOrderForm = () => {
 
                     {groupForms.map((formData, index) => (
                         <div >
-                            <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3">
+                            <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3" >
 
                                 <form
                                     id={`orderForm${index}`}

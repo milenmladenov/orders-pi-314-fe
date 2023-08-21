@@ -18,6 +18,7 @@ import OrdersTable from "../components/OrdersTable";
 
 
 function Dashboard() {
+  const loggedUser = JSON.parse(localStorage.getItem("user"))
 
   return (
     <>
@@ -25,7 +26,7 @@ function Dashboard() {
 
       {/* <CTA /> */}
 
-      {/* <!-- Cards --> */}
+      {loggedUser.data.role === '[ADMIN]' && ( <>
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
         <InfoCard title="Брой клиенти" value="765">
           <RoundIcon
@@ -75,7 +76,8 @@ function Dashboard() {
           <ChartLegend legends={doughnutLegends} />
         </ChartCard>
       </div>
-
+      </>
+      )}
       <PageTitle>Поръчки</PageTitle>
       <OrdersTable resultsPerPage={10} />
     </>

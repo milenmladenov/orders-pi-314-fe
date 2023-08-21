@@ -1,6 +1,6 @@
 const prod = {
     url: {
-      API_BASE_URL: 'http://localhost:8080' ,
+      API_BASE_URL: 'https://orders-pi314-396621.uc.r.appspot.com]' ,
     }
   }
   
