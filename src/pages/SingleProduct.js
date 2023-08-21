@@ -6,10 +6,13 @@ import { HomeIcon } from "../icons";
 import response from "../utils/demo/productData";
 import { Card, CardBody, Badge, Button, Avatar } from "@windmill/react-ui";
 import { genRating } from "../utils/genarateRating";
+import { config } from '../Constants';
+
+
 
 const SingleProduct = () => {
   const { id } = useParams();
-
+  const apiBaseUrl = config.url.API_BASE_URL;
   // change view component
   const [tabView, setTabView] = useState("reviews");
   const handleTabView = (viewName) => setTabView(viewName);

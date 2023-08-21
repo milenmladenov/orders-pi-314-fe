@@ -7,12 +7,15 @@ import { Button, Label, Input, Textarea, HelperText } from '@windmill/react-ui';
 import Logo from '../assets/img/logo-white-frame.png'
 import "../assets/css/input-fields-container.css"
 import { Link } from 'react-router-dom'
+import { config } from '../Constants';
+
 
 
 
 
 class SignUp extends Component {
   static contextType = AuthContext;
+  
 
   state = {
     username: '',
@@ -354,14 +357,14 @@ validatePasswords = () => {
                       className="mt-4"
                       block
                       as={Link}  // Use the Link component
-                      to="/login"
+                      to="/"
                       onClick={this.handleSubmit}
                     >
                       Регистрация
                     </Button>
                     <Link
                       className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                      to="/login"
+                      to="/"
                     >
                       Имате потребител? Влезнете в профила си!
                     </Link>                </div>
