@@ -12,23 +12,23 @@ export function register() {
       });
     }
   }
-  self.addEventListener('install', (event) => {
-    event.waitUntil(
-      caches.open('app-cache').then((cache) => {
-        return cache.addAll([
-          // List of URLs to cache
-        ]);
-      })
-    );
-  });
+//   self.addEventListener('install', (event) => {
+//     event.waitUntil(
+//       caches.open('app-cache').then((cache) => {
+//         return cache.addAll([
+//           // List of URLs to cache
+//         ]);
+//       })
+//     );
+//   });
   
-  self.addEventListener('fetch', (event) => {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
-  });
+//   self.addEventListener('fetch', (event) => {
+//     event.respondWith(
+//       caches.match(event.request).then((response) => {
+//         return response || fetch(event.request);
+//       })
+//     );
+//   });
   
  
   self.addEventListener("activate", function (event) {
