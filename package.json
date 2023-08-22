@@ -54,7 +54,7 @@
         ]
     },
     "proxy": "https://orders-pi314-396621.uc.r.appspot.com",
-    "homepage": ".",
+    "homepage": "/",
     "browserslist": {
         "production": [
             ">0.2%",
