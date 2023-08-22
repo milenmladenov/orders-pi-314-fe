@@ -5,6 +5,8 @@ import { orderApi } from '../components/misc/OrderApi'
 import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 import InfoCard from "../components/Cards/InfoCard";
+import { config } from '../Constants';
+
 
 
 
@@ -16,6 +18,7 @@ const NewOrderForm = () => {
     }
 
     const loggedUser = JSON.parse(localStorage.getItem("user"))
+    const apiBaseUrl = config.url.API_BASE_URL;
 
     const initialFormState = {
         doorName: '',
@@ -39,9 +42,9 @@ const NewOrderForm = () => {
 
 
     useEffect(() => {
-        setOrderPreflightUrl('http://localhost:8080/api/orders/new-order/preflight');
-        setOrderUrl('http://localhost:8080/api/orders/new-order');
-      }, []);
+        setOrderPreflightUrl(apiBaseUrl + 'api/orders/new-order/preflight');
+        setOrderUrl(apiBaseUrl + '/api/orders/new-order');
+    }, []);
 
 
     const [groupForms, setGroupForms] = useState([
