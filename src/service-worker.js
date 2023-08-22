@@ -30,16 +30,16 @@ export function register() {
     );
   });
   
-  self.addEventListener('activate', (event) => {
+ 
+  self.addEventListener("activate", function (event) {
     event.waitUntil(
-      caches.keys().then((cacheNames) => {
+      this.caches.keys().then(function (cacheNames) {
         return Promise.all(
           cacheNames
-            .filter((cacheName) => {
-              // You can add conditions to decide which caches to delete
+            .filter(function (cacheName) {
               return true;
             })
-            .map((cacheName) => {
+            .map(function (cacheName) {
               return caches.delete(cacheName);
             })
         );
