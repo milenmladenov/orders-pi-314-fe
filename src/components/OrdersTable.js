@@ -92,7 +92,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   };
   const handleConfirmChange = (order) => {
     // Make API call to change the order status
-    fetch(apiBaseUrl + `/orders/${order.id}/change-status?orderStatus=${selectedStatus}`, {
+    fetch(apiBaseUrl + `api/orders/${order.id}/change-status?orderStatus=${selectedStatus}`, {
       method: 'POST',
     })
       .then((response) => {

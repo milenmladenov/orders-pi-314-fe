@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import PageTitle from "../components/Typography/PageTitle";
 import { Link, NavLink } from "react-router-dom";
 import axios from "axios";
+import { config } from '../Constants';
+
 
 import {
   EditIcon,
@@ -38,6 +40,7 @@ import { genRating } from "../utils/genarateRating";
 const ProductsAll = () => {
   const [view, setView] = useState("list");
   const token = localStorage.getItem('accessToken')
+  const apiBaseUrl = config.url.API_BASE_URL;
 
   // Table and grid data handlling
   const [page, setPage] = useState(1);
@@ -62,7 +65,7 @@ const ProductsAll = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get("http://localhost:8080/api/products", config);
+      const response = await axios.get(apiBaseUrl + "/api/products", config);
       const productsData = response.data;
 
 

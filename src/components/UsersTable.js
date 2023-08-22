@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { config } from '../Constants';
+
 
 import {
   TableBody,
@@ -18,6 +20,7 @@ import { Link } from 'react-router-dom'
 const UsersTable = ({ resultsPerPage, filter }) => {
   const [page, setPage] = useState(1);
   const token = localStorage.getItem('accessToken')
+  const apiBaseUrl = config.url.API_BASE_URL;
 
   const [data, setData] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
@@ -33,7 +36,7 @@ const UsersTable = ({ resultsPerPage, filter }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get("http://localhost:8080/api/customers", config);
+      const response = await axios.get(apiBaseUrl + "api/customers", config);
       const userData = response.data
       setTotalResults(userData.length);
       setData(userData.slice((page - 1) * resultsPerPage, page * resultsPerPage));

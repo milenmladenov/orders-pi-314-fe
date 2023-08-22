@@ -4,6 +4,8 @@ import NewOrderForm from './newOrderForm';
 import PageTitle from "../components/Typography/PageTitle";
 import "../assets/css/groups-in-rows.css"
 import ConfirmationModal from '../components/ConfirmationModal';
+import { config } from '../Constants';
+
 
 
 
@@ -16,6 +18,7 @@ const NewExcelOrderForm = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [totalPrice, setTotalPrice] = useState('0лв. / Добавени са 30% надценка към крайната цена.');
     const [groupForms, setGroupForms] = useState([]);
+    const apiBaseUrl = config.url.API_BASE_URL;
 
 
 
@@ -57,7 +60,7 @@ const NewExcelOrderForm = () => {
         }));
 
         // Send the data to the backend using AJAX
-        fetch('http://localhost:8080/api/orders/new-order', {
+        fetch(apiBaseUrl + 'api/orders/new-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -125,7 +128,7 @@ const NewExcelOrderForm = () => {
         }));
         const token = localStorage.getItem('accessToken')
         // Send the data to the backend using AJAX
-        fetch('http://localhost:8080/api/orders/new-order/preflight', {
+        fetch(apiBaseUrl + 'api/orders/new-order/preflight', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
