@@ -14,29 +14,13 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "./precache-manifest.f0f8716589db022a5e52061639d68f55.js"
+  "./precache-manifest.181e5482f3ffc135efed9d18349e5b81.js"
 );
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-});
-
-self.addEventListener("activate", function (event) {
-  event.waitUntil(
-    this.caches.keys().then(function (cacheNames) {
-      return Promise.all(
-        cacheNames
-          .filter(function (cacheName) {
-            return true;
-          })
-          .map(function (cacheName) {
-            return caches.delete(cacheName);
-          })
-      );
-    })
-  );
 });
 
 workbox.core.clientsClaim();
