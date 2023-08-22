@@ -1,0 +1,1 @@
+{"version":3,"sources":["input-fields-container.css"],"names":[],"mappings":"AAAA,wBACI,8BAA+B,CAC/B,eACF","file":"21.4cd0d3bf.chunk.css","sourcesContent":[".input-fields-container {\n    max-height: calc(100vh - 120px);\n    overflow-y: auto;\n  }\n  "]}

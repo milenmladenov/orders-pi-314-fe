@@ -1,0 +1,2 @@
+(this.webpackJsonpreact_admin_dashboard=this.webpackJsonpreact_admin_dashboard||[]).push([[16],{264:function(t,e,a){"use strict";a.r(e);var n=a(0),r=a.n(n),c=a(39);e.default=function(){return r.a.createElement("div",null,r.a.createElement(c.a,null,"Settings"))}},39:function(t,e,a){"use strict";var n=a(0),r=a.n(n);e.a=function(t){var e=t.children;return r.a.createElement("h1",{className:"my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"},e)}}}]);
+//# sourceMappingURL=16.ee4f8495.chunk.js.map
