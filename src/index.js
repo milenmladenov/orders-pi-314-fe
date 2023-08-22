@@ -6,6 +6,7 @@ import { SidebarProvider } from "./context/SidebarContext";
 import ThemedSuspense from "./components/ThemedSuspense";
 import { Windmill } from "@windmill/react-ui";
 import windmillTheme from "./windmillTheme";
+import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <SidebarProvider>
@@ -17,3 +18,4 @@ ReactDOM.render(
   </SidebarProvider>,
   document.getElementById("root")
 );
+serviceWorker.register();
