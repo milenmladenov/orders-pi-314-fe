@@ -107,14 +107,7 @@ function SidebarContent() {
         </li>
       </ul>
 
-      <div className="px-6 my-6">
-        <Button>
-          Genarate Report
-          <span className="ml-2" aria-hidden="true">
-            +
-          </span>
-        </Button>
-      </div>
+     
       <LogoutModal onConfirm={handleLogout} isOpen={showCustomLogoutModal} onClose={() => setShowCustomLogoutModal(false)} />
 
     </div>

@@ -32,7 +32,7 @@ const SingleOrder = ({ match }) => {
                         Authorization: `Bearer ${token}`,
                     },
                 };
-                const response = await axios.get(`http://localhost:8080/api/orders/${orderId}`, config);
+                const response = await axios.get(apiBaseUrl + `/api/orders/${orderId}`, config);
                 setOrder(response.data);
             } catch (error) {
                 console.error('Error fetching order:', error);
