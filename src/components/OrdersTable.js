@@ -225,6 +225,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
                       <ModalBody>
                         Сигурни ли сте, че искате да промените статуса на{" "}
                         {selectedStatus && `"${selectedStatus}"`}
+                        {selectedStatus === "WORKING_ON" ? "Изпълнява се" : selectedStatus === "CREATED" ? "Създадена  " : selectedStatus === "SEND" ? "Изпратена" : selectedStatus === "DONE" ? "Изпълнена" : selectedStatus}
                       </ModalBody>
                       <ModalFooter>
                         <div className="hidden sm:block">

@@ -42,7 +42,7 @@ const NewOrderForm = () => {
 
 
     useEffect(() => {
-        setOrderPreflightUrl(apiBaseUrl + 'api/orders/new-order/preflight');
+        setOrderPreflightUrl(apiBaseUrl + '/api/orders/new-order/preflight');
         setOrderUrl(apiBaseUrl + '/api/orders/new-order');
     }, []);
 
