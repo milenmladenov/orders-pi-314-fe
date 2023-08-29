@@ -23,6 +23,20 @@ const SingleOrder = ({ match }) => {
         return date.toLocaleDateString('en-US', options).replace(/\//g, ''); // Remove slashes
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+          case "WORKING_ON":
+            return "text-yellow-500"; // Yellow color
+          case "CREATED":
+            return "text-gray-500";
+          case "SEND":
+            return "text-blue-500";
+          case "DONE":
+            return "text-green-500";
+            return "";
+        }
+      };
+
     useEffect(() => {
         const fetchOrder = async () => {
 
@@ -53,20 +67,20 @@ const SingleOrder = ({ match }) => {
 
             const dataWorksheet = existingWorkbook.getWorksheet('Data')
             order.groups.forEach(group => {
-                
+
                 const rowData = ["",
-                order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, order.id + "-"];
+                    order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, order.id + "-"];
 
                 const newRow = dataWorksheet.addRow(rowData);
-           })
-        
-         
+            })
+
+
 
             const buffer = await existingWorkbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
+
             saveAs(blob, 'етикети - ' + order.id + '.xlsx');
-        
+
 
         } catch (error) {
             console.error('Error exporting to Excel:', error);
@@ -75,9 +89,10 @@ const SingleOrder = ({ match }) => {
 
     return (
         console.log(order),
-        <div className='border'>
+        <div className='border mr-10'>
             <div className='text-center border'>
-                <PageTitle>Статус на поръчката :  {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена  " : order.status}
+                <PageTitle>Статус на поръчката : <span className={getStatusColor(order.status)}>{order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}</span>
+
                 </PageTitle>        </div>
             <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
             <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма : {order.user.companyName}</div><div className='mb-2'>Град : {order.user.city}</div><div className='mb-2'>Адрес : {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ : {order.user.bulstat}</div><div>МОЛ : {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка : {order.user.companyAdress}</div></div></div>
@@ -134,12 +149,7 @@ const SingleOrder = ({ match }) => {
                 </Table>
                 <div ><p className='font-semibold content-end text-right mr-3 mt-3 mb-3'>Обща стойност : {order.totalPrice}лв.</p></div>
             </TableContainer>
-            <div className=' h-10 grid grid-cols-5  gap-20 content-end '> <div></div>
-                <div> </div><div></div><div></div>  <div></div>
-                <div></div>
-
-                <div></div><div></div><div></div>
-            </div>
+            
         </div>
     );
 };

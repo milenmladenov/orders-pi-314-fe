@@ -92,6 +92,7 @@ class Login extends Component {
                     name="username"
                     value={this.state.username}
                     onChange={(e) => this.handleInputChange(e, { name: 'username', value: e.target.value })}
+                   
                     />
                 </Label>
 
@@ -113,6 +114,7 @@ class Login extends Component {
                   tag={Link} // Assuming you are using react-router-dom's Link component
                   to="/app"
                   onClick={this.handleSubmit}
+                  
                 >
                   Вход
                 </Button>

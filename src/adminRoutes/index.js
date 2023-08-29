@@ -16,6 +16,7 @@ const Blank = lazy(() => import("../pages/Blank"));
 const NewOrderForm = lazy(() => import("../pages/newOrderForm"))
 const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 const SingleOrder = lazy(() => import("../pages/SingleOrder"))
+const SingleCustomer = lazy(() => import("../pages/SingleCustomer"))
 // const LogoutModal = lazy(() => import("../components/LogoutModal"))
 
 /**
@@ -66,6 +67,10 @@ const SingleOrder = lazy(() => import("../pages/SingleOrder"))
     {
         path: "/customers",
         component: Customers,
+    },
+    {
+        path: "/customers/:id",
+        component: SingleCustomer,
     },
     {
         path: "/chats",
