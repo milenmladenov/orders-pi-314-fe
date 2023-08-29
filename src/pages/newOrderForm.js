@@ -6,6 +6,7 @@ import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthCo
 import ConfirmationModal from '../components/ConfirmationModal';
 import InfoCard from "../components/Cards/InfoCard";
 import { config } from '../Constants';
+import { Select, Input, Label } from "@windmill/react-ui";
 
 
 
@@ -62,6 +63,8 @@ const NewOrderForm = () => {
             return formData;
         });
         setGroupForms(updatedForms);
+        // handleInputChange(event,index);
+
     };
 
     const handleChange1 = (event) => {
@@ -78,12 +81,11 @@ const NewOrderForm = () => {
         setSelectedPilastur(event.target.value);
     };
 
-    const handleAddGroup = () => {
-
+    const handleAddGroup = (event) => {
         setGroupForms((prevGroupForms) => [
             ...prevGroupForms,
             {
-                doorName: "",
+                doorName: groupForms[0].doorName,
                 modelName: "",
                 folioName: "",
                 handleName: "Без Дръжка",
@@ -96,10 +98,6 @@ const NewOrderForm = () => {
         ]);
     };
 
-    //     function handleChange(event) {
-    //     const { name, value } = event.target;
-    //     setFormData({ ...formData, [name]: value });
-    // }
     const handleSubmit = () => {
         const groupsArray = groupForms.map((formData) => ({
             door: {
@@ -157,6 +155,7 @@ const NewOrderForm = () => {
     };
 
 
+
     const handlePreflight = () => {
         // Create an array of groups from the groupForms state
         const groupsArray = groupForms.map((formData) => ({
@@ -203,7 +202,7 @@ const NewOrderForm = () => {
                 // Set the total price as the sum of all groupTotalPrices
                 const totalPrice = data.totalPrice;
                 if (loggedUser.data.role === '[ADMIN]') {
-                    setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка към крайната цена.`);
+                    setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка.`);
                 } else if (loggedUser.data.role === '[USER]') {
                     setTotalPrice(`${totalPrice}лв.`);
 
@@ -215,8 +214,6 @@ const NewOrderForm = () => {
             .catch((error) => {
                 console.log('Error: ' + error.message);
             });
-        console.log(orderUrl)
-        console.log(orderPreflightUrl)
     };
 
 
@@ -227,29 +224,35 @@ const NewOrderForm = () => {
             <div className="grid gap-2 mb-12 md:grid-cols-2">
                 <div className="col-span-12 text-center sticky-top ">
                     <PageTitle>Създаване на нова поръчка</PageTitle>
-                    <div> {<p className='flex justify-start'>Обща цена на поръчката : {totalPrice}</p>}
-                        <div className="col-span-2 flex justify-end">
-
-                            <button
-                                className="w-full px-4 py-2 text-white bg-green-600 rounded-md shadow-md hover:bg-green-700"
-                                onClick={handleAddGroup}
-                                style={{ width: '150px', margin: '10px' }}
-                            >
-                                Нова Група
-                            </button>
-                            <button
-                                type="button"
-                                style={{ width: '150px', margin: '10px' }}
-                                className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                onClick={() => setModalOpen(true)}
-                            >
-                                Създаване
-                            </button>
-                            <ConfirmationModal
-                                isOpen={modalOpen}
-                                onClose={() => setModalOpen(false)}
-                                onConfirm={handleSubmit}
-                            />
+                    <div>
+                        <div className="grid md:grid-cols-2 ml-20">
+                            <div className='mt-8'>
+                                {<p className='grid text-left block'>Крайна цена: {totalPrice}</p>}</div>
+                            <div className='grid md:grid-cols-2 ml-20'>
+                                <div className='text-right'>
+                                    <button
+                                        className="w-full  px-4 py-2 text-white bg-green-600 rounded-md shadow-md hover:bg-green-700"
+                                        onClick={(event) => handleAddGroup(event)}
+                                        style={{ width: '150px', margin: '10px' }}
+                                    >
+                                        Нова Група
+                                    </button></div>
+                                <div className='text-left'>
+                                    <button
+                                        type="button"
+                                        style={{ width: '150px', margin: '10px' }}
+                                        className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
+                                        onClick={() => setModalOpen(true)}
+                                    >
+                                        Създаване
+                                    </button>
+                                </div>
+                                <ConfirmationModal
+                                    isOpen={modalOpen}
+                                    onClose={() => setModalOpen(false)}
+                                    onConfirm={handleSubmit}
+                                />
+                            </div>
                         </div>
                     </div>
                     <hr className="customeDivider mx-4 my-5" />
@@ -268,12 +271,13 @@ const NewOrderForm = () => {
                                     style={{ padding: '20px', width: '1230px' }}
                                 >
                                     <div>
-                                        <label htmlFor="doorName" className="block font-medium">Материал:</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="doorName" className="block font-medium">Материал:</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="doorName"
                                             name="doorName"
                                             value={formData.doorName}
                                             onChange={(event) => handleChange(event, index)}
+                                            disabled={index > 0}
                                             required
 
                                         >
@@ -281,11 +285,11 @@ const NewOrderForm = () => {
                                             <option value="Мембранна вратичка">Мембранна вратичка</option>
                                             <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
                                             <option value="Фурнирован МДФ">Фурнирован МДФ</option>
-                                        </select>
+                                        </Select>
                                     </div>
                                     <div>
-                                        <label htmlFor="detailName" className="block font-medium">Вид на материала:</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="detailName" className="block font-medium">Вид на материала:</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="detailName"
                                             name="detailName"
                                             value={selectedMaterial}
@@ -300,11 +304,11 @@ const NewOrderForm = () => {
                                             <option value="Пиластър">Пиластър</option>
                                             <option value="Корниз">Корниз</option>
 
-                                        </select>
+                                        </Select>
                                         {selectedMaterial === 'Пиластър' && (
                                             <div>
-                                                <label htmlFor="pilasturSelect">Пиластър:</label>
-                                                <select
+                                                <Label htmlFor="pilasturSelect">Пиластър:</Label>
+                                                <Select
                                                     className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                                     id="pilasturSelect"
                                                     name="pilasturSelect"
@@ -317,15 +321,15 @@ const NewOrderForm = () => {
                                                     <option value="P2">P2</option>
                                                     <option value="P3">P3</option>
                                                     {/* Add more options here */}
-                                                </select>
+                                                </Select>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Model Name */}
                                     <div>
-                                        <label htmlFor="modelName" className="block font-medium">Модел:</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="modelName" className="block font-medium">Модел:</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="modelName"
                                             name="modelName"
                                             value={formData.modelName}
@@ -456,13 +460,13 @@ const NewOrderForm = () => {
                                             <option value="D1105">D1105</option>
                                             <option value="D1104">D1104</option>
                                             <option value="D1106">D1106</option>
-                                        </select>
+                                        </Select>
                                     </div>
                                     <div>
                                         {/* Folio Name s
 */}
-                                        <label htmlFor="folioName" className="block font-medium">Фолио :</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="folioName" className="block font-medium">Фолио :</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="folioName"
                                             name="folioName"
                                             value={formData.folioName}
@@ -601,11 +605,11 @@ const NewOrderForm = () => {
                                             <option value="Y6099-1">Y6099-1</option>
                                             <option value="Y7076-1">Y7076-1</option>
                                             <option value="Y7077-1">Y7077-1</option>
-                                            <option value="Z3006-2">Z3006-2</option>       </select>
+                                            <option value="Z3006-2">Z3006-2</option>       </Select>
                                     </div><div>
                                         {/* Handle Name */}
-                                        <label htmlFor="handleName" className="block font-medium">Дръжка</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="handleName" className="block font-medium">Дръжка</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             type="text"
                                             id="handleName"
                                             name="handleName"
@@ -614,11 +618,11 @@ const NewOrderForm = () => {
                                             disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
                                         >
                                             <option value="Без дръжка">Без дръжка</option>
-                                            <option value="дръжка H1">дръжка H1</option></select></div>
+                                            <option value="дръжка H1">дръжка H1</option></Select></div>
                                     <div>
                                         {/* Profil Name */}
-                                        <label htmlFor="profilName" className="block font-medium">Профил:</label>
-                                        <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="profilName" className="block font-medium">Профил:</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             type="text"
                                             id="profilName"
                                             name="profilName"
@@ -631,7 +635,7 @@ const NewOrderForm = () => {
                                             <option value="R2">Профил R2</option>
                                             <option value="Профил R3">Профил R3</option>
                                             <option value="Профил R4">Профил R4</option>
-                                            <option value="Профил R5">Профил R5</option></select>
+                                            <option value="Профил R5">Профил R5</option></Select>
 
 
 
@@ -639,8 +643,8 @@ const NewOrderForm = () => {
 
                                     </div><div>
                                         {/* Height */}
-                                        <label htmlFor="height" className="block font-medium">Височина, мм:</label>
-                                        <input className="mt-1 p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
                                             type="number"
                                             id="height"
                                             name="height"
@@ -651,8 +655,8 @@ const NewOrderForm = () => {
                                         />
                                     </div><div>
                                         {/* Width */}
-                                        <label htmlFor="width" className="block font-medium">Широчина, мм:</label>
-                                        <input className="mt-1 p-2 border rounded-md shadow-sm"
+                                        <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
                                             type="number"
                                             id="width"
                                             name="width"
@@ -662,8 +666,8 @@ const NewOrderForm = () => {
                                             required />
                                     </div><div>
                                         {/* Number */}
-                                        <label htmlFor="number" className="block font-medium">Брой:</label>
-                                        <input
+                                        <Label htmlFor="number" className="block font-medium">Брой:</Label>
+                                        <Input
                                             className="mt-1 p-2 border rounded-md shadow-sm"
                                             type="number"
                                             id={`number${index}`}
