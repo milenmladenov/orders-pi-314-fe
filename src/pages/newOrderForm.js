@@ -7,6 +7,8 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import InfoCard from "../components/Cards/InfoCard";
 import { config } from '../Constants';
 import { Select, Input, Label } from "@windmill/react-ui";
+import { Popover } from '@headlessui/react';
+
 
 
 
@@ -30,17 +32,21 @@ const NewOrderForm = () => {
         height: 400,
         width: 400,
         number: 1,
+        bothSidesLaminated: "false",
         detailType: ''
     };
 
     const [totalPrice, setTotalPrice] = useState('0лв.');
     const [groupPrices, setGroupPrices] = useState('0');
+    const [totalGroupPrices, setTotalGroupPrices] = useState('0');
+    const [groupSqrt, setGroupSqrt] = useState('0');
+    const [totalSqrt, setTotalSqrt] = useState('0');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState('');
     const [selectedPilastur, setSelectedPilastur] = useState('');
     const [orderUrl, setOrderUrl] = useState();
     const [orderPreflightUrl, setOrderPreflightUrl] = useState();
-
+    const [handlePrice, setHandlePrice] = useState(0);
 
     useEffect(() => {
         setOrderPreflightUrl(apiBaseUrl + '/api/orders/new-order/preflight');
@@ -86,16 +92,23 @@ const NewOrderForm = () => {
             ...prevGroupForms,
             {
                 doorName: groupForms[0].doorName,
-                modelName: "",
-                folioName: "",
-                handleName: "Без Дръжка",
-                profilName: "R1",
-                height: 400,
-                width: 400,
+                modelName: groupForms[0].modelName,
+                folioName: groupForms[0].folioName,
+                handleName: groupForms[0].handleName,
+                profilName: groupForms[0].profilName,
+                height: 0,
+                width: 0,
                 number: 1,
+                bothSidesLaminated: groupForms[0].bothSidesLaminated,
                 detailType: ''
             },
         ]);
+    };
+
+    const handleDeleteGroup = (indexToDelete) => {
+        setGroupForms((prevGroupForms) =>
+            prevGroupForms.filter((_, index) => index !== indexToDelete)
+        );
     };
 
     const handleSubmit = () => {
@@ -119,7 +132,8 @@ const NewOrderForm = () => {
             width: parseInt(formData.width),
             number: parseInt(formData.number),
             detailType: `${selectedMaterial} - ${selectedPilastur}`
-        }));
+        }
+        ));
         const token = localStorage.getItem('accessToken')
         // Send the data to the backend using AJAX
         fetch(orderUrl, {
@@ -138,13 +152,24 @@ const NewOrderForm = () => {
 
                 // Get the groupTotalPrice for every group in the response
                 const groupPrices = data.groups.map((group) => group.groupTotalPrice);
+                const groupSqrt = data.groups.map((group) => {
+                    console.log("Height:", group.height);
+                    console.log("Width:", group.width);
+                    console.log("Number:", group.number);
 
+                    const result = (group.height * group.width) * group.number;
+                    console.log("Result:", result);
+
+                    return result;
+                });
                 // Set the total price as the sum of all groupTotalPrices
                 const totalPrice = groupPrices.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
                 // Render the response data
                 setTotalPrice(`${totalPrice}`);
                 setGroupPrices(groupPrices);
+                setGroupSqrt(groupSqrt);
+                console.log(groupSqrt)
                 window.location.reload();
 
 
@@ -174,6 +199,7 @@ const NewOrderForm = () => {
             profil: {
                 name: formData.profilName,
             },
+            bothSidesLaminated: formData.bothSidesLaminated,
             height: parseInt(formData.height),
             width: parseInt(formData.width),
             number: parseFloat(formData.number),
@@ -195,17 +221,41 @@ const NewOrderForm = () => {
             .then((response) => response.json())
             .then((data) => {
                 console.log(loggedUser.data.role);
-
+                console.log(data);
+                let totalSqrt = 0;
+                let totalGroupPrices = 0;
                 // Get the groupTotalPrice for every group in the response
-                const groupPrices = data.groups.map((group) => group.groupTotalPrice);
+                const groupPrices = data.groups.map((group) => {
+                    const result = group.groupTotalPrice;
+                    totalGroupPrices += result;
+                    setTotalGroupPrices(totalGroupPrices.toFixed(2))
+                    return result;
+                });
+                const groupSqrt = data.groups.map((group) => {
+                    console.log("Height:", group.height);
+                    console.log("Width:", group.width);
+                    console.log("Number:", group.number);
+
+                    const result = ((group.height / 1000) * (group.width / 1000)) * group.number;
+                    console.log("Result:", result);
+                    totalSqrt += result;
+                    setTotalSqrt(totalSqrt.toFixed(2))
+
+                    return result.toFixed(2);
+                });
+
+                setHandlePrice(handlePrice);
                 setGroupPrices(groupPrices);
+                setGroupSqrt(groupSqrt);
+                console.log(groupSqrt)
                 // Set the total price as the sum of all groupTotalPrices
                 const totalPrice = data.totalPrice;
                 if (loggedUser.data.role === '[ADMIN]') {
-                    setTotalPrice(`${totalPrice}лв. / Добавени са 30% надценка.`);
-                } else if (loggedUser.data.role === '[USER]') {
-                    setTotalPrice(`${totalPrice}лв.`);
-
+                    setTotalPrice(`${totalPrice}лв. с ДДС / Добавени са 30% надценка.`);
+                } else if (loggedUser.data.role === '[USER]' && data.appliedDiscount === null) {
+                    setTotalPrice(`${totalPrice}лв. с ДДС / Добавена е 5% отстъпка.`);
+                } else if (loggedUser.data.role === '[USER]' && data.appliedDiscount != null) {
+                    setTotalPrice(`${totalPrice}лв. с ДДС / Добавена е ${data.appliedDiscount + 5}% отстъпка.`);
                 }
                 // Render the response data
 
@@ -225,9 +275,24 @@ const NewOrderForm = () => {
                 <div className="col-span-12 text-center sticky-top ">
                     <PageTitle>Създаване на нова поръчка</PageTitle>
                     <div>
-                        <div className="grid md:grid-cols-2 ml-20">
-                            <div className='mt-8'>
-                                {<p className='grid text-left block'>Крайна цена: {totalPrice}</p>}</div>
+
+                        <div className="grid md:grid-cols-1 ml-20 ">
+                            <div className='grid md:grid-cols-4'>
+                                <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
+                                <div className='grid md:grid-rows-2 text-center border'><div>Обшо бр. дръжки.</div><div className=''> / {handlePrice}лв.<b>
+                                </b></div> </div>
+
+                                <div className="grid md:grid-rows-2 text-center border">
+                                    <div>
+                                        Общо ламиниране
+                                    </div>
+                                    <div className="">
+                                        <b>{totalSqrt} кв.м</b>
+                                    </div>
+                                </div>
+                                <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
+
+                            </div>
                             <div className='grid md:grid-cols-2 ml-20'>
                                 <div className='text-right'>
                                     <button
@@ -235,7 +300,7 @@ const NewOrderForm = () => {
                                         onClick={(event) => handleAddGroup(event)}
                                         style={{ width: '150px', margin: '10px' }}
                                     >
-                                        Нова Група
+                                        Добави Детайл
                                     </button></div>
                                 <div className='text-left'>
                                     <button
@@ -244,7 +309,7 @@ const NewOrderForm = () => {
                                         className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
                                         onClick={() => setModalOpen(true)}
                                     >
-                                        Създаване
+                                        Завърши
                                     </button>
                                 </div>
                                 <ConfirmationModal
@@ -262,14 +327,75 @@ const NewOrderForm = () => {
                 <div className="grid  md:grid-cols-1 gap-10">
 
                     {groupForms.map((formData, index) => (
-                        <div >
+                        <div className='' >
+                            <div>
+                                <div></div>
+                            </div>
                             <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3" >
 
                                 <form
+
                                     id={`orderForm${index}`}
-                                    className="grid grid-cols-4 gap-4 border"
+                                    className="grid grid-cols-4 gap-4  hover:border"
                                     style={{ padding: '20px', width: '1230px' }}
                                 >
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div className=''>
+                                        <div className='ml-20'>
+                                            <button type='button' onClick={(event) => handleAddGroup(event)}
+                                                className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth={1.5}
+                                                    stroke="currentColor"
+                                                    className="w-10 h-10"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+
+
+                                            <Popover className="absolute hidden bg-white border border-gray-300 rounded-lg shadow-lg group-hover:block">
+                                                {({ open }) => (
+                                                    <div className={`px-4 py-2 ${open ? '' : 'hidden'}`}>
+                                                        This is a green button popover content.
+                                                    </div>
+                                                )}
+                                            </Popover>
+
+                                            {index > 0 && (
+
+                                                <button
+                                                    onClick={(event) => handleDeleteGroup(index)}
+                                                    className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800"
+                                                    type="button"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        strokeWidth={1.5}
+                                                        stroke="currentColor"
+                                                        className="w-10 h-10"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+                                                    </svg>
+                                                </button>
+                                            )}</div>
+                                        <Popover className="absolute hidden bg-white border border-gray-300 rounded-lg shadow-lg">
+                                            {({ open }) => (
+                                                <div className={`px-4 py-2 ${open ? 'block' : 'hidden'}`}>
+                                                    This is a red button popover content.
+                                                </div>
+                                            )}
+                                        </Popover>
+                                    </div>
+
                                     <div>
                                         <Label htmlFor="doorName" className="block font-medium">Материал:</Label>
                                         <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
@@ -288,7 +414,7 @@ const NewOrderForm = () => {
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="detailName" className="block font-medium">Вид на материала:</Label>
+                                        <Label htmlFor="detailName" className="block font-medium">Вид:</Label>
                                         <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="detailName"
                                             name="detailName"
@@ -297,7 +423,7 @@ const NewOrderForm = () => {
                                             required
 
                                         >
-                                            <option value="">-Вид на материала-</option>
+                                            <option value="">-Изберете Вид-</option>
                                             <option value="Вратичка">Вратичка</option>
                                             <option value="Страница">Страница</option>
                                             <option value="Чекмедже">Чекмедже</option>
@@ -617,7 +743,7 @@ const NewOrderForm = () => {
                                             onChange={(event) => handleChange(event, index)}
                                             disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
                                         >
-                                            <option value="Без дръжка">Без дръжка</option>
+                                            <option value="Без Дръжка">Без дръжка</option>
                                             <option value="дръжка H1">дръжка H1</option></Select></div>
                                     <div>
                                         {/* Profil Name */}
@@ -629,13 +755,13 @@ const NewOrderForm = () => {
                                             value={formData.profilName}
                                             onChange={(event) => handleChange(event, index)}
                                             required
-                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже  '}
+                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже' || formData.doorName === 'Фурнирован МДФ'}
                                         >
                                             <option value="R1">Профил R1</option>
                                             <option value="R2">Профил R2</option>
-                                            <option value="Профил R3">Профил R3</option>
-                                            <option value="Профил R4">Профил R4</option>
-                                            <option value="Профил R5">Профил R5</option></Select>
+                                            <option value="R3">Профил R3</option>
+                                            <option value="R4">Профил R4</option>
+                                            <option value="R5">Профил R5</option></Select>
 
 
 
@@ -677,16 +803,53 @@ const NewOrderForm = () => {
                                             required disabled={selectedMaterial == 'Пиластър'}
                                         />
                                     </div>
-                                    <div>Цена на групата : {groupPrices[index]}лв.</div>
-                                </form>
-                            </div>
-                        </div>
-                    ))}
-                </div></div > <div className="grid gap-2 mb-12 md:grid-cols-2">
-                <div></div>
-                <div className="col-span-2 flex justify-end">
+                                    <div>
+                                        <Label>Ламиниране:</Label>
+                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                            type="boolean"
+                                            id={`bothSidesLaminated${index}`}
+                                            name="bothSidesLaminated"
+                                            value={formData.bothSidesLaminated}
+                                            onChange={(event) => handleChange(event, index)}
+                                            required
+                                        >
+                                            <option value="false">Едностранно ламиниране</option>
+                                            <option value="true">Двустранно ламиниране</option>
+                                        </Select>
 
-                </div></div></>)
+
+
+
+
+                                    </div>
+
+
+                                </form>
+                                <div className='grid md:grid-cols-4'>
+                                    <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
+                                    <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
+                                        ? `1бр. / ${handlePrice}лв.`
+                                        : "0бр./ 0лв."} </b></div> </div>
+
+                                    <div className="grid md:grid-rows-2 text-center border">
+                                        <div>
+                                            {formData.bothSidesLaminated === "false"
+                                                ? "Едностранно ламиниране"
+                                                : "Двустранно ламиниране"}
+                                        </div>
+                                        <div className="">
+                                            <b>{groupSqrt[index]} кв.м</b>
+                                        </div>
+                                    </div>
+                                    <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    ))}
+                </div></div ></>)
 }
 
 
