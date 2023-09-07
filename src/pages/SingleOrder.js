@@ -25,17 +25,17 @@ const SingleOrder = ({ match }) => {
 
     const getStatusColor = (status) => {
         switch (status) {
-          case "WORKING_ON":
-            return "text-yellow-500"; // Yellow color
-          case "CREATED":
-            return "text-gray-500";
-          case "SEND":
-            return "text-blue-500";
-          case "DONE":
-            return "text-green-500";
-            return "";
+            case "WORKING_ON":
+                return "text-yellow-500"; // Yellow color
+            case "CREATED":
+                return "text-gray-500";
+            case "SEND":
+                return "text-blue-500";
+            case "DONE":
+                return "text-green-500";
+                return "";
         }
-      };
+    };
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -112,11 +112,13 @@ const SingleOrder = ({ match }) => {
                     <TableHeader>
                         <tr>
                             <TableCell>Модел</TableCell>
+                            <TableCell>Вид</TableCell>
                             <TableCell>Фолио</TableCell>
                             <TableCell>Профил</TableCell>
                             <TableCell>Дръжка</TableCell>
                             <TableCell>Височина,мм</TableCell>
                             <TableCell>Широчина, мм</TableCell>
+                            <TableCell>Дължина,мм</TableCell>
                             <TableCell>Брой</TableCell>
                             <TableCell>Цена Дръжка, бр.</TableCell>
                             <TableCell>Цена мат за кв.м</TableCell>
@@ -129,27 +131,40 @@ const SingleOrder = ({ match }) => {
                     <TableBody>
                         {order.groups.map((group, j) => (
                             <TableRow key={j}>
-
                                 <TableCell>{group.model.name}</TableCell>
+                                <TableCell>
+                                    {group.detailType.material}{' '}
+                                    {group.detailType.type !== null ? `(${group.detailType.type})` : ''}
+                                </TableCell>
                                 <TableCell>{group.folio.name}</TableCell>
                                 <TableCell>{group.profil.name}</TableCell>
                                 <TableCell>{group.handle.name}</TableCell>
-                                <TableCell>{group.height}</TableCell>
-                                <TableCell>{group.width}</TableCell>
+                                {group.detailType.material === 'Корниз' ? (
+                                    <>
+                                        <TableCell>{group.length}</TableCell>
+                                        <TableCell></TableCell>
+                                        <TableCell></TableCell>  {/* Leave this cell empty */}
+                                    </>
+                                ) : (
+                                    <> <TableCell></TableCell> 
+                                        <TableCell>{group.height}</TableCell>
+                                        <TableCell>{group.width}</TableCell>
+                                    </>
+                                )}
                                 <TableCell>{group.number}</TableCell>
                                 <TableCell>{group.handle.price}</TableCell>
                                 <TableCell>{group.matPrice}</TableCell>
                                 <TableCell>{group.isBothSidesLaminated}</TableCell>
                                 <TableCell>{group.groupTotalPrice}лв.</TableCell>
-
-                            </TableRow>))}
+                            </TableRow>
+                        ))}
 
                     </TableBody>
 
                 </Table>
                 <div ><p className='font-semibold content-end text-right mr-3 mt-3 mb-3'>Обща стойност : {order.totalPrice}лв.</p></div>
             </TableContainer>
-            
+
         </div>
     );
 };

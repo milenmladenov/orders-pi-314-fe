@@ -4,9 +4,8 @@ import "../assets/css/groups-in-rows.css"
 import { orderApi } from '../components/misc/OrderApi'
 import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
-import InfoCard from "../components/Cards/InfoCard";
 import { config } from '../Constants';
-import { Select, Input, Label } from "@windmill/react-ui";
+import { Select, Input, Label, HelperText } from "@windmill/react-ui";
 import { Popover } from '@headlessui/react';
 
 
@@ -24,16 +23,20 @@ const NewOrderForm = () => {
     const apiBaseUrl = config.url.API_BASE_URL;
 
     const initialFormState = {
-        doorName: '',
-        modelName: '',
-        folioName: '',
+        doorName: "",
+        modelName: "Без",
+        folioName: "Без",
         handleName: 'Без Дръжка',
         profilName: 'R1',
         height: 400,
         width: 400,
+        length: 2360,
         number: 1,
         bothSidesLaminated: "false",
-        detailType: ''
+        detailType: {
+            material: "",
+            type: ""
+        }
     };
 
     const [totalPrice, setTotalPrice] = useState('0лв.');
@@ -43,10 +46,10 @@ const NewOrderForm = () => {
     const [totalSqrt, setTotalSqrt] = useState('0');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState('');
-    const [selectedPilastur, setSelectedPilastur] = useState('');
     const [orderUrl, setOrderUrl] = useState();
     const [orderPreflightUrl, setOrderPreflightUrl] = useState();
     const [handlePrice, setHandlePrice] = useState(0);
+    const [handleNumber, setHandleNumber] = useState(0);
 
     useEffect(() => {
         setOrderPreflightUrl(apiBaseUrl + '/api/orders/new-order/preflight');
@@ -73,19 +76,36 @@ const NewOrderForm = () => {
 
     };
 
-    const handleChange1 = (event) => {
-        const value = event.target.value;
-        setSelectedMaterial(value);
-        setSelectedPilastur('');
+    const handleMaterialChange = (event, index) => {
+        const updatedGroupForms = groupForms.map((formData, i) => {
+            if (i === index) {
+                return { ...formData, detailType: { material: event.target.value } };
+            }
+            return formData;
+        });
+        setGroupForms(updatedGroupForms);
     };
 
     useEffect(() => {
         handlePreflight();
-    }, [groupForms, selectedPilastur]);
+    }, [groupForms]);
 
-    const handlePilasturChange = (event) => {
-        setSelectedPilastur(event.target.value);
+    const handleTypeChange = (event, index) => {
+        const updatedGroupForms = groupForms.map((formData, i) => {
+            if (i === index) {
+                return {
+                    ...formData,
+                    detailType: {
+                        ...formData.detailType, // Keep the existing material
+                        type: event.target.value,
+                    },
+                };
+            }
+            return formData;
+        });
+        setGroupForms(updatedGroupForms);
     };
+
 
     const handleAddGroup = (event) => {
         setGroupForms((prevGroupForms) => [
@@ -98,12 +118,17 @@ const NewOrderForm = () => {
                 profilName: groupForms[0].profilName,
                 height: 0,
                 width: 0,
+                length: 0,
                 number: 1,
                 bothSidesLaminated: groupForms[0].bothSidesLaminated,
-                detailType: ''
+                detailType: {
+                    material: groupForms[0].detailType.material,
+                    type: groupForms[0].detailType.type,
+                },
             },
         ]);
     };
+
 
     const handleDeleteGroup = (indexToDelete) => {
         setGroupForms((prevGroupForms) =>
@@ -130,8 +155,12 @@ const NewOrderForm = () => {
             },
             height: parseInt(formData.height),
             width: parseInt(formData.width),
+            length: parseInt(formData.length),
             number: parseInt(formData.number),
-            detailType: `${selectedMaterial} - ${selectedPilastur}`
+            detailType: {
+                material: formData.detailType.material,
+                type: formData.detailType.type
+            }
         }
         ));
         const token = localStorage.getItem('accessToken')
@@ -163,10 +192,10 @@ const NewOrderForm = () => {
                     return result;
                 });
                 // Set the total price as the sum of all groupTotalPrices
-                const totalPrice = groupPrices.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+                const totalPrice = data.totalPrice;
 
                 // Render the response data
-                setTotalPrice(`${totalPrice}`);
+                setTotalPrice(`${totalPrice}лв. с ДДС`);
                 setGroupPrices(groupPrices);
                 setGroupSqrt(groupSqrt);
                 console.log(groupSqrt)
@@ -202,8 +231,12 @@ const NewOrderForm = () => {
             bothSidesLaminated: formData.bothSidesLaminated,
             height: parseInt(formData.height),
             width: parseInt(formData.width),
+            length: parseInt(formData.length),
             number: parseFloat(formData.number),
-            detailType: `${selectedMaterial} - ${selectedPilastur}`
+            detailType: {
+                material: formData.detailType.material,
+                type: formData.detailType.type
+            }
         }));
         const token = localStorage.getItem('accessToken')
         // Send the data to the backend using AJAX
@@ -232,27 +265,31 @@ const NewOrderForm = () => {
                     return result;
                 });
                 const groupSqrt = data.groups.map((group) => {
-                    console.log("Height:", group.height);
-                    console.log("Width:", group.width);
-                    console.log("Number:", group.number);
-
                     const result = ((group.height / 1000) * (group.width / 1000)) * group.number;
-                    console.log("Result:", result);
                     totalSqrt += result;
                     setTotalSqrt(totalSqrt.toFixed(2))
 
                     return result.toFixed(2);
                 });
+                let handleNumber = 0;
+                data.groups.map((group) => {
+                    if (group.handle.name !== 'Без Дръжка') {
+                        handleNumber += 1; // Use += to increment the variable
+                        setHandleNumber(handleNumber);
+                    }
+                    return handleNumber;
+                });
+                const totalPrice = data.totalPrice;
 
-                setHandlePrice(handlePrice);
+                setTotalPrice(`${totalPrice}лв. с ДДС`);
+                setHandlePrice(data.handlePrice);
                 setGroupPrices(groupPrices);
                 setGroupSqrt(groupSqrt);
                 console.log(groupSqrt)
                 // Set the total price as the sum of all groupTotalPrices
-                const totalPrice = data.totalPrice;
-                if (loggedUser.data.role === '[ADMIN]') {
-                    setTotalPrice(`${totalPrice}лв. с ДДС / Добавени са 30% надценка.`);
-                } else if (loggedUser.data.role === '[USER]' && data.appliedDiscount === null) {
+
+
+                if (loggedUser.data.role === '[USER]' && data.appliedDiscount === null) {
                     setTotalPrice(`${totalPrice}лв. с ДДС / Добавена е 5% отстъпка.`);
                 } else if (loggedUser.data.role === '[USER]' && data.appliedDiscount != null) {
                     setTotalPrice(`${totalPrice}лв. с ДДС / Добавена е ${data.appliedDiscount + 5}% отстъпка.`);
@@ -279,8 +316,8 @@ const NewOrderForm = () => {
                         <div className="grid md:grid-cols-1 ml-20 ">
                             <div className='grid md:grid-cols-4'>
                                 <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
-                                <div className='grid md:grid-rows-2 text-center border'><div>Обшо бр. дръжки.</div><div className=''> / {handlePrice}лв.<b>
-                                </b></div> </div>
+                                <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
+                                </div> </div>
 
                                 <div className="grid md:grid-rows-2 text-center border">
                                     <div>
@@ -293,7 +330,9 @@ const NewOrderForm = () => {
                                 <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
 
                             </div>
-                            <div className='grid md:grid-cols-2 ml-20'>
+
+
+                            <div className='grid md:grid-cols-2 '>
                                 <div className='text-right'>
                                     <button
                                         className="w-full  px-4 py-2 text-white bg-green-600 rounded-md shadow-md hover:bg-green-700"
@@ -311,13 +350,17 @@ const NewOrderForm = () => {
                                     >
                                         Завърши
                                     </button>
+
                                 </div>
+
                                 <ConfirmationModal
                                     isOpen={modalOpen}
                                     onClose={() => setModalOpen(false)}
                                     onConfirm={handleSubmit}
                                 />
                             </div>
+                            {totalSqrt <= 1.5 && (<div className='text-center '>
+                                <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText></div>)}
                         </div>
                     </div>
                     <hr className="customeDivider mx-4 my-5" />
@@ -414,13 +457,14 @@ const NewOrderForm = () => {
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="detailName" className="block font-medium">Вид:</Label>
+                                        <Label htmlFor={`materialName${index}`} className="block font-medium">Вид:</Label>
                                         <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            id="detailName"
-                                            name="detailName"
-                                            value={selectedMaterial}
-                                            onChange={(event) => handleChange1(event, index)}
+                                            id={`materialName${index}`}
+                                            name={`materialName${index}`}
+                                            value={formData.detailType.material}
+                                            onChange={(event) => handleMaterialChange(event, index)}
                                             required
+                                            disabled={(formData.doorName === '')}
 
                                         >
                                             <option value="">-Изберете Вид-</option>
@@ -431,15 +475,15 @@ const NewOrderForm = () => {
                                             <option value="Корниз">Корниз</option>
 
                                         </Select>
-                                        {selectedMaterial === 'Пиластър' && (
+                                        {formData.detailType.material === 'Пиластър' && (
                                             <div>
-                                                <Label htmlFor="pilasturSelect">Пиластър:</Label>
+                                                <Label htmlFor={`typeName${index}`}>Пиластър:</Label>
                                                 <Select
                                                     className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                    id="pilasturSelect"
-                                                    name="pilasturSelect"
-                                                    value={selectedPilastur}
-                                                    onChange={(event) => handlePilasturChange(event)}
+                                                    id={`typeName${index}`}
+                                                    name={`typeName${index}`}
+                                                    value={formData.detailType.type}
+                                                    onChange={(event) => handleTypeChange(event, index)}
                                                     required
                                                 >
                                                     <option value="">-Изберете Пиластър-</option>
@@ -449,6 +493,43 @@ const NewOrderForm = () => {
                                                     {/* Add more options here */}
                                                 </Select>
                                             </div>
+                                        )}
+                                        {formData.detailType.material === 'Чекмедже' && (
+                                            <><div>
+                                                <Select
+                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id={`typeName${index}`}
+                                                    name={`typeName${index}`}
+                                                    value={formData.detailType.type}
+                                                    onChange={(event) => handleTypeChange(event, index)}
+                                                    required
+                                                >
+                                                    <option value="">----------</option>
+                                                    <option value="Обща фрезовка">Обща фрезовка</option>
+                                                    <option value="Изчистен детайл">Изчистен детайл</option>
+                                                    <option value="Корекция на рамка">Корекция на рамка</option>
+                                                    {/* Add more options here */}
+                                                </Select>
+                                            </div></>
+                                        )}
+                                        {formData.detailType.material === 'Корниз' && (
+                                            <><div>
+                                                <Label htmlFor={`typeName${index}`}>Корниз:</Label>
+                                                <Select
+                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id={`typeName${index}`}
+                                                    name={`typeName${index}`}
+                                                    value={formData.detailType.type}
+                                                    onChange={(event) => handleTypeChange(event, index)}
+                                                    required
+                                                >
+                                                    <option value="">-Изберете Корниз-</option>
+                                                    <option value="К1 – 68мм височина">К1 – 68мм височина</option>
+                                                    <option value="К2 – 70мм височина">К2 – 70мм височина</option>
+                                                    <option value="К3 – 80мм височина">К3 – 80мм височина</option>
+                                                    {/* Add more options here */}
+                                                </Select>
+                                            </div></>
                                         )}
                                     </div>
 
@@ -460,7 +541,7 @@ const NewOrderForm = () => {
                                             name="modelName"
                                             value={formData.modelName}
                                             onChange={(event) => handleChange(event, index)}
-                                            disabled={(formData.doorName === '' || selectedMaterial === "Пиластър" || selectedMaterial === "Корниз") || selectedMaterial === "Чекмедже"}
+                                            disabled={(formData.doorName === '' || selectedMaterial === "Пиластър" || selectedMaterial === "Корниз")}
                                             required
                                         >
 
@@ -597,7 +678,7 @@ const NewOrderForm = () => {
                                             name="folioName"
                                             value={formData.folioName}
                                             onChange={(event) => handleChange(event, index)}
-                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже  '}
+                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър'}
                                             required
                                         >
                                             <option value="" selected="selected">-Изберете Фолио-</option>
@@ -741,7 +822,7 @@ const NewOrderForm = () => {
                                             name="handleName"
                                             value={formData.handleName}
                                             onChange={(event) => handleChange(event, index)}
-                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
+                                            disabled={formData.modelName === '' || formData.detailType.material === 'Корниз'}
                                         >
                                             <option value="Без Дръжка">Без дръжка</option>
                                             <option value="дръжка H1">дръжка H1</option></Select></div>
@@ -755,7 +836,7 @@ const NewOrderForm = () => {
                                             value={formData.profilName}
                                             onChange={(event) => handleChange(event, index)}
                                             required
-                                            disabled={formData.modelName === '' || selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже' || formData.doorName === 'Фурнирован МДФ'}
+                                            disabled={formData.modelName === '' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Корниз'}
                                         >
                                             <option value="R1">Профил R1</option>
                                             <option value="R2">Профил R2</option>
@@ -767,30 +848,90 @@ const NewOrderForm = () => {
 
 
 
-                                    </div><div>
-                                        {/* Height */}
-                                        <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
-                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                            type="number"
-                                            id="height"
-                                            name="height"
-                                            value={formData.height}
-                                            onChange={(event) => handleChange(event, index)}
-                                            required
+                                    </div>
+                                    {formData.detailType.material === 'Корниз' ? (
+                                        <>
+                                            <div>
+                                                <Label htmlFor="length" className="block font-medium">Дължина, мм:</Label>
+                                                <Select
+                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id="length"
+                                                    name="length"
+                                                    value={formData.length}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required
+                                                >
+                                                    <option value="2360">2360мм / 1бр.</option>
+                                                    <option value="1160">1160мм / 0.5бр.</option>
+                                                </Select>
+                                            </div>
+                                        </>
+                                    ) : formData.detailType.material === 'Пиластър' ? (
 
-                                        />
-                                    </div><div>
-                                        {/* Width */}
-                                        <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
-                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                            type="number"
-                                            id="width"
-                                            name="width"
-                                            value={formData.width}
-                                            onChange={(event) => handleChange(event, index)}
-                                            disabled={selectedMaterial == 'Пиластър' || selectedMaterial == 'Чекмедже'}
-                                            required />
-                                    </div><div>
+                                        <div>
+                                            {/* Height */}
+                                            <div>
+                                                <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                    type="number"
+                                                    id="height"
+                                                    name="height"
+                                                    value={formData.height}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required />
+                                            </div>
+                                            {formData.detailType.material === 'Пиластър' && (
+                                                <div>
+                                                    <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                    <Select
+                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                        id={`typeName${index}`}
+                                                        name={`typeName${index}`}
+                                                        value={formData.width}
+                                                        onChange={(event) => handleChange(event, index)}
+                                                        required
+                                                    >
+                                                        <option value="50">50</option>
+                                                        <option value="60">60</option>
+                                                        <option value="70">70</option>
+                                                        <option value="80">80</option>
+                                                        <option value="90">90</option>
+                                                        <option value="100">100</option>
+                                                        <option value="110">110</option>
+                                                    </Select>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                    ) : (
+                                        <>
+                                            <div>
+                                                {/* Height */}
+                                                <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                    type="number"
+                                                    id="height"
+                                                    name="height"
+                                                    value={formData.height}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                <Input
+                                                    className="mt-1 p-2 border rounded-md shadow-sm"
+                                                    type="number"
+                                                    id="width"
+                                                    name="width"
+                                                    value={formData.width}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required />
+                                            </div>
+                                        </>
+                                    )}
+
+
+                                    <div>
                                         {/* Number */}
                                         <Label htmlFor="number" className="block font-medium">Брой:</Label>
                                         <Input
