@@ -3,11 +3,11 @@ import { NavLink, Redirect } from 'react-router-dom';
 import AuthContext from '../components/context/AuthContext'
 import { orderApi } from '../components/misc/OrderApi'
 import { parseJwt, handleLogError } from '../components/misc/Helpers'
-import { Button, Label, Input, Textarea, HelperText } from '@windmill/react-ui';
+import { Button, Label, Input, Textarea, HelperText,Select} from '@windmill/react-ui';
 import Logo from '../assets/img/logo-white-frame.png'
 import "../assets/css/input-fields-container.css"
+import { citiesInBulgaria } from '../cities/citiesData';
 import { Link } from 'react-router-dom'
-import { config } from '../Constants';
 
 
 
@@ -15,7 +15,7 @@ import { config } from '../Constants';
 
 class SignUp extends Component {
   static contextType = AuthContext;
-  
+
 
   state = {
     username: '',
@@ -30,7 +30,7 @@ class SignUp extends Component {
     isDdsRegistered: false,
     mol: '',
     postCode: null,
-    orderAddressList: [],
+    orderAddress: '',
     isLoggedIn: false,
     isError: false,
     errorMessage: ''
@@ -45,29 +45,29 @@ class SignUp extends Component {
   handleInputChange = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
-   
+
   }
 
-validatePasswords = () => {
-  const { password, 'confirm-password': confirmPassword } = this.state;
-  if (password !== confirmPassword) {
-    this.setState({
-      isError: true,
-      passwordErrorMessage: 'Паролите не съвпадат!',
-    });
-  } else {
-    this.setState({
-      isError: false,
-      passwordErrorMessage: '',
-    });
-  }
-};
+  validatePasswords = () => {
+    const { password, 'confirm-password': confirmPassword } = this.state;
+    if (password !== confirmPassword) {
+      this.setState({
+        isError: true,
+        passwordErrorMessage: 'Паролите не съвпадат!',
+      });
+    } else {
+      this.setState({
+        isError: false,
+        passwordErrorMessage: '',
+      });
+    }
+  };
 
   handleSubmit = (e) => {
     e.preventDefault()
 
-    
-    const  {
+
+    const {
       username,
       password,
       email,
@@ -80,10 +80,10 @@ validatePasswords = () => {
       isDdsRegistered,
       mol,
       postCode,
+      orderAddress
     } = this.state;
     console.log(username,
       password,
-
       email,
       companyAddress,
       communicationName,
@@ -93,7 +93,7 @@ validatePasswords = () => {
       city,
       isDdsRegistered,
       mol,
-      postCode)
+      postCode, orderAddress)
     if (
       !(
         username &&
@@ -106,7 +106,8 @@ validatePasswords = () => {
         bulstat &&
         city &&
         mol &&
-        postCode
+        postCode &&
+        orderAddress
       )
     ) {
       this.setState({
@@ -134,6 +135,7 @@ validatePasswords = () => {
       city,
       mol,
       postCode,
+      orderAddress
     };
     console.log(user)
 
@@ -141,15 +143,12 @@ validatePasswords = () => {
       .then(response => {
         const { accessToken } = response.data
         const data = parseJwt(accessToken)
-        const user = { data, accessToken }
 
-        const Auth = this.context
-        Auth.userLogin(user)
 
         this.setState({
           username: '',
           password: '',
-          isLoggedIn: true,
+          isLoggedIn: false,
           isError: false,
           errorMessage: ''
         })
@@ -173,7 +172,7 @@ validatePasswords = () => {
   }
 
   render() {
-    const { isLoggedIn, isError, errorMessage,passwordErrorMessage } = this.state
+    const { isLoggedIn, isError, errorMessage, passwordErrorMessage } = this.state
 
     if (isLoggedIn) {
       return <Redirect to='/app' />
@@ -278,12 +277,17 @@ validatePasswords = () => {
 
                       <Label>
                         <span>Град</span>
-                        <Input
+                        
+                        <Select
                           className="mt-1"
                           name="city"
                           placeholder="Град"
                           onChange={this.handleInputChange}
-                        />
+                        >{citiesInBulgaria.map((city) => (
+                          <option key={city} value={city}>
+                              {city}
+                          </option>
+                      ))}</Select>
                       </Label>
                       <Label>
                         <span>МОЛ</span>
@@ -350,7 +354,7 @@ validatePasswords = () => {
                       {/* Add other fields here */}
                     </div>
                     <hr className="my-8" />
-                    <p style={{color : 'red'}}>{errorMessage}</p>
+                    <p style={{ color: 'red' }}>{errorMessage}</p>
 
 
                     <Button

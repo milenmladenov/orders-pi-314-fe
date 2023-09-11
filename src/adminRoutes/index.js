@@ -17,6 +17,7 @@ const NewOrderForm = lazy(() => import("../pages/newOrderForm"))
 const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 const SingleOrder = lazy(() => import("../pages/SingleOrder"))
 const SingleCustomer = lazy(() => import("../pages/SingleCustomer"))
+const EditOrder = lazy(() => import("../pages/EditOrder"))
 // const LogoutModal = lazy(() => import("../components/LogoutModal"))
 
 /**
@@ -43,6 +44,10 @@ const SingleCustomer = lazy(() => import("../pages/SingleCustomer"))
     {
         path: "/orders/:id",
         component: SingleOrder,
+    },
+    {
+        path: "/orders/edit/:id",
+        component: EditOrder,
     },
     {
         path: "/insert-by-excel",

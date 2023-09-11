@@ -95,7 +95,7 @@ const SingleOrder = ({ match }) => {
 
                 </PageTitle>        </div>
             <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
-            <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма : {order.user.companyName}</div><div className='mb-2'>Град : {order.user.city}</div><div className='mb-2'>Адрес : {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ : {order.user.bulstat}</div><div>МОЛ : {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка : {order.user.companyAdress}</div></div></div>
+            <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма : {order.user.companyName}</div><div className='mb-2'>Град : {order.user.city}</div><div className='mb-2'>Адрес : {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ : {order.user.bulstat}</div><div>МОЛ : {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка : {order.deliveryAddress}</div></div></div>
             <div className='grid grid-cols-2'><h1 className='ml-3'>Материал : <span className='font-semibold'> {order.groups[0].door.name}</span></h1>{loggedUser.data.role === '[ADMIN]' && (
                 <>
                     <div className='text-right mr-3 mb-4'>
@@ -162,7 +162,7 @@ const SingleOrder = ({ match }) => {
                     </TableBody>
 
                 </Table>
-                <div ><p className='font-semibold content-end text-right mr-3 mt-3 mb-3'>Обща стойност : {order.totalPrice}лв.</p></div>
+                <div ><div><p className=' ml-3  content-end text-left mr-3 grid '><span className=' font-semibold content-end text-left mr-3 mt-3 mb-3'>Забележка :</span> <span>{order.note}</span></p> </div><p className='font-semibold content-end text-right mr-3 mt-3 mb-3'>Обща стойност : <span>{order.totalPrice}лв.</span></p></div>
             </TableContainer>
 
         </div>

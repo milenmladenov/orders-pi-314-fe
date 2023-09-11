@@ -15,6 +15,10 @@ const Blank = lazy(() => import("../pages/Blank"));
 const NewOrderForm = lazy(() => import("../pages/newOrderForm"))
 const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 const loggedUser = JSON.parse(localStorage.getItem("user"));
+const SingleOrder = lazy(() => import("../pages/SingleOrder"));
+const EditOrder = lazy(() => import("../pages/EditOrder"));
+
+
 
 console.log(loggedUser)
 
@@ -41,6 +45,15 @@ const routes = [
     path: "/orders",
     component: Orders,
   },
+  {
+    path: "/orders/:id",
+    component: SingleOrder,
+  },
+  {
+    path: "edit/orders/:id",
+    component: EditOrder,
+  },
+
   {
     path: "/manage-profile",
     component: Profile,

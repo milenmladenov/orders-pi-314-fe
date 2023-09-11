@@ -15,7 +15,6 @@ import {
   ModalFooter
 } from "@windmill/react-ui";
 import {
-  DropdownIcon,
   EditIcon,
 
 } from "../icons";
@@ -66,7 +65,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
     });
     setIsEditing(editingState);
   }, [data]);
-  
+
 
   const handleChange = (event, order) => {
     const newStatus = event.target.value;
@@ -276,24 +275,24 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
 
                   {loggedUser.data.role === '[ADMIN]' && (
                     <div onClick={() => setIsEditing(prevState => ({ ...prevState, [order.id]: true }))} style={{ cursor: isEditing[order.id] || order.status === "DONE" ? "default" : "pointer" }}>
-                    {isEditing[order.id] ? (
+                      {isEditing[order.id] ? (
                         <Select
                           value={selectedStatus}
                           onChange={(event) => handleChange(event, order)}
                           onBlur={() => setIsEditing(false)}
                         >
                           {order.status === "CREATED" ? (
-                            
+
                             <>                            <option value="">--</option>
-                            <option value="WORKING_ON">Изпълнява се</option><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>
-                            
+                              <option value="WORKING_ON">Изпълнява се</option><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>
+
 
                           ) : (
                             <option value={selectedStatus}>
                               {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "SEND" ? "Изпратена" : "Изпълнена"}
                             </option>
                           )}
-                           {order.status == "WORKING_ON" && (
+                          {order.status == "WORKING_ON" && (
                             <><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>)}
                           {order.status == "SEND" && (
                             <option value="DONE">Изпълнена</option>)}
@@ -355,6 +354,14 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
                   >
                     Детайли
                   </Link>
+                </TableCell>
+
+                <TableCell className="w-1/12 text-center">
+                  {loggedUser.data.role === '[ADMIN]' || (loggedUser.data.role === '[USER]' && order.status === 'CREATED') ? (
+                    <Link to={`orders/edit/${order.id}`} className="text-indigo-600 hover:text-indigo-900">
+                      Редактиране
+                    </Link>
+                  ) : null}
                 </TableCell>
               </TableRow>
             ))}
