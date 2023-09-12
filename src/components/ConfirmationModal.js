@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom'
+
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) {
@@ -16,8 +18,10 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
               onConfirm();
               onClose();
             }}
+            
           >
-            Да
+                      Да
+            
           </button>
           <button
             className="px-4 py-2 text-gray-500 bg-gray-200 rounded-md shadow-md hover:bg-gray-300"

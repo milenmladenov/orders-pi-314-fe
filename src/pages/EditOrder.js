@@ -31,21 +31,124 @@ const EditOrder = ({ match }) => {
     const [totalSqrt, setTotalSqrt] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
     const [orderPreflightUrl, setOrderPreflightUrl] = useState();
+    const [orderUrl, setOrderUrl] = useState();
+
     const [handleNumber, setHandleNumber] = useState(0);
     const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false)
     const [orderData, setOrderData] = useState({
     });
     const [doorName, setDoorName] = useState('')
     const [handlePrice, setHandlePrice] = useState(0);
-
+    const [data, setData] = useState('')
 
 
     const [groupForms, setGroupForms] = useState([
     ]);
     useEffect(() => {
         setOrderPreflightUrl(apiBaseUrl + '/api/orders/new-order/preflight');
-        setOrderUrl(apiBaseUrl + '/api/orders/new-order');
+        setOrderUrl(apiBaseUrl + `/api/orders/${orderId}`);
     }, []);
+
+    const handlePreflight = async () => {
+        try {
+            const groupsArray = groupForms.map((formData) => ({
+                door: {
+                    name: doorName,
+                },
+                model: {
+                    name: formData.modelName,
+                },
+                folio: {
+                    name: formData.folioName,
+                },
+                handle: {
+                    name: formData.handleName,
+                },
+                profil: {
+                    name: formData.profilName,
+                },
+                bothSidesLaminated: formData.bothSidesLaminated,
+                height: parseInt(formData.height),
+                width: parseInt(formData.width),
+                length: parseInt(formData.length),
+                number: parseFloat(formData.number),
+                detailType: {
+                    material: formData.detailType.material,
+                    type: formData.detailType.type
+                }
+            }));
+    
+            const token = localStorage.getItem('accessToken');
+            
+            const response = await fetch(orderPreflightUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    groups: groupsArray,
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const data = await response.json();
+            console.log(loggedUser.data.role);
+            console.log(data);
+    
+            let totalSqrt = 0;
+            let totalGroupPrices = 0;
+    
+            const groupPrices = data.groups.map((group) => {
+                const result = group.groupTotalPrice;
+                totalGroupPrices += result;
+                setTotalGroupPrices(totalGroupPrices.toFixed(2))
+                return result;
+            });
+    
+            const groupSqrt = data.groups.map((group) => {
+                const result = ((group.height / 1000) * (group.width / 1000)) * group.number;
+                totalSqrt += result;
+                setTotalSqrt(totalSqrt.toFixed(2))
+                return result.toFixed(2);
+            });
+    
+            let handleNumber = 0;
+            data.groups.forEach((group) => {
+                if (group.handle.name !== 'Без Дръжка') {
+                    handleNumber += 1;
+                    setHandleNumber(handleNumber);
+                }
+            });
+    
+            const totalPrice = data.totalPrice;
+    
+            setTotalPrice(`${totalPrice}лв. с ДДС`);
+            setGroupPrices(groupPrices);
+            setGroupSqrt(groupSqrt);
+    
+            const isButtonDisabled = groupForms.some((formData) => (
+                (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
+                (formData.width > 1160) ||
+                (formData.width < 60) ||
+                (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
+                (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
+                (formData.height > 2400) ||
+                ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
+                (formData.detailType.material === 'Чекмедже' && formData.height < 60)
+            ));
+    
+            setSubmitButtonDisabled(isButtonDisabled);
+        } catch (error) {
+            console.log('Error: ' + error.message);
+        }
+    };
+    useEffect(() => {
+        handlePreflight();
+    }, [groupForms]);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -58,10 +161,9 @@ const EditOrder = ({ match }) => {
                 };
                 const response = await axios.get(apiBaseUrl + `/api/orders/${orderId}`, config);
                 const orderData = response.data;
-                setHandlePrice(response.data.handlePrice);
-                setData(orderData)
                 setOrderData(orderData);
-                setTotalPrice(response.data.totalPrice + ' лв. с ДДС')
+                setHandlePrice(orderData.handlePrice);
+                setTotalPrice(orderData.totalPrice + ' лв. с ДДС')
                 const initialFormState = orderData.groups.map((group) => ({
                     doorName: group.door.name,
                     modelName: group.model.name,
@@ -88,11 +190,12 @@ const EditOrder = ({ match }) => {
                     if (group.handle.name !== 'Без Дръжка') {
                         handleNumber += 1;
                         setHandleNumber(handleNumber);
+                        
                     }
                     return handleNumber;
                 });
                 let totalGroupPrices = 0
-                orderData.groups.forEach((group) => {
+                const groupPrices = orderData.groups.map((group) => {
                     setDoorName(group.door.name)
                     const result = group.groupTotalPrice;
                     totalGroupPrices += result;
@@ -100,7 +203,9 @@ const EditOrder = ({ match }) => {
                     return result;
                 });
 
-                setGroupPrices(groupPrices);
+                setGroupPrices(groupPrices)
+
+                
 
             } catch (error) {
                 console.error('Error fetching order:', error);
@@ -109,14 +214,9 @@ const EditOrder = ({ match }) => {
         fetchOrder();
     }, [orderId]);
 
-    useEffect(() => {
-        handlePreflight();
-    }, [groupForms]);
-    
-    useEffect(() => {
-        console.log('groupPrices:', JSON.stringify(groupPrices));
-        console.log('totalGroupPrices:', JSON.stringify(totalGroupPrices));
-    }, [groupPrices, totalGroupPrices]);
+   
+
+  
 
     const handleSubmit = async () => {
         try {
@@ -158,8 +258,9 @@ const EditOrder = ({ match }) => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ 
-                    groups: updatedGroups }
+                body: JSON.stringify({
+                    groups: updatedGroups
+                }
                 ),
             });
 
@@ -243,104 +344,8 @@ const EditOrder = ({ match }) => {
         );
     };
 
-    const handlePreflight = () => {
-        const groupsArray = groupForms.map((formData) => ({
-            door: {
-                name: doorName,
-            },
-            model: {
-                name: formData.modelName,
-            },
-            folio: {
-                name: formData.folioName,
-            },
-            handle: {
-                name: formData.handleName,
-            },
-            profil: {
-                name: formData.profilName,
-            },
-            bothSidesLaminated: formData.bothSidesLaminated,
-            height: parseInt(formData.height),
-            width: parseInt(formData.width),
-            length: parseInt(formData.length),
-            number: parseFloat(formData.number),
-            detailType: {
-                material: formData.detailType.material,
-                type: formData.detailType.type
-            }
-        }));
-        const token = localStorage.getItem('accessToken')
-        // Send the data to the backend using AJAX
-
-        fetch(orderPreflightUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                groups: groupsArray,
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setData(data);
-                console.log(loggedUser.data.role);
-                console.log(data);
-                let totalSqrt = 0;
-                let totalGroupPrices = 0;
-                // Get the groupTotalPrice for every group in the response
-                const groupPrices = data.groups.map((group) => {
-                    const result = group.groupTotalPrice;
-                    totalGroupPrices += result;
-                    setTotalGroupPrices(totalGroupPrices.toFixed(2))
-                    return result;
-                });
-                const groupSqrt = data.groups.map((group) => {
-                    const result = ((group.height / 1000) * (group.width / 1000)) * group.number;
-                    totalSqrt += result;
-                    setTotalSqrt(totalSqrt.toFixed(2))
-
-                    return result.toFixed(2);
-                });
-                let handleNumber = 0;
-                data.groups.map((group) => {
-                    if (group.handle.name !== 'Без Дръжка') {
-                        handleNumber += 1; // Use += to increment the variable
-                        setHandleNumber(handleNumber);
-                    }
-                    return handleNumber;
-                });
-                const totalPrice = data.totalPrice;
-
-                setTotalPrice(`${totalPrice}лв. с ДДС`);
-                setGroupPrices(groupPrices);
-                setGroupSqrt(groupSqrt);
-                console.log(groupSqrt)
-                // Set the total price as the sum of all groupTotalPrices
-
-
-                // Render the response data
-                const isButtonDisabled = groupForms.some((formData) => (
-                    (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
-                    (formData.width > 1160) ||
-                    (formData.width < 60) ||
-                    (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
-                    (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
-                    (formData.height > 2400) ||
-                    ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
-                    (formData.detailType.material === 'Чекмедже' && formData.height < 60)
-                ));
-
-                setSubmitButtonDisabled(isButtonDisabled)
-            })
-
-            .catch((error) => {
-                console.log('Error: ' + error.message);
-            });
-    };
-
+    
+    
 
     if (!orderData) {
         return <div>Loading...</div>;

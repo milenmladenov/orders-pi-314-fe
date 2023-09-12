@@ -14,6 +14,8 @@ import {
 } from "@windmill/react-ui";
 import FolioOptions from '../components/FolioOptions';
 import modelOptions from '../components/modelOptions';
+import { Link } from 'react-router-dom'
+
 
 
 
@@ -68,6 +70,8 @@ const NewOrderForm = () => {
     const [note, setNote] = useState('');
     const [city, setCity] = useState('');
     const [isTextareaVisible, setTextareaVisible] = useState(false);
+    const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]); // Initialize with true for the initial group
+
 
 
 
@@ -132,6 +136,8 @@ const NewOrderForm = () => {
 
 
     const handleAddGroup = (event) => {
+        setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
+
         setGroupForms((prevGroupForms) => [
             ...prevGroupForms,
             {
@@ -151,6 +157,7 @@ const NewOrderForm = () => {
                 },
             },
         ]);
+
     };
 
 
@@ -394,6 +401,7 @@ const NewOrderForm = () => {
                                     isOpen={modalOpen}
                                     onClose={() => setModalOpen(false)}
                                     onConfirm={handleSubmit}
+                                    
                                 />
                             </div>
                             {totalSqrt <= 1.5 && (<div className='text-center '>
@@ -545,7 +553,8 @@ const NewOrderForm = () => {
                                     </Button>
                                 </div>
                                 <div className="hidden sm:block">
-                                    <Button layout="outline" onClick={closeModal}>
+                                    <Button layout="outline" onClick={closeModal} >
+                                        
                                         Отказ
                                     </Button>
                                 </div>
@@ -567,20 +576,24 @@ const NewOrderForm = () => {
                                         <div></div>
                                         <div className=''>
                                             <div className='ml-20'>
-                                                <button type='button' onClick={(event) => handleAddGroup(event)}
-                                                    className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        strokeWidth={1.5}
-                                                        stroke="currentColor"
-                                                        className="w-10 h-10"
+                                                {groupButtonVisibility[index] && (
+                                                    <button
+                                                        type='button'
+                                                        onClick={(event) => handleAddGroup(event)}
+                                                        className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
                                                     >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                    </svg>
-                                                </button>
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            strokeWidth={1.5}
+                                                            stroke="currentColor"
+                                                            className="w-10 h-10"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                        </svg>
+                                                    </button>
+                                                )}
 
 
 
