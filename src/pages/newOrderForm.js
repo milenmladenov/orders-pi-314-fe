@@ -908,7 +908,7 @@ const NewOrderForm = () => {
                                                 name="bothSidesLaminated"
                                                 value={formData.bothSidesLaminated}
                                                 onChange={(event) => handleChange(event, index)}
-                                                disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ'}
+                                                disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' }
                                             >
                                                 <option value="false">Едностранно ламиниране</option>
                                                 <option value="true">Двустранно ламиниране</option>
