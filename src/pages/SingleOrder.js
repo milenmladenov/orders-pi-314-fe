@@ -116,14 +116,14 @@ const SingleOrder = ({ match }) => {
                             <TableCell>Фолио</TableCell>
                             <TableCell>Профил</TableCell>
                             <TableCell>Дръжка</TableCell>
-                            <TableCell>Височина,мм</TableCell>
-                            <TableCell>Широчина, мм</TableCell>
-                            <TableCell>Дължина,мм</TableCell>
+                            <TableCell>Вис.,мм</TableCell>
+                            <TableCell>Шир., мм</TableCell>
+                            <TableCell>Дъл.,мм</TableCell>
                             <TableCell>Брой</TableCell>
                             <TableCell>Цена Дръжка, бр.</TableCell>
-                            <TableCell>Цена мат за кв.м</TableCell>
-                            <TableCell>Двустр. ламиниране</TableCell>
-                            <TableCell>Стойност</TableCell>
+                            <TableCell>Мат за кв.м,лв.</TableCell>
+                            <TableCell>Двустр. лам.</TableCell>
+                            <TableCell>Ст-ст</TableCell>
 
                             {/* Add more table headers for other fields */}
                         </tr>
@@ -152,7 +152,7 @@ const SingleOrder = ({ match }) => {
                                     </>
                                 )}
                                 <TableCell>{group.number}</TableCell>
-                                <TableCell>{group.handle.price}</TableCell>
+                                <TableCell>{group.handle.price} лв.</TableCell>
                                 <TableCell>{group.matPrice}</TableCell>
                                 <TableCell>{group.isBothSidesLaminated}</TableCell>
                                 <TableCell>{group.groupTotalPrice}лв.</TableCell>

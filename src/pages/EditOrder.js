@@ -218,13 +218,14 @@ const EditOrder = ({ match }) => {
             }
         };
         fetchOrder();
+        openModal()
+
 
 
     }, [orderId]);
 
 
     useEffect(() => {
-        openModal()
         handlePreflight();
     }, [groupForms]);
 
