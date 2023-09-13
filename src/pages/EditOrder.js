@@ -32,6 +32,8 @@ const EditOrder = ({ match }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [orderPreflightUrl, setOrderPreflightUrl] = useState();
     const [orderUrl, setOrderUrl] = useState();
+    const [isDataLoadModalOpen, setIsDataLoadModalOpen] = useState(false);
+
 
     const [handleNumber, setHandleNumber] = useState(0);
     const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false)
@@ -40,10 +42,14 @@ const EditOrder = ({ match }) => {
     const [doorName, setDoorName] = useState('')
     const [handlePrice, setHandlePrice] = useState(0);
     const [data, setData] = useState('')
+    const [width, setWidth] = useState('')
 
 
     const [groupForms, setGroupForms] = useState([
     ]);
+    const [preflightGroupForms, setPreflightGroupForms] = useState([
+    ]);
+
     useEffect(() => {
         setOrderPreflightUrl(apiBaseUrl + '/api/orders/new-order/preflight');
         setOrderUrl(apiBaseUrl + `/api/orders/${orderId}`);
@@ -77,9 +83,9 @@ const EditOrder = ({ match }) => {
                     type: formData.detailType.type
                 }
             }));
-    
+
             const token = localStorage.getItem('accessToken');
-            
+
             const response = await fetch(orderPreflightUrl, {
                 method: 'POST',
                 headers: {
@@ -90,32 +96,32 @@ const EditOrder = ({ match }) => {
                     groups: groupsArray,
                 }),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const data = await response.json();
             console.log(loggedUser.data.role);
             console.log(data);
-    
+
             let totalSqrt = 0;
             let totalGroupPrices = 0;
-    
+
             const groupPrices = data.groups.map((group) => {
                 const result = group.groupTotalPrice;
                 totalGroupPrices += result;
                 setTotalGroupPrices(totalGroupPrices.toFixed(2))
                 return result;
             });
-    
+
             const groupSqrt = data.groups.map((group) => {
                 const result = ((group.height / 1000) * (group.width / 1000)) * group.number;
                 totalSqrt += result;
                 setTotalSqrt(totalSqrt.toFixed(2))
                 return result.toFixed(2);
             });
-    
+
             let handleNumber = 0;
             data.groups.forEach((group) => {
                 if (group.handle.name !== 'Без Дръжка') {
@@ -123,14 +129,14 @@ const EditOrder = ({ match }) => {
                     setHandleNumber(handleNumber);
                 }
             });
-    
+
             const totalPrice = data.totalPrice;
-    
+
             setTotalPrice(`${totalPrice}лв. с ДДС`);
             setGroupPrices(groupPrices);
             setGroupSqrt(groupSqrt);
-    
-            const isButtonDisabled = groupForms.some((formData) => (
+
+            const isButtonDisabled = preflightGroupForms.some((formData) => (
                 (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
                 (formData.width > 1160) ||
                 (formData.width < 60) ||
@@ -140,20 +146,20 @@ const EditOrder = ({ match }) => {
                 ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
                 (formData.detailType.material === 'Чекмедже' && formData.height < 60)
             ));
-    
+
             setSubmitButtonDisabled(isButtonDisabled);
         } catch (error) {
             console.log('Error: ' + error.message);
         }
     };
-    useEffect(() => {
-        handlePreflight();
-    }, [groupForms]);
+
 
     useEffect(() => {
         const fetchOrder = async () => {
 
             try {
+                await handlePreflight();
+
                 const config = {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -184,19 +190,19 @@ const EditOrder = ({ match }) => {
                     note: orderData.note
                 }));
                 setGroupForms(initialFormState)
-
                 let handleNumber = 0;
                 orderData.groups.map((group) => {
                     if (group.handle.name !== 'Без Дръжка') {
                         handleNumber += 1;
                         setHandleNumber(handleNumber);
-                        
+
                     }
                     return handleNumber;
                 });
                 let totalGroupPrices = 0
                 const groupPrices = orderData.groups.map((group) => {
                     setDoorName(group.door.name)
+                    setWidth(group.width)
                     const result = group.groupTotalPrice;
                     totalGroupPrices += result;
                     setTotalGroupPrices(totalGroupPrices.toFixed(2))
@@ -205,18 +211,26 @@ const EditOrder = ({ match }) => {
 
                 setGroupPrices(groupPrices)
 
-                
+
 
             } catch (error) {
                 console.error('Error fetching order:', error);
             }
         };
         fetchOrder();
+
+
     }, [orderId]);
 
-   
 
-  
+    useEffect(() => {
+        openModal()
+        handlePreflight();
+    }, [groupForms]);
+
+    function openModal() {
+        setIsDataLoadModalOpen(true)        // window.location.reload();
+    }
 
     const handleSubmit = async () => {
         try {
@@ -301,6 +315,9 @@ const EditOrder = ({ match }) => {
         });
         setGroupForms(updatedGroupForms);
     };
+    function closeModal() {
+        setIsDataLoadModalOpen(false)        // window.location.reload();
+    }
 
     const handleChange = (event, index) => {
         const { name, value } = event.target;
@@ -344,8 +361,8 @@ const EditOrder = ({ match }) => {
         );
     };
 
-    
-    
+
+
 
     if (!orderData) {
         return <div>Loading...</div>;
@@ -376,7 +393,23 @@ const EditOrder = ({ match }) => {
                                 <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
 
                             </div>
+                            <Modal isOpen={isDataLoadModalOpen}>
+                                <ModalHeader className="flex items-center">
+                                    Редактиране на поръчка !
+                                </ModalHeader>
+                                <ModalBody>
 
+                                    Ще редактирате поръчка с номер {orderData.id}, създадена на {orderData.createdAt} ! 
+                                </ModalBody>
+                                <ModalFooter>
+                                    <div className="hidden sm:block">
+                                        <Button onClick={() => { handlePreflight() ; closeModal()}}>
+                                            Зареждане на Данни
+                                        </Button>
+                                    </div>
+                                   
+                                </ModalFooter>
+                            </Modal>
 
                             <div className='grid md:grid-cols-2 '>
                                 <div className='text-right'>
@@ -789,7 +822,7 @@ const EditOrder = ({ match }) => {
 
                                     <div className="grid md:grid-rows-2 text-center border">
                                         <div>
-                                            {orderData.bothSidesLaminated === "false"
+                                            {formData.bothSidesLaminated === "false"
                                                 ? "Едностранно ламиниране"
                                                 : "Двустранно ламиниране"}
                                         </div>
