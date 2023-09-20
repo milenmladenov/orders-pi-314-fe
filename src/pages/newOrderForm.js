@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from "../components/Typography/PageTitle";
 import "../assets/css/groups-in-rows.css"
-import { orderApi } from '../components/misc/OrderApi'
-import AuthContext, { AuthProvider, useAuth } from '../components/context/AuthContext';
+import AuthContext, { useAuth } from '../components/context/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { citiesInBulgaria } from '../cities/citiesData';
 import { config } from '../Constants';
@@ -12,9 +11,9 @@ import {
     ModalBody,
     ModalFooter, Textarea
 } from "@windmill/react-ui";
+import { Link } from 'react-router-dom'
 import FolioOptions from '../components/FolioOptions';
 import modelOptions from '../components/modelOptions';
-import { Link } from 'react-router-dom'
 
 
 
@@ -30,7 +29,7 @@ const NewOrderForm = () => {
     const apiBaseUrl = config.url.API_BASE_URL;
 
     const initialFormState = {
-        doorName: "",
+        doorName: '',
         modelName: "Без",
         folioName: "Без",
         handleName: 'Без Дръжка',
@@ -68,7 +67,9 @@ const NewOrderForm = () => {
     const [note, setNote] = useState('');
     const [city, setCity] = useState('');
     const [isTextareaVisible, setTextareaVisible] = useState(false);
-    const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]); // Initialize with true for the initial group
+    const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]);
+    const [createdOrderId, setCreatedOrderId] = useState(0)
+    const [createdOrderModalOpen, isCreatedOrderModalOpen] = useState(false);
 
 
 
@@ -88,6 +89,11 @@ const NewOrderForm = () => {
         setIsModalOpen(false);
         // window.location.reload();
     }
+    function closeCreatedorderModal() {
+        isCreatedOrderModalOpen(false);
+        window.location.reload();
+    }
+
 
 
     const handleChange = (event, index) => {
@@ -114,6 +120,7 @@ const NewOrderForm = () => {
 
     useEffect(() => {
         handlePreflight();
+        setSubmitButtonDisabled(true);
     }, [groupForms]);
 
     const handleTypeChange = (event, index) => {
@@ -135,7 +142,7 @@ const NewOrderForm = () => {
 
     const handleAddGroup = (event) => {
         setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
-
+        handlePreflight();
         setGroupForms((prevGroupForms) => [
             ...prevGroupForms,
             {
@@ -186,6 +193,7 @@ const NewOrderForm = () => {
             width: parseInt(formData.width),
             length: parseInt(formData.length),
             number: parseInt(formData.number),
+            bothSidesLaminated: formData.bothSidesLaminated,
             detailType: {
                 material: formData.detailType.material,
                 type: formData.detailType.type
@@ -210,7 +218,7 @@ const NewOrderForm = () => {
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
-
+                setCreatedOrderId(data.createdOrderId);
                 // Get the groupTotalPrice for every group in the response
                 const groupPrices = data.groups.map((group) => group.groupTotalPrice);
                 const groupSqrt = data.groups.map((group) => {
@@ -231,9 +239,7 @@ const NewOrderForm = () => {
                 setGroupPrices(groupPrices);
                 setGroupSqrt(groupSqrt);
                 console.log(groupSqrt)
-                window.location.reload();
-
-
+                isCreatedOrderModalOpen(true);
             })
             .catch((error) => {
                 setTotalPrice('Error: ' + error.message);
@@ -322,15 +328,14 @@ const NewOrderForm = () => {
                 console.log(groupSqrt)
                 // Set the total price as the sum of all groupTotalPrices
 
-
                 // Render the response data
                 const isButtonDisabled = groupForms.some((formData) => (
                     (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
-                    (formData.width > 1160) ||
+                    (formData.width > 1160) || (formData.doorName === '') ||
                     (formData.width < 60) ||
                     (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
                     (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
-                    (formData.height > 2400) ||
+                    (formData.height > 2400) || (formData.detailType.material === 'Корниз' && formData.detailType.type === '') ||
                     ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
                     (formData.detailType.material === 'Чекмедже' && formData.height < 60)
                 ));
@@ -387,7 +392,7 @@ const NewOrderForm = () => {
                                         type="button"
                                         style={{ width: '150px', margin: '10px' }}
                                         className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                        disabled={submitButtonDisabled}
+                                        disabled={(submitButtonDisabled) }
                                         onClick={() => setIsModalOpen(true)}
                                     >
                                         Завърши
@@ -399,7 +404,7 @@ const NewOrderForm = () => {
                                     isOpen={modalOpen}
                                     onClose={() => setModalOpen(false)}
                                     onConfirm={handleSubmit}
-                                    
+
                                 />
                             </div>
                             {totalSqrt <= 1.5 && (<div className='text-center '>
@@ -415,7 +420,40 @@ const NewOrderForm = () => {
                 <div className="grid  md:grid-cols-1 gap-10">
 
                     {groupForms.map((formData, index) => (
-                        <><Modal isOpen={isModalOpen} onClose={closeModal}>
+                        
+                        <>                    
+                        <Modal isOpen={createdOrderModalOpen}>
+                            <ModalHeader className="flex items-center">
+                                Вашата поръчка е създадена!
+                            </ModalHeader>
+                            <ModalBody>
+                                Създадена е поръчка с номер {createdOrderId}.
+                            </ModalBody>
+                            <ModalFooter className="flex items-right">
+                                <div className="hidden sm:block">
+                                    <Button  >
+                                        <Link
+                                            to={`orders/${createdOrderId}`}
+                                        >
+                                            Преглед</Link>
+                                    </Button>
+                                </div>
+                                <div className="hidden sm:block">
+                                    <Button >
+                                        <Link
+                                            to={`orders`}
+                                        >
+                                            Виж всички</Link>
+                                    </Button>
+                                </div>
+                                <div className="hidden sm:block ">
+                                    <Button layout="outline" onClick={() => { closeCreatedorderModal() }}>
+                                        Създаване на нова
+                                    </Button>
+                                </div>
+
+                            </ModalFooter>
+                        </Modal><><Modal isOpen={isModalOpen} onClose={closeModal}>
                             <ModalHeader className="flex items-center">
                                 Допълнителна информация
                             </ModalHeader>
@@ -474,8 +512,7 @@ const NewOrderForm = () => {
                                                         id={`toggleTextarea${index}`}
                                                         name="toggleTextarea"
                                                         checked={isTextareaVisible}
-                                                        onChange={() => setTextareaVisible(!isTextareaVisible)}
-                                                    /><span className='ml-3'>Въведете друг адрес за доставка:</span>
+                                                        onChange={() => setTextareaVisible(!isTextareaVisible)} /><span className='ml-3'>Въведете друг адрес за доставка:</span>
                                                 </Label>
 
                                             </div>
@@ -487,8 +524,7 @@ const NewOrderForm = () => {
                                                     name="deliveryAddress"
                                                     value={deliveryAddress}
                                                     onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}
-                                                    required
-                                                />
+                                                    required />
                                             </div>
                                         </div>
 
@@ -551,388 +587,390 @@ const NewOrderForm = () => {
                                     </Button>
                                 </div>
                                 <div className="hidden sm:block">
-                                    <Button layout="outline" onClick={closeModal} >
-                                        
+                                    <Button layout="outline" onClick={closeModal}>
+
                                         Отказ
                                     </Button>
                                 </div>
                             </ModalFooter>
                         </Modal><div className=''>
-                                <div>
-                                    <div></div>
-                                </div>
-                                <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3">
+                                    <div>
+                                        <div></div>
+                                    </div>
+                                    <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3">
 
-                                    <form
+                                        <form
 
-                                        id={`orderForm${index}`}
-                                        className="grid grid-cols-4 gap-4  hover:border"
-                                        style={{ padding: '20px', width: '1230px' }}
-                                    >
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                        <div className=''>
-                                            <div className='ml-20'>
-                                                {groupButtonVisibility[index] && (
-                                                    <button
-                                                        type='button'
-                                                        onClick={(event) => handleAddGroup(event)}
-                                                        className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            strokeWidth={1.5}
-                                                            stroke="currentColor"
-                                                            className="w-10 h-10"
+                                            id={`orderForm${index}`}
+                                            className="grid grid-cols-4 gap-4  hover:border"
+                                            style={{ padding: '20px', width: '1230px' }}
+                                        >
+                                            <div></div>
+                                            <div className='text-right'><PageTitle >{index + 1}</PageTitle></div>
+                                            <div></div>
+                                            <div className=''>
+                                                <div className='ml-20'>
+                                                    {groupButtonVisibility[index] && (
+                                                        <button
+                                                            type='button'
+                                                            onClick={(event) => handleAddGroup(event)}
+                                                            className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
                                                         >
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                        </svg>
-                                                    </button>
-                                                )}
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                strokeWidth={1.5}
+                                                                stroke="currentColor"
+                                                                className="w-10 h-10"
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
 
 
 
 
-                                                {index > 0 && (
+                                                    {index > 0 && (
 
-                                                    <button
-                                                        onClick={(event) => handleDeleteGroup(index)}
-                                                        className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800"
-                                                        type="button"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            strokeWidth={1.5}
-                                                            stroke="currentColor"
-                                                            className="w-10 h-10"
+                                                        <button
+                                                            onClick={(event) => handleDeleteGroup(index)}
+                                                            className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800"
+                                                            type="button"
                                                         >
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                                                        </svg>
-                                                    </button>
-                                                )}</div>
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                strokeWidth={1.5}
+                                                                stroke="currentColor"
+                                                                className="w-10 h-10"
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+                                                            </svg>
+                                                        </button>
+                                                    )}</div>
 
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="doorName" className="block font-medium">Материал:</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                id="doorName"
-                                                name="doorName"
-                                                value={formData.doorName}
-                                                onChange={(event) => handleChange(event, index)}
-                                                disabled={index > 0}
-                                                required
-
-                                            >
-                                                <option value="">-Изберете Материал-</option>
-                                                <option value="Мембранна вратичка">Мембранна вратичка</option>
-                                                <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
-                                                <option value="Фурнирован МДФ">Фурнирован МДФ</option>
-                                            </Select>
-                                        </div>
-                                        <div>
-                                            <Label htmlFor={`materialName${index}`} className="block font-medium">Вид:</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                id={`materialName${index}`}
-                                                name={`materialName${index}`}
-                                                value={formData.detailType.material}
-                                                onChange={(event) => handleMaterialChange(event, index)}
-                                                required
-                                                disabled={(formData.doorName === '')}
-
-                                            >
-                                                <option value="">-Изберете Вид-</option>
-                                                <option value="Вратичка">Вратичка</option>
-                                                <option value="Страница">Страница</option>
-                                                <option value="Чекмедже">Чекмедже</option>
-                                                <option value="Пиластър">Пиластър</option>
-                                                <option value="Корниз">Корниз</option>
-
-                                            </Select>
-                                            {formData.detailType.material === 'Пиластър' && (
-                                                <div>
-                                                    <Label htmlFor={`typeName${index}`}>Пиластър:</Label>
-                                                    <Select
-                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                        id={`typeName${index}`}
-                                                        name={`typeName${index}`}
-                                                        value={formData.detailType.type}
-                                                        onChange={(event) => handleTypeChange(event, index)}
-                                                        required
-                                                    >
-                                                        <option value="">-Изберете Пиластър-</option>
-                                                        <option value="P1">P1</option>
-                                                        <option value="P2">P2</option>
-                                                        <option value="P3">P3</option>
-                                                        {/* Add more options here */}
-                                                    </Select>
-                                                </div>
-                                            )}
-                                            {formData.detailType.material === 'Чекмедже' && (
-                                                <><div>
-                                                    <Select
-                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                        id={`typeName${index}`}
-                                                        name={`typeName${index}`}
-                                                        value={formData.detailType.type}
-                                                        onChange={(event) => handleTypeChange(event, index)}
-                                                        required
-                                                    >
-                                                        <option value="">----------</option>
-                                                        <option value="Обща фрезовка">Обща фрезовка</option>
-                                                        <option value="Изчистен детайл">Изчистен детайл</option>
-                                                        <option value="Корекция на рамка">Корекция на рамка</option>
-                                                        {/* Add more options here */}
-                                                    </Select>
-                                                </div></>
-                                            )}
-                                            {formData.detailType.material === 'Корниз' && (
-                                                <><div>
-                                                    <Label htmlFor={`typeName${index}`}>Корниз:</Label>
-                                                    <Select
-                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                        id={`typeName${index}`}
-                                                        name={`typeName${index}`}
-                                                        value={formData.detailType.type}
-                                                        onChange={(event) => handleTypeChange(event, index)}
-                                                        required
-                                                    >
-                                                        <option value="">-Изберете Корниз-</option>
-                                                        <option value="К1 – 68мм височина">К1 – 68мм височина</option>
-                                                        <option value="К2 – 70мм височина">К2 – 70мм височина</option>
-                                                        <option value="К3 – 80мм височина">К3 – 80мм височина</option>
-                                                        {/* Add more options here */}
-                                                    </Select>
-                                                </div></>
-                                            )}
-                                        </div>
-
-                                        {/* Model Name */}
-                                        <div>
-                                            <Label htmlFor="modelName" className="block font-medium">Модел:</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                id="modelName"
-                                                name="modelName"
-                                                value={formData.modelName}
-                                                onChange={(event) => handleChange(event, index)}
-                                                disabled={(formData.doorName === '' || selectedMaterial === "Пиластър" || selectedMaterial === "Корниз")}
-                                                required
-                                            >
-
-                                                <option value="" selected="selected">-Изберете Модел-</option>
-                                                {modelOptions.map((option, index) => (
-                                                    <option key={index} value={option}>
-                                                        {option}
-                                                    </option>
-                                                ))}
-                                            </Select>
-                                        </div>
-                                        <div>
-                                            {/* Folio Name s
-*/}
-                                            <Label htmlFor="folioName" className="block font-medium">Фолио :</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                id="folioName"
-                                                name="folioName"
-                                                value={formData.folioName}
-                                                onChange={(event) => handleChange(event, index)}
-                                                disabled={formData.modelName === '' || formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ'}
-                                                required
-                                            >
-                                                <option value="" selected="selected">-Изберете Фолио-</option>
-                                                {FolioOptions.map((option, index) => (
-                                                    <option key={index} value={option}>
-                                                        {option}
-                                                    </option>
-                                                ))}   </Select>
-                                        </div><div>
-                                            {/* Handle Name */}
-                                            <Label htmlFor="handleName" className="block font-medium">Дръжка</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                type="text"
-                                                id="handleName"
-                                                name="handleName"
-                                                value={formData.handleName}
-                                                onChange={(event) => handleChange(event, index)}
-                                                disabled={formData.modelName === '' || formData.detailType.material === 'Корниз'}
-                                            >
-                                                <option value="Без Дръжка">Без дръжка</option>
-                                                <option value="дръжка H1">дръжка H1</option></Select></div>
-                                        <div>
-                                            {/* Profil Name */}
-                                            <Label htmlFor="profilName" className="block font-medium">Профил:</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                type="text"
-                                                id="profilName"
-                                                name="profilName"
-                                                value={formData.profilName}
-                                                onChange={(event) => handleChange(event, index)}
-                                                required
-                                                disabled={formData.modelName === '' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Корниз'}
-                                            >
-                                                <option value="R1">Профил R1</option>
-                                                <option value="R2">Профил R2</option>
-                                                <option value="R3">Профил R3</option>
-                                                <option value="R4">Профил R4</option>
-                                                <option value="R5">Профил R5</option></Select>
-
-
-
-
-
-                                        </div>
-                                        {formData.detailType.material === 'Корниз' ? (
-                                            <>
-                                                <div>
-                                                    <Label htmlFor="length" className="block font-medium">Дължина, мм:</Label>
-                                                    <Select
-                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                        id="length"
-                                                        name="length"
-                                                        value={formData.length}
-                                                        onChange={(event) => handleChange(event, index)}
-                                                        required
-                                                    >
-                                                        <option value="2360">2360мм / 1бр.</option>
-                                                        <option value="1160">1160мм / 0.5бр.</option>
-                                                    </Select>
-                                                </div>
-                                            </>
-                                        ) : formData.detailType.material === 'Пиластър' ? (
+                                            </div>
 
                                             <div>
-                                                {/* Height */}
-                                                <div>
-                                                    <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
-                                                    <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                                        type="number"
-                                                        id="height"
-                                                        name="height"
-                                                        value={formData.height}
-                                                        onChange={(event) => handleChange(event, index)}
-                                                        required />
-                                                </div>
+                                                <Label htmlFor="doorName" className="block font-medium">Материал:</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id="doorName"
+                                                    name="doorName"
+                                                    value={formData.doorName}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    disabled={index > 0}
+                                                    required
+
+                                                >
+                                                    <option value="">-Изберете Материал-</option>
+                                                    <option value="Мембранна вратичка">Мембранна вратичка</option>
+                                                    <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
+                                                    <option value="Фурнирован МДФ">Фурнирован МДФ</option>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`materialName${index}`} className="block font-medium">Вид:</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id={`materialName${index}`}
+                                                    name={`materialName${index}`}
+                                                    value={formData.detailType.material}
+                                                    onChange={(event) => handleMaterialChange(event, index)}
+                                                    required
+                                                    disabled={(formData.doorName === '')}
+
+                                                >
+                                                    <option value="">-Изберете Вид-</option>
+                                                    <option value="Вратичка">Вратичка</option>
+                                                    <option value="Страница">Страница</option>
+                                                    <option value="Чекмедже">Чекмедже</option>
+                                                    <option value="Пиластър">Пиластър</option>
+                                                    <option value="Корниз">Корниз</option>
+
+                                                </Select>
                                                 {formData.detailType.material === 'Пиластър' && (
                                                     <div>
-                                                        <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                        <Label htmlFor={`typeName${index}`}>Пиластър:</Label>
                                                         <Select
                                                             className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                                             id={`typeName${index}`}
                                                             name={`typeName${index}`}
-                                                            value={formData.width}
-                                                            onChange={(event) => handleChange(event, index)}
+                                                            value={formData.detailType.type}
+                                                            onChange={(event) => handleTypeChange(event, index)}
                                                             required
                                                         >
-                                                            <option value="50">50</option>
-                                                            <option value="60">60</option>
-                                                            <option value="70">70</option>
-                                                            <option value="80">80</option>
-                                                            <option value="90">90</option>
-                                                            <option value="100">100</option>
-                                                            <option value="110">110</option>
+                                                            <option value="">-Изберете Пиластър-</option>
+                                                            <option value="P1">P1</option>
+                                                            <option value="P2">P2</option>
+                                                            <option value="P3">P3</option>
+                                                            {/* Add more options here */}
                                                         </Select>
                                                     </div>
                                                 )}
+                                                {formData.detailType.material === 'Чекмедже' && (
+                                                    <><div>
+                                                        <Select
+                                                            className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                            id={`typeName${index}`}
+                                                            name={`typeName${index}`}
+                                                            value={formData.detailType.type}
+                                                            onChange={(event) => handleTypeChange(event, index)}
+                                                            required
+                                                            disabled = {formData.doorName === ''}
+                                                        >
+                                                            <option value="">----------</option>
+                                                            <option value="Обща фрезовка">Обща фрезовка</option>
+                                                            <option value="Изчистен детайл">Изчистен детайл</option>
+                                                            <option value="Корекция на рамка">Корекция на рамка</option>
+                                                            {/* Add more options here */}
+                                                        </Select>
+                                                    </div></>
+                                                )}
+                                                {formData.detailType.material === 'Корниз' && (
+                                                    <><div>
+                                                        <Label htmlFor={`typeName${index}`}>Корниз:</Label>
+                                                        <Select
+                                                            className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                            id={`typeName${index}`}
+                                                            name={`typeName${index}`}
+                                                            value={formData.detailType.type}
+                                                            onChange={(event) => handleTypeChange(event, index)}
+                                                            required
+                                                            disabled = {formData.doorName === ''}
+                                                        >
+                                                            <option value="">-Изберете Корниз-</option>
+                                                            <option value="К1 – 68мм височина">К1 – 68мм височина</option>
+                                                            <option value="К2 – 70мм височина">К2 – 70мм височина</option>
+                                                            <option value="К3 – 80мм височина">К3 – 80мм височина</option>
+                                                            {/* Add more options here */}
+                                                        </Select>
+                                                    </div></>
+                                                )}
                                             </div>
 
-                                        ) : (
-                                            <>
+                                            {/* Model Name */}
+                                            <div>
+                                                <Label htmlFor="modelName" className="block font-medium">Модел:</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id="modelName"
+                                                    name="modelName"
+                                                    value={formData.modelName}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    disabled={(formData.doorName === '' || formData.detailType.material === "Пиластър" || formData.detailType.material === "Корниз")}
+                                                    required
+                                                >
+
+                                                    <option value="" selected="selected">-Изберете Модел-</option>
+                                                    {modelOptions.map((option, index) => (
+                                                        <option key={index} value={option}>
+                                                            {option}
+                                                        </option>
+                                                    ))}
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                {/* Folio Name s
+*/}
+                                                <Label htmlFor="folioName" className="block font-medium">Фолио :</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    id="folioName"
+                                                    name="folioName"
+                                                    value={formData.folioName}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    disabled={formData.modelName === '' || formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ'}
+                                                    required
+                                                >
+                                                    <option value="" selected="selected">-Изберете Фолио-</option>
+                                                    {FolioOptions.map((option, index) => (
+                                                        <option key={index} value={option}>
+                                                            {option}
+                                                        </option>
+                                                    ))}   </Select>
+                                            </div><div>
+                                                {/* Handle Name */}
+                                                <Label htmlFor="handleName" className="block font-medium">Дръжка</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    type="text"
+                                                    id="handleName"
+                                                    name="handleName"
+                                                    value={formData.handleName}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    disabled={formData.modelName === '' || formData.detailType.material === 'Корниз'}
+                                                >
+                                                    <option value="Без Дръжка">Без дръжка</option>
+                                                    <option value="дръжка H1">дръжка H1</option></Select></div>
+                                            <div>
+                                                {/* Profil Name */}
+                                                <Label htmlFor="profilName" className="block font-medium">Профил:</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    type="text"
+                                                    id="profilName"
+                                                    name="profilName"
+                                                    value={formData.profilName}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required
+                                                    disabled={formData.modelName === '' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Корниз'}
+                                                >
+                                                    <option value="R1">Профил R1</option>
+                                                    <option value="R2">Профил R2</option>
+                                                    <option value="R3">Профил R3</option>
+                                                    <option value="R4">Профил R4</option>
+                                                    <option value="R5">Профил R5</option></Select>
+
+
+
+
+
+                                            </div>
+                                            {formData.detailType.material === 'Корниз' ? (
+                                                <>
+                                                    <div>
+                                                        <Label htmlFor="length" className="block font-medium">Дължина, мм:</Label>
+                                                        <Select
+                                                            className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                            id="length"
+                                                            name="length"
+                                                            value={formData.length}
+                                                            onChange={(event) => handleChange(event, index)}
+                                                            required
+                                                        >
+                                                            <option value="2360">2360мм / 1бр.</option>
+                                                            <option value="1160">1160мм / 0.5бр.</option>
+                                                        </Select>
+                                                    </div>
+                                                </>
+                                            ) : formData.detailType.material === 'Пиластър' ? (
+
                                                 <div>
                                                     {/* Height */}
-                                                    <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
-                                                    <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                                        type="number"
-                                                        id="height"
-                                                        name="height"
-                                                        value={formData.height}
-                                                        onChange={(event) => handleChange(event, index)}
-                                                        required />
-                                                    {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
-                                                        <HelperText valid={false}>минимум 200мм</HelperText>)}
-                                                    {formData.height > 2400 && (
-                                                        <HelperText valid={false}>макс 2400мм</HelperText>)}
-                                                    {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
-                                                        <HelperText valid={false}>минимум 60мм</HelperText>)}
-                                                    {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
-                                                        <HelperText valid={false}>минимум 60мм</HelperText>
-                                                    )}
-
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
-                                                    <Input
-                                                        className="mt-1 p-2 border rounded-md shadow-sm"
-                                                        type="number"
-                                                        id="width"
-                                                        name="width"
-                                                        value={formData.width}
-                                                        onChange={(event) => handleChange(event, index)}
-                                                        required />
-                                                    {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200) && (
-                                                        <HelperText valid={false}>минимум 200мм</HelperText>)}
-                                                    {formData.width > 1160 && (
-                                                        <HelperText valid={false}>макс 1160мм</HelperText>)}
-                                                    {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
-                                                        <HelperText valid={false}>минимум 60мм</HelperText>)}
-                                                    {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
-                                                        <HelperText valid={false}>минимум 60мм</HelperText>
+                                                    <div>
+                                                        <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                            type="number"
+                                                            id="height"
+                                                            name="height"
+                                                            value={formData.height}
+                                                            onChange={(event) => handleChange(event, index)}
+                                                            required />
+                                                    </div>
+                                                    {formData.detailType.material === 'Пиластър' && (
+                                                        <div>
+                                                            <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                            <Select
+                                                                className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                                id='width'
+                                                                name='width'
+                                                                value={formData.width}
+                                                                onChange={(event) => handleChange(event, index)}
+                                                                required
+                                                            >
+                                                                <option value="50">50</option>
+                                                                <option value="60">60</option>
+                                                                <option value="70">70</option>
+                                                                <option value="80">80</option>
+                                                                <option value="90">90</option>
+                                                                <option value="100">100</option>
+                                                                <option value="110">110</option>
+                                                            </Select>
+                                                        </div>
                                                     )}
                                                 </div>
 
-                                            </>
-                                        )}
-                                        <div>
-                                            {/* Number */}
-                                            <Label htmlFor="number" className="block font-medium">Брой:</Label>
-                                            <Input
-                                                className="mt-1 p-2 border rounded-md shadow-sm"
-                                                type="number"
-                                                id={`number${index}`}
-                                                name="number"
-                                                value={formData.number}
-                                                onChange={(event) => handleChange(event, index)}
-                                                required disabled={selectedMaterial == 'Пиластър'} />
-                                        </div>
-                                        <div>
-                                            <Label>Ламиниране:</Label>
-                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                type="boolean"
-                                                id={`bothSidesLaminated${index}`}
-                                                name="bothSidesLaminated"
-                                                value={formData.bothSidesLaminated}
-                                                onChange={(event) => handleChange(event, index)}
-                                                disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' }
-                                            >
-                                                <option value="false">Едностранно ламиниране</option>
-                                                <option value="true">Двустранно ламиниране</option>
-                                            </Select>
-                                        </div>
-                                    </form>
-                                    <div className='grid md:grid-cols-4'>
-                                        <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
-                                        <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
-                                            ? `1бр. / ${handlePrice}лв.`
-                                            : "0бр./ 0лв."} </b></div> </div>
+                                            ) : (
+                                                <>
+                                                    <div>
+                                                        {/* Height */}
+                                                        <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                        <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                            type="number"
+                                                            id="height"
+                                                            name="height"
+                                                            value={formData.height}
+                                                            onChange={(event) => handleChange(event, index)}
+                                                            required />
+                                                        {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
+                                                            <HelperText valid={false}>минимум 200мм</HelperText>)}
+                                                        {formData.height > 2400 && (
+                                                            <HelperText valid={false}>макс 2400мм</HelperText>)}
+                                                        {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>)}
+                                                        {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>
+                                                        )}
 
-                                        <div className="grid md:grid-rows-2 text-center border">
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                        <Input
+                                                            className="mt-1 p-2 border rounded-md shadow-sm"
+                                                            type="number"
+                                                            id="width"
+                                                            name="width"
+                                                            value={formData.width}
+                                                            onChange={(event) => handleChange(event, index)}
+                                                            required />
+                                                        {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200) && (
+                                                            <HelperText valid={false}>минимум 200мм</HelperText>)}
+                                                        {formData.width > 1160 && (
+                                                            <HelperText valid={false}>макс 1160мм</HelperText>)}
+                                                        {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>)}
+                                                        {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>
+                                                        )}
+                                                    </div>
+
+                                                </>
+                                            )}
                                             <div>
-                                                {formData.bothSidesLaminated === "false"
-                                                    ? "Едностранно ламиниране"
-                                                    : "Двустранно ламиниране"}
+                                                {/* Number */}
+                                                <Label htmlFor="number" className="block font-medium">Брой:</Label>
+                                                <Input
+                                                    className="mt-1 p-2 border rounded-md shadow-sm"
+                                                    type="number"
+                                                    id={`number${index}`}
+                                                    name="number"
+                                                    value={formData.number}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    required disabled={selectedMaterial == 'Пиластър'} />
                                             </div>
-                                            <div className="">
-                                                <b>{groupSqrt[index]} кв.м</b>
+                                            <div>
+                                                <Label>Ламиниране:</Label>
+                                                <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                    type="boolean"
+                                                    id={`bothSidesLaminated${index}`}
+                                                    name="bothSidesLaminated"
+                                                    value={formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз' ? false : formData.bothSidesLaminated}
+                                                    onChange={(event) => handleChange(event, index)}
+                                                    disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз' }
+                                                >
+                                                    <option value="false">Едностранно ламиниране</option>
+                                                    <option value="true">Двустранно ламиниране</option>
+                                                </Select>
                                             </div>
+                                        </form>
+                                        <div className='grid md:grid-cols-4'>
+                                            <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
+                                            <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
+                                                ? `1бр. / ${handlePrice}лв.`
+                                                : "0бр./ 0лв."} </b></div> </div>
+
+                                            <div className="grid md:grid-rows-2 text-center border">
+                                                <div>
+                                                    {formData.bothSidesLaminated === "false"
+                                                        ? "Едностранно ламиниране"
+                                                        : "Двустранно ламиниране"}
+                                                </div>
+                                                <div className="">
+                                                    <b>{groupSqrt[index]} кв.м</b>
+                                                </div>
+                                            </div>
+                                            <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
                                         </div>
-                                        <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
                                     </div>
-                                </div>
-                            </div></>
+                                </div></></>
                     ))}
                 </div></div ></>)
 }

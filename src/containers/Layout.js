@@ -19,7 +19,7 @@ function Layout() {
   useEffect(() => {
     closeSidebar()
   }, [location])
-  if (loggedUser.data.role == '[ADMIN]') {
+  if (loggedUser.data.role === '[ADMIN]') {
     return (
       <div
         className={`flex h-screen bg-gray-50 dark:bg-gray-900 ${isSidebarOpen && 'overflow-hidden'}`}

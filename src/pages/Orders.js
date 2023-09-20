@@ -16,19 +16,19 @@ const Orders = () => {
   const [filter, setFilter] = useState("всички");
 
   const handleFilter = (filter_name) => {
-    if (filter_name == "Всички") {
+    if (filter_name === "Всички") {
       setFilter("всички");
     }
-    if (filter_name == "Създадена") {
+    if (filter_name === "Създадена") {
       setFilter("създадена");
     }
-    if (filter_name == "Изпълнява се") {
+    if (filter_name === "Изпълнява се") {
       setFilter("изпълнява се");
     }
-    if (filter_name == "Изпратена") {
+    if (filter_name === "Изпратена") {
       setFilter("изпратена");
     }
-    if (filter_name == "Изпълнена") {
+    if (filter_name === "Изпълнена") {
       setFilter("изпълнена");
     }
   };

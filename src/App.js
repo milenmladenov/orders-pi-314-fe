@@ -8,7 +8,6 @@ const Layout = lazy(() => import("./containers/Layout"));
 const Login = lazy(() => import("./pages/Login"));
 const SignUp = lazy(() => import("./pages/CreateAccount"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const Logout = lazy(()=> import("./components/LogoutModal"))
 
 function App() {
   return (

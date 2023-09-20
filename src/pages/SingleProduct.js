@@ -12,7 +12,6 @@ import { config } from '../Constants';
 
 const SingleProduct = () => {
   const { id } = useParams();
-  const apiBaseUrl = config.url.API_BASE_URL;
   // change view component
   const [tabView, setTabView] = useState("reviews");
   const handleTabView = (viewName) => setTabView(viewName);

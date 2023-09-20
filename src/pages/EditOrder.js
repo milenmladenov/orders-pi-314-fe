@@ -4,7 +4,7 @@ import {
     Select, Input, Label, HelperText, Button, Modal,
     ModalHeader,
     ModalBody,
-    ModalFooter, Textarea
+    ModalFooter
 } from "@windmill/react-ui";
 import PageTitle from "../components/Typography/PageTitle";
 import { config } from '../Constants';
@@ -456,7 +456,8 @@ const EditOrder = ({ match }) => {
                     {groupForms.map((formData, index) => (
                         <div className='' >
                             <div>
-                                <div></div>
+                                <div></div>                                            
+
                             </div>
                             <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3" >
 
@@ -466,8 +467,9 @@ const EditOrder = ({ match }) => {
                                     className="grid grid-cols-4 gap-4  hover:border"
                                     style={{ padding: '20px', width: '1230px' }}
                                 >
+                                    
                                     <div></div>
-                                    <div></div>
+                                    <div className='text-right'><PageTitle >{index + 1}</PageTitle></div>
                                     <div></div>
                                     <div className=''>
                                         <div className='ml-20'>
@@ -610,7 +612,7 @@ const EditOrder = ({ match }) => {
                                         <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="modelName"
                                             name="modelName"
-                                            value={formData.modelName !== '' ? formData.modelName : order.model.name}
+                                            value={formData.modelName}
                                             onChange={(event) => { handleChange(event, index); }}
                                             disabled={(doorName === '' || formData.detailType.material === "Пиластър" || formData.detailType.material === "Корниз")}
                                             required
@@ -631,7 +633,7 @@ const EditOrder = ({ match }) => {
                                         <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                             id="folioName"
                                             name="folioName"
-                                            value={formData.folioName !== '' ? formData.folioName : order.folio.name}
+                                            value={formData.folioName}
                                             onChange={(event) => { handleChange(event, index) }}
                                             disabled={formData.modelName === '' || doorName === 'Двустранно грундиран МДФ' || doorName === 'Фурнирован МДФ'}
                                             required

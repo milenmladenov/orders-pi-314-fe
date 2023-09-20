@@ -2,22 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { config } from '../Constants';
 import {
-  SearchIcon,
-  MoonIcon,
-  SunIcon,
-  BellIcon,
-  MenuIcon,
-  OutlinePersonIcon,
-  OutlineCogIcon,
-  OutlineLogoutIcon,
+  SearchIcon
 } from "../icons";
 import {
-  Avatar,
-  Badge,
-  Input,
-  Dropdown,
-  DropdownItem,
-  WindmillContext,
+  Input
 } from "@windmill/react-ui";
 
 
@@ -29,7 +17,6 @@ import {
   TableCell,
   TableRow,
   TableFooter,
-  Pagination,
 
 } from "@windmill/react-ui";
 import { Link } from 'react-router-dom'
@@ -82,7 +69,7 @@ const UsersTable = ({ resultsPerPage, filter }) => {
     setSearchParam(event.target.value);
   };
 
-  
+
 
   // on page change, load new sliced data
   // here you would make another server request for new data
@@ -97,13 +84,13 @@ const UsersTable = ({ resultsPerPage, filter }) => {
           <SearchIcon className="w-4 h-4" aria-hidden="true" />
         </div>
         <Input
-        className="pl-8 text-gray-700"
-        placeholder="Търсете по име или ЕИК"
-        aria-label="Search"
-        value={searchParam}
-        onChange={handleSearchInputChange}
-        onBlur={filterCustomer} // You can also use onKeyDown event if you want the search to happen on pressing Enter
-      />
+          className="pl-8 text-gray-700"
+          placeholder="Търсете по име или ЕИК"
+          aria-label="Search"
+          value={searchParam}
+          onChange={handleSearchInputChange}
+          onBlur={filterCustomer} // You can also use onKeyDown event if you want the search to happen on pressing Enter
+        />
       </div>
 
 

@@ -13,13 +13,7 @@ import {
 
 } from "../icons";
 import PageTitle from "../components/Typography/PageTitle";
-import labelsFile from "../assets/xlxs/за етикети.xlsx";
-import json2xls from 'json2xls'; // Import json2xls
-import { saveAs } from "file-saver"; // Import saveAs function
-import * as XLSX from 'xlsx';
-import ExcelJS from 'exceljs';
 import { config } from '../Constants';
-import { fa } from 'faker/lib/locales';
 
 
 const SingleCustomer = ({ match }) => {
@@ -30,7 +24,6 @@ const SingleCustomer = ({ match }) => {
     const [editingDiscount, setEditingDiscount] = useState(false);
     const [newDiscount, setNewDiscount] = useState(0); const customerId = match.params.id; // Get the customerId from the route parameter
     const token = localStorage.getItem('accessToken')
-    const loggedUser = JSON.parse(localStorage.getItem('user'))
     function closeModal() {
         setIsModalOpen(false);
     }
@@ -131,7 +124,7 @@ const SingleCustomer = ({ match }) => {
 
                         </ModalBody>
                         <ModalFooter> <div className="hidden sm:block">
-                            <Button onClick={() => { handleSaveDiscount(); } }>
+                            <Button onClick={() => { handleSaveDiscount(); }}>
                                 Потвърждаване
                             </Button></div>
                             <div className="hidden sm:block">
@@ -155,10 +148,10 @@ const SingleCustomer = ({ match }) => {
                                 value={newDiscount}
                                 onChange={handleDiscountChange}
                                 className='border rounded p-1' />
-                            <Button className='ml-4 text-s' onClick={() => { setIsModalOpen(true); } }>
+                            <Button className='ml-4 text-s' onClick={() => { setIsModalOpen(true); }}>
                                 Готово
                             </Button>
-                            <Button layout="outline" className='ml-4 text-s' onClick={() => { setEditingDiscount(false); } }>
+                            <Button layout="outline" className='ml-4 text-s' onClick={() => { setEditingDiscount(false); }}>
                                 Отказ
                             </Button>
                         </>

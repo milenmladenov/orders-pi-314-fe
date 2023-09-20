@@ -19,9 +19,7 @@ import {
 
 } from "../icons";
 import { Link } from 'react-router-dom'
-import json2xls from 'json2xls'; // Import json2xls
 import { saveAs } from "file-saver"; // Import saveAs function
-import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import Icon from "../components/Icon";
 import { config } from '../Constants';

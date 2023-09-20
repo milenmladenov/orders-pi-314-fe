@@ -4,7 +4,6 @@ import adminRoutes from "../../adminRoutes/sidebar";
 import { NavLink, Route } from "react-router-dom";
 import * as Icons from "../../icons";
 import SidebarSubmenu from "./SidebarSubmenu";
-import { Button } from "@windmill/react-ui";
 import LogoutModal from "../LogoutModal";
 import { useAuth } from '../context/AuthContext';
 import Logo from '../../assets/img/pi314-logo.png'
