@@ -121,6 +121,7 @@ const NewOrderForm = () => {
     useEffect(() => {
         handlePreflight();
         setSubmitButtonDisabled(true);
+        setDeliveryAddress(data.deliveryAddress)
     }, [groupForms]);
 
     const handleTypeChange = (event, index) => {
@@ -210,7 +211,7 @@ const NewOrderForm = () => {
             },
             body: JSON.stringify({
                 groups: groupsArray,
-                deliveryAddress: `${deliveryAddress}`,
+                deliveryAddress: `${city} , ${deliveryAddress}`,
                 discount: discount,
                 note: note
             }),
@@ -471,7 +472,7 @@ const NewOrderForm = () => {
                                         id={`note${index}`}
                                         name="note"
                                         value={note}
-                                        onChange={(event) => { handleChange(event, index); setNote(event.target.value); }}
+                                        onChange={(event) => { setNote(event.target.value); }}
                                         required />
                                 </div>
                                 <hr className="customeDivider " />
@@ -486,7 +487,7 @@ const NewOrderForm = () => {
                                                 className={`mt-1 border w-full`} // Toggle hidden class
                                                 id="city"
                                                 value={city}
-                                                onChange={(event) => { handleChange(event, index); setCity(event.target.value); }}
+                                                onChange={(event) => { setCity(event.target.value); }}
                                                 required
                                             ><option key={city} value="">
                                                     --Изберете Град--
@@ -503,9 +504,8 @@ const NewOrderForm = () => {
                                             <div className={`mt-1 w-full ${isTextareaVisible ? 'hidden' : ''}`}>
                                                 <Select
                                                 value={deliveryAddress}
-                                                onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}>
-                                               <option value=""> --Изберете Един От Вашите Адреси За Доставка-- </option>
-                                                    <option key={city} value={deliveryAddress}>
+                                                onChange={(event) => { setDeliveryAddress(event.target.value); }}>
+                                                    <option key={deliveryAddress} value={deliveryAddress}>
                                                         {data.deliveryAddress}
                                                     </option>
                                                 </Select>
@@ -525,10 +525,10 @@ const NewOrderForm = () => {
                                                 <Textarea
                                                     className="mt-1 w-full"
                                                     type="text"
-                                                    id={`deliveryAddress${index}`}
+                                                    id="deliveryAddress"
                                                     name="deliveryAddress"
                                                     value={deliveryAddress}
-                                                    onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}
+                                                    onChange={(event) => { setDeliveryAddress(event.target.value); }}
                                                     required />
                                             </div>
                                         </div>
@@ -579,7 +579,7 @@ const NewOrderForm = () => {
                                                 id={`discount${index}`}
                                                 name="discount"
                                                 value={discount}
-                                                onChange={(event) => { handleChange(event, index); setDiscount(event.target.value); }}
+                                                onChange={(event) => {  setDiscount(event.target.value); }}
                                                 required />
                                         </div>
                                     </>
