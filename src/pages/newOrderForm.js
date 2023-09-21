@@ -120,7 +120,6 @@ const NewOrderForm = () => {
 
     useEffect(() => {
         handlePreflight();
-        setSubmitButtonDisabled(true);
         setDeliveryAddress(data.deliveryAddress)
     }, [groupForms]);
 
@@ -306,6 +305,8 @@ const NewOrderForm = () => {
                     const result = group.groupTotalPrice;
                     totalGroupPrices += result;
                     setTotalGroupPrices(totalGroupPrices.toFixed(2))
+
+
                     return result;
                 });
                 const groupSqrt = data.groups.map((group) => {
@@ -334,17 +335,19 @@ const NewOrderForm = () => {
 
                 // Render the response data
                 const isButtonDisabled = groupForms.some((formData) => (
-                    (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
+                    ((formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) && (formData.detailType.material === 'Пиластър' && formData.width < 40)) ||
                     (formData.width > 1160) || (formData.doorName === '') ||
-                    (formData.width < 60) ||
+                    (formData.detailType.material === 'Пиластър' && formData.width > 300) ||
                     (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
+                    (formData.detailType.material === 'Чекмедже' && formData.height < 60) ||
                     (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
-                    (formData.height > 2400) || (formData.detailType.material === 'Корниз' && formData.detailType.type === '') ||
-                    ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
-                    (formData.detailType.material === 'Чекмедже' && formData.height < 60)
-                ));
+                    (formData.height > 2400) || (formData.detailType.material !== '' && formData.detailType.type === '') ||
+                    ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60))
 
+                ));
                 setSubmitButtonDisabled(isButtonDisabled)
+
+
             })
 
             .catch((error) => {
@@ -396,7 +399,7 @@ const NewOrderForm = () => {
                                         type="button"
                                         style={{ width: '150px', margin: '10px' }}
                                         className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                        disabled={(submitButtonDisabled) }
+                                        disabled={(submitButtonDisabled)}
                                         onClick={() => setIsModalOpen(true)}
                                     >
                                         Завърши
@@ -424,181 +427,181 @@ const NewOrderForm = () => {
                 <div className="grid  md:grid-cols-1 gap-10">
 
                     {groupForms.map((formData, index) => (
-                        
-                        <>                    
-                        <Modal isOpen={createdOrderModalOpen}>
-                            <ModalHeader className="flex items-center">
-                                Вашата поръчка е създадена!
-                            </ModalHeader>
-                            <ModalBody>
-                                Създадена е поръчка с номер {createdOrderId}.
-                            </ModalBody>
-                            <ModalFooter className="flex items-right">
-                                <div className="hidden sm:block">
-                                    <Button  >
-                                        <Link
-                                            to={`orders/${createdOrderId}`}
-                                        >
-                                            Преглед</Link>
-                                    </Button>
-                                </div>
-                                <div className="hidden sm:block">
-                                    <Button >
-                                        <Link
-                                            to={`orders`}
-                                        >
-                                            Виж всички</Link>
-                                    </Button>
-                                </div>
-                                <div className="hidden sm:block ">
-                                    <Button layout="outline" onClick={() => { closeCreatedorderModal() }}>
-                                        Създаване на нова
-                                    </Button>
-                                </div>
 
-                            </ModalFooter>
-                        </Modal><><Modal isOpen={isModalOpen} onClose={closeModal}>
-                            <ModalHeader className="flex items-center">
-                                Допълнителна информация
-                            </ModalHeader>
-                            <ModalBody>
-                                <hr className="customeDivider " />
-                                <div className='mb-5 mt-5'>
-                                    {/* Number */}
-                                    <Label htmlFor="note" className="font-medium "><span>Забележка:</span></Label>
-                                    <Textarea
-                                        className="mt-1 border w-full"
-                                        type="text"
-                                        id={`note${index}`}
-                                        name="note"
-                                        value={note}
-                                        onChange={(event) => { setNote(event.target.value); }}
-                                        required />
-                                </div>
-                                <hr className="customeDivider " />
-                                {loggedUser.data.role === '[USER]' && (
-                                    <>
-                                        <div className='mb-5 mt-5'>
-                                            <Label htmlFor="deliveryAddress" className="font-large mt-3 mb-3"><span>Адрес за доставка:</span></Label>
-                                            <Label htmlFor="city" className="font-medium mt-3 mb-3"><span>Град:</span></Label>
+                        <>
+                            <Modal isOpen={createdOrderModalOpen}>
+                                <ModalHeader className="flex items-center">
+                                    Вашата поръчка е създадена!
+                                </ModalHeader>
+                                <ModalBody>
+                                    Създадена е поръчка с номер {createdOrderId}.
+                                </ModalBody>
+                                <ModalFooter className="flex items-right">
+                                    <div className="hidden sm:block">
+                                        <Button  >
+                                            <Link
+                                                to={`orders/${createdOrderId}`}
+                                            >
+                                                Преглед</Link>
+                                        </Button>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <Button >
+                                            <Link
+                                                to={`orders`}
+                                            >
+                                                Виж всички</Link>
+                                        </Button>
+                                    </div>
+                                    <div className="hidden sm:block ">
+                                        <Button layout="outline" onClick={() => { closeCreatedorderModal() }}>
+                                            Създаване на нова
+                                        </Button>
+                                    </div>
 
-                                            <Select
-                                                name="city"
-                                                className={`mt-1 border w-full`} // Toggle hidden class
-                                                id="city"
-                                                value={city}
-                                                onChange={(event) => { setCity(event.target.value); }}
-                                                required
-                                            ><option key={city} value="">
-                                                    --Изберете Град--
-                                                </option>
-                                                {citiesInBulgaria.map((city) => (
-                                                    <><option key={city} value={city}>
-                                                        {city}
-                                                    </option></>
-                                                ))}
+                                </ModalFooter>
+                            </Modal><><Modal isOpen={isModalOpen} onClose={closeModal}>
+                                <ModalHeader className="flex items-center">
+                                    Допълнителна информация
+                                </ModalHeader>
+                                <ModalBody>
+                                    <hr className="customeDivider " />
+                                    <div className='mb-5 mt-5'>
+                                        {/* Number */}
+                                        <Label htmlFor="note" className="font-medium "><span>Забележка:</span></Label>
+                                        <Textarea
+                                            className="mt-1 border w-full"
+                                            type="text"
+                                            id={`note${index}`}
+                                            name="note"
+                                            value={note}
+                                            onChange={(event) => { setNote(event.target.value); }}
+                                            required />
+                                    </div>
+                                    <hr className="customeDivider " />
+                                    {loggedUser.data.role === '[USER]' && (
+                                        <>
+                                            <div className='mb-5 mt-5'>
+                                                <Label htmlFor="deliveryAddress" className="font-large mt-3 mb-3"><span>Адрес за доставка:</span></Label>
+                                                <Label htmlFor="city" className="font-medium mt-3 mb-3"><span>Град:</span></Label>
 
-                                            </Select>
-
-                                            <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
-                                            <div className={`mt-1 w-full ${isTextareaVisible ? 'hidden' : ''}`}>
                                                 <Select
-                                                value={deliveryAddress}
-                                                onChange={(event) => { setDeliveryAddress(event.target.value); }}>
-                                                    <option key={deliveryAddress} value={deliveryAddress}>
-                                                        {data.deliveryAddress}
+                                                    name="city"
+                                                    className={`mt-1 border w-full`} // Toggle hidden class
+                                                    id="city"
+                                                    value={city}
+                                                    onChange={(event) => { setCity(event.target.value); }}
+                                                    required
+                                                ><option key={city} value="">
+                                                        --Изберете Град--
                                                     </option>
-                                                </Select>
-                                            </div>
-                                            <div className="mb-5 mt-5">
-                                                <Label htmlFor="toggleTextarea" className="font-medium mt-3 mb-3">
-                                                    <Input
-                                                        type="checkbox"
-                                                        id={`toggleTextarea${index}`}
-                                                        name="toggleTextarea"
-                                                        checked={isTextareaVisible}
-                                                        onChange={() => setTextareaVisible(!isTextareaVisible)} /><span className='ml-3'>Въведете друг адрес за доставка:</span>
-                                                </Label>
+                                                    {citiesInBulgaria.map((city) => (
+                                                        <><option key={city} value={city}>
+                                                            {city}
+                                                        </option></>
+                                                    ))}
 
+                                                </Select>
+
+                                                <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
+                                                <div className={`mt-1 w-full ${isTextareaVisible ? 'hidden' : ''}`}>
+                                                    <Select
+                                                        value={deliveryAddress}
+                                                        onChange={(event) => { setDeliveryAddress(event.target.value); }}>
+                                                        <option key={deliveryAddress} value={deliveryAddress}>
+                                                            {data.deliveryAddress}
+                                                        </option>
+                                                    </Select>
+                                                </div>
+                                                <div className="mb-5 mt-5">
+                                                    <Label htmlFor="toggleTextarea" className="font-medium mt-3 mb-3">
+                                                        <Input
+                                                            type="checkbox"
+                                                            id={`toggleTextarea${index}`}
+                                                            name="toggleTextarea"
+                                                            checked={isTextareaVisible}
+                                                            onChange={() => setTextareaVisible(!isTextareaVisible)} /><span className='ml-3'>Въведете друг адрес за доставка:</span>
+                                                    </Label>
+
+                                                </div>
+                                                <div className={`mt-1 w-full ${!isTextareaVisible ? 'hidden' : ''}`}> {/* Toggle hidden class */}
+                                                    <Textarea
+                                                        className="mt-1 w-full"
+                                                        type="text"
+                                                        id="deliveryAddress"
+                                                        name="deliveryAddress"
+                                                        value={deliveryAddress}
+                                                        onChange={(event) => { setDeliveryAddress(event.target.value); }}
+                                                        required />
+                                                </div>
                                             </div>
-                                            <div className={`mt-1 w-full ${!isTextareaVisible ? 'hidden' : ''}`}> {/* Toggle hidden class */}
-                                                <Textarea
-                                                    className="mt-1 w-full"
+
+
+                                        </>
+                                    )}
+
+                                    {loggedUser.data.role === '[ADMIN]' && (
+                                        <>
+                                            <div className='mb-5 mt-5'>
+                                                <Label htmlFor="deliveryAddress" className="font-large mt-3 mb-3"><span>Адрес за доставка:</span></Label>
+                                                <Label htmlFor="city" className="font-medium mt-3 mb-3"><span>Град:</span></Label>
+
+                                                <Select
+                                                    name="city"
+                                                    className="mt-1 border w-full "
                                                     type="text"
-                                                    id="deliveryAddress"
+                                                    id="city"
+                                                    value={city}
+                                                    onChange={(event) => { handleChange(event, index); setCity(event.target.value); }}
+                                                    required
+                                                >
+                                                    {citiesInBulgaria.map((city) => (
+                                                        <option key={city} value={city}>
+                                                            {city}
+                                                        </option>
+                                                    ))}
+                                                </Select>
+
+                                                <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
+                                                <Textarea
+                                                    className="mt-1  w-full"
+                                                    type="text"
+                                                    id={`deliveryAddress${index}`}
                                                     name="deliveryAddress"
                                                     value={deliveryAddress}
-                                                    onChange={(event) => { setDeliveryAddress(event.target.value); }}
+                                                    onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}
                                                     required />
                                             </div>
-                                        </div>
+                                            <hr className="customeDivider " />
+                                            <div className='mt-5'>
+                                                {/* Number */}
+                                                <Label htmlFor="discount" className="font-medium"><span>Отстъпка:</span></Label>
+                                                <Input
+                                                    className="mt-1 border w-full"
+                                                    type="number"
+                                                    id={`discount${index}`}
+                                                    name="discount"
+                                                    value={discount}
+                                                    onChange={(event) => { setDiscount(event.target.value); }}
+                                                    required />
+                                            </div>
+                                        </>
+                                    )}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <div className="hidden sm:block">
+                                        <Button onClick={(event) => { handleChange(event, index); setIsModalOpen(false); setModalOpen(true); }}>
+                                            Продължи
+                                        </Button>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <Button layout="outline" onClick={closeModal}>
 
-
-                                    </>
-                                )}
-
-                                {loggedUser.data.role === '[ADMIN]' && (
-                                    <>
-                                        <div className='mb-5 mt-5'>
-                                            <Label htmlFor="deliveryAddress" className="font-large mt-3 mb-3"><span>Адрес за доставка:</span></Label>
-                                            <Label htmlFor="city" className="font-medium mt-3 mb-3"><span>Град:</span></Label>
-
-                                            <Select
-                                                name="city"
-                                                className="mt-1 border w-full "
-                                                type="text"
-                                                id="city"
-                                                value={city}
-                                                onChange={(event) => { handleChange(event, index); setCity(event.target.value); }}
-                                                required
-                                            >
-                                                {citiesInBulgaria.map((city) => (
-                                                    <option key={city} value={city}>
-                                                        {city}
-                                                    </option>
-                                                ))}
-                                            </Select>
-
-                                            <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
-                                            <Textarea
-                                                className="mt-1  w-full"
-                                                type="text"
-                                                id={`deliveryAddress${index}`}
-                                                name="deliveryAddress"
-                                                value={deliveryAddress}
-                                                onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}
-                                                required />
-                                        </div>
-                                        <hr className="customeDivider " />
-                                        <div className='mt-5'>
-                                            {/* Number */}
-                                            <Label htmlFor="discount" className="font-medium"><span>Отстъпка:</span></Label>
-                                            <Input
-                                                className="mt-1 border w-full"
-                                                type="number"
-                                                id={`discount${index}`}
-                                                name="discount"
-                                                value={discount}
-                                                onChange={(event) => {  setDiscount(event.target.value); }}
-                                                required />
-                                        </div>
-                                    </>
-                                )}
-                            </ModalBody>
-                            <ModalFooter>
-                                <div className="hidden sm:block">
-                                    <Button onClick={(event) => { handleChange(event, index); setIsModalOpen(false); setModalOpen(true); }}>
-                                        Продължи
-                                    </Button>
-                                </div>
-                                <div className="hidden sm:block">
-                                    <Button layout="outline" onClick={closeModal}>
-
-                                        Отказ
-                                    </Button>
-                                </div>
-                            </ModalFooter>
-                        </Modal><div className=''>
+                                            Отказ
+                                        </Button>
+                                    </div>
+                                </ModalFooter>
+                            </Modal><div className=''>
                                     <div>
                                         <div></div>
                                     </div>
@@ -723,7 +726,7 @@ const NewOrderForm = () => {
                                                             value={formData.detailType.type}
                                                             onChange={(event) => handleTypeChange(event, index)}
                                                             required
-                                                            disabled = {formData.doorName === ''}
+                                                            disabled={formData.doorName === ''}
                                                         >
                                                             <option value="">----------</option>
                                                             <option value="Обща фрезовка">Обща фрезовка</option>
@@ -743,7 +746,7 @@ const NewOrderForm = () => {
                                                             value={formData.detailType.type}
                                                             onChange={(event) => handleTypeChange(event, index)}
                                                             required
-                                                            disabled = {formData.doorName === ''}
+                                                            disabled={formData.doorName === ''}
                                                         >
                                                             <option value="">-Изберете Корниз-</option>
                                                             <option value="К1 – 68мм височина">К1 – 68мм височина</option>
@@ -859,6 +862,16 @@ const NewOrderForm = () => {
                                                             value={formData.height}
                                                             onChange={(event) => handleChange(event, index)}
                                                             required />
+                                                        {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
+                                                            <HelperText valid={false}>минимум 200мм</HelperText>)}
+                                                        {formData.height > 2400 && (
+                                                            <HelperText valid={false}>макс 2400мм</HelperText>)}
+                                                        {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>)}
+                                                        {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
+                                                            <HelperText valid={false}>минимум 60мм</HelperText>
+                                                        )}
+
                                                     </div>
                                                     {formData.detailType.material === 'Пиластър' && (
                                                         <div>
@@ -870,7 +883,7 @@ const NewOrderForm = () => {
                                                                 value={formData.width}
                                                                 onChange={(event) => handleChange(event, index)}
                                                                 required
-                                                            >
+                                                            >   <option value="0">--Широчина--</option>
                                                                 <option value="50">50</option>
                                                                 <option value="60">60</option>
                                                                 <option value="70">70</option>
@@ -879,6 +892,18 @@ const NewOrderForm = () => {
                                                                 <option value="100">100</option>
                                                                 <option value="110">110</option>
                                                             </Select>
+                                                            {(formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200)) || (formData.detailType.material === 'Пиластър' && formData.width < 40) && (
+                                                                <HelperText valid={false}>минимум 200мм</HelperText>)}
+                                                            {formData.width > 1160 && (
+                                                                <HelperText valid={false}>макс 1160мм</HelperText>)}
+                                                            {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
+                                                                <HelperText valid={false}>минимум 60мм</HelperText>)}
+                                                            {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
+                                                                <HelperText valid={false}>минимум 60мм</HelperText>
+                                                            )}
+                                                            {formData.detailType.material === 'Пиластър' && formData.width < 40 && (
+                                                                <HelperText valid={false}>минимум 50мм</HelperText>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -949,7 +974,7 @@ const NewOrderForm = () => {
                                                     name="bothSidesLaminated"
                                                     value={formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз' ? false : formData.bothSidesLaminated}
                                                     onChange={(event) => handleChange(event, index)}
-                                                    disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз' }
+                                                    disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз'}
                                                 >
                                                     <option value="false">Едностранно ламиниране</option>
                                                     <option value="true">Двустранно ламиниране</option>
