@@ -272,6 +272,13 @@ const SingleOrder = ({ match }) => {
                                         <TableCell >{(totalGroupPrices * (order.discount / 100).toFixed(2)).toFixed(2)}лв.</TableCell>
                                     </TableRow>)}
 
+                                    {order.type === 'BY_HAND' && order.discount !== 0 && (
+                                    <TableRow className='border-t border-b font-bold text-xs' >
+                                        <TableCell colspan='11'>Отстъпка:</TableCell>
+                                        <TableCell >{order.discount}%</TableCell>
+                                        <TableCell >{(totalGroupPrices * (order.discount / 100).toFixed(2)).toFixed(2)}лв.</TableCell>
+                                    </TableRow>)}
+
                                 <TableRow className='border-t border-b font-bold text-xs' >
                                     <TableCell colspan='12'>За Плащане:</TableCell>
 

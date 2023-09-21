@@ -120,7 +120,6 @@ const NewOrderForm = () => {
 
     useEffect(() => {
         handlePreflight();
-        setDeliveryAddress(data.deliveryAddress)
     }, [groupForms]);
 
     const handleTypeChange = (event, index) => {
@@ -295,6 +294,9 @@ const NewOrderForm = () => {
             .then((response) => response.json())
             .then((data) => {
                 setData(data);
+                if (data.type === 'BY_USER'){
+                    setDeliveryAddress(data.deliveryAddress);
+                }
                 console.log(loggedUser.data.role);
                 console.log(data);
                 console.log(data.deliveryAddress)
@@ -531,7 +533,7 @@ const NewOrderForm = () => {
                                                         id="deliveryAddress"
                                                         name="deliveryAddress"
                                                         value={deliveryAddress}
-                                                        onChange={(event) => { setDeliveryAddress(event.target.value); }}
+                                                        onChange={(event) => { setDeliveryAddress(event.target); }}
                                                         required />
                                                 </div>
                                             </div>
@@ -579,11 +581,11 @@ const NewOrderForm = () => {
                                                 <Input
                                                     className="mt-1 border w-full"
                                                     type="number"
-                                                    id={`discount${index}`}
+                                                    id="discount"
                                                     name="discount"
                                                     value={discount}
-                                                    onChange={(event) => { setDiscount(event.target.value); }}
-                                                    required />
+                                                    onChange={(event) => { setDiscount(event.target.value) }}
+                                                    required />%
                                             </div>
                                         </>
                                     )}
