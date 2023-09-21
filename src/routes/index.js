@@ -17,6 +17,8 @@ const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 const loggedUser = JSON.parse(localStorage.getItem("user"));
 const SingleOrder = lazy(() => import("../pages/SingleOrder"));
 const EditOrder = lazy(() => import("../pages/EditOrder"));
+const SuccessRegistration = lazy(() => import("../pages/SuccessRegistration"));
+
 
 
 
@@ -57,6 +59,10 @@ const routes = [
   {
     path: "/manage-profile",
     component: Profile,
+  },
+  {
+    path: "/success-registration",
+    component: SuccessRegistration,
   }
 ]
 export default routes;

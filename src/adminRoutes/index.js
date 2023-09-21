@@ -18,6 +18,8 @@ const NewExcelOrderForm = lazy(() => import("../pages/newExcelOrderForm"))
 const SingleOrder = lazy(() => import("../pages/SingleOrder"))
 const SingleCustomer = lazy(() => import("../pages/SingleCustomer"))
 const EditOrder = lazy(() => import("../pages/EditOrder"))
+const SuccesRegistration = lazy(() => import("../pages/SuccessRegistration"))
+
 // const LogoutModal = lazy(() => import("../components/LogoutModal"))
 
 /**
@@ -88,6 +90,10 @@ const EditOrder = lazy(() => import("../pages/EditOrder"))
     {
         path: "/settings",
         component: Settings,
+    },
+    {
+        path: "/success-registration",
+        component: SuccesRegistration,
     },
     {
         path: "/404",

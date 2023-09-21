@@ -1,9 +1,9 @@
-import React, { Component } from 'react'
+import React, { useState, Component } from 'react'
 import { NavLink, Redirect } from 'react-router-dom';
 import AuthContext from '../components/context/AuthContext'
 import { orderApi } from '../components/misc/OrderApi'
 import { parseJwt, handleLogError } from '../components/misc/Helpers'
-import { Button, Label, Input, Textarea, HelperText,Select} from '@windmill/react-ui';
+import { Button, Label, Input, Textarea, HelperText, Select, Modal, ModalBody, ModalFooter, ModalHeader } from '@windmill/react-ui';
 import Logo from '../assets/img/logo-white-frame.png'
 import "../assets/css/input-fields-container.css"
 import { citiesInBulgaria } from '../cities/citiesData';
@@ -64,9 +64,8 @@ class SignUp extends Component {
   };
 
   handleSubmit = (e) => {
+  
     e.preventDefault()
-
-
     const {
       username,
       password,
@@ -150,7 +149,7 @@ class SignUp extends Component {
           password: '',
           isLoggedIn: false,
           isError: false,
-          errorMessage: ''
+          errorMessage: '',
         })
       })
       .catch(error => {
@@ -195,7 +194,7 @@ class SignUp extends Component {
                   <HelperText >Полетата отбелязани със <span style={{ color: 'red' }}>*</span> са задължителни </HelperText>
 
                   <hr className="my-8" />
-
+                  
                   <div className='input-fields-container'>
                     <div className="grid grid-cols-1 gap-1">
                       <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
@@ -277,7 +276,7 @@ class SignUp extends Component {
 
                       <Label>
                         <span>Град</span>
-                        
+
                         <Select
                           className="mt-1"
                           name="city"
@@ -285,9 +284,9 @@ class SignUp extends Component {
                           onChange={this.handleInputChange}
                         >{citiesInBulgaria.map((city) => (
                           <option key={city} value={city}>
-                              {city}
+                            {city}
                           </option>
-                      ))}</Select>
+                        ))}</Select>
                       </Label>
                       <Label>
                         <span>МОЛ</span>
@@ -360,11 +359,13 @@ class SignUp extends Component {
                     <Button
                       className="mt-4"
                       block
-                      as={Link}  // Use the Link component
-                      to="/login"
-                      onClick={this.handleSubmit}
-                    >
-                      Регистрация
+                      onClick={this.handleSubmit}>
+                      <Link
+                        className="text-sm font-medium"
+                        to="/success-registration"
+                      >
+                        Регистрация
+                      </Link>
                     </Button>
                     <Link
                       className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
