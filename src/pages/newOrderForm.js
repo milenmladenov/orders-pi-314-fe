@@ -210,7 +210,7 @@ const NewOrderForm = () => {
             },
             body: JSON.stringify({
                 groups: groupsArray,
-                deliveryAddress: `${city}, ${deliveryAddress}`,
+                deliveryAddress: `${deliveryAddress}`,
                 discount: discount,
                 note: note
             }),
@@ -287,6 +287,9 @@ const NewOrderForm = () => {
             },
             body: JSON.stringify({
                 groups: groupsArray,
+                deliveryAddress: `${city},${deliveryAddress}`,
+                discount: discount,
+                note: note
             }),
         })
             .then((response) => response.json())
@@ -410,7 +413,7 @@ const NewOrderForm = () => {
                             {totalSqrt <= 1.5 && (<div className='text-center '>
                                 <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
                             {loggedUser.data.role === '[USER]' && data.appliedDiscount === null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от 5% </u></b></HelperText></div>)}
-                            {loggedUser.data.role === '[USER]' && data.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {data.appliedDiscount + 5}% </u></b></HelperText></div>)}
+                            {loggedUser.data.role === '[USER]' && data.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {data.appliedDiscount}% </u></b></HelperText></div>)}
                         </div>
                     </div>
                     <hr className="customeDivider mx-4 my-5" />
@@ -481,12 +484,11 @@ const NewOrderForm = () => {
                                             <Select
                                                 name="city"
                                                 className={`mt-1 border w-full`} // Toggle hidden class
-                                                type="text"
-                                                id={`city${index}`}
+                                                id="city"
                                                 value={city}
                                                 onChange={(event) => { handleChange(event, index); setCity(event.target.value); }}
                                                 required
-                                            ><option key={city} value={city}>
+                                            ><option key={city} value="">
                                                     --Изберете Град--
                                                 </option>
                                                 {citiesInBulgaria.map((city) => (
@@ -499,8 +501,11 @@ const NewOrderForm = () => {
 
                                             <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
                                             <div className={`mt-1 w-full ${isTextareaVisible ? 'hidden' : ''}`}>
-                                                <Select>
-                                                    <option key={city} value={data.deliveryAddress}>
+                                                <Select
+                                                value={deliveryAddress}
+                                                onChange={(event) => { handleChange(event, index); setDeliveryAddress(event.target.value); }}>
+                                               <option value=""> --Изберете Един От Вашите Адреси За Доставка-- </option>
+                                                    <option key={city} value={deliveryAddress}>
                                                         {data.deliveryAddress}
                                                     </option>
                                                 </Select>
@@ -542,7 +547,7 @@ const NewOrderForm = () => {
                                                 name="city"
                                                 className="mt-1 border w-full "
                                                 type="text"
-                                                id={`city${index}`}
+                                                id="city"
                                                 value={city}
                                                 onChange={(event) => { handleChange(event, index); setCity(event.target.value); }}
                                                 required

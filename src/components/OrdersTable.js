@@ -340,8 +340,13 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center text-sm">
-                    <div>
-                      <span className="font-semibold">0</span><span>%</span>
+                    <div> {order.type === 'BY_USER' && order.discount !== 0 && (
+                      <span className="font-semibold">{order.discount}% </span>)}
+
+                      {order.type === 'BY_USER' && order.discount === 0 && (
+                        <span className="font-semibold">5% </span>)}
+                        {order.type === 'BY_HAND' && order.discount === 0 && (
+                        <span className="font-semibold">{order.discount}% </span>)}
                     </div>
                   </div>
                 </TableCell>

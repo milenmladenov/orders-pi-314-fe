@@ -361,7 +361,7 @@ class SignUp extends Component {
                       className="mt-4"
                       block
                       as={Link}  // Use the Link component
-                      to="/"
+                      to="/login"
                       onClick={this.handleSubmit}
                     >
                       Регистрация
