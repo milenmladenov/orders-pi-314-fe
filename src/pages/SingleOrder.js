@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, TableContainer, Table, TableHeader, TableCell, TableRow, TableBody,HelperText } from '@windmill/react-ui';
+import { Button, TableContainer, Table, TableHeader, TableCell, TableRow, TableBody, HelperText } from '@windmill/react-ui';
 import PageTitle from "../components/Typography/PageTitle";
 import labelsFile from "../assets/xlxs/за етикети.xlsx";
 import { saveAs } from "file-saver"; // Import saveAs function
@@ -11,6 +11,7 @@ import html2canvas from 'html2canvas';
 import Logo from '../assets/img/logo-white-frame.png';
 import font from '../assets/fonts/font';
 import { Tab } from 'semantic-ui-react';
+import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
 
 
 const SingleOrder = ({ match }) => {
@@ -70,6 +71,12 @@ const SingleOrder = ({ match }) => {
 
     };
 
+    const isHashFromUrl = () => {
+        const hashFromUrl = window.location.hash
+        if (hashFromUrl === '#pdf-button') {
+            captureScreenshotAndConvertToPDF();
+        }
+    }
     useEffect(() => {
         const fetchOrder = async () => {
 
@@ -117,6 +124,7 @@ const SingleOrder = ({ match }) => {
                 setHandlePrice(response.data.handlePrice);
                 setGroupPrices(groupPrices);
                 setGroupSqrt(groupSqrt);
+                isHashFromUrl();
             } catch (error) {
                 console.error('Error fetching order:', error);
             }
@@ -176,13 +184,13 @@ const SingleOrder = ({ match }) => {
 
                                 </div>
                             </>
-                        )}   <div className='text-right mr-3'><Button onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div></div>
+                        )}   <div className='text-right mr-3' ><Button id="pdf-button" onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div></div>
                     </PageTitle>        </div>
                 <div id="singleOrderComponent">
                     <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
                     <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
                     <div className='grid grid-cols-2 mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
-                        </div>
+                    </div>
                     <TableContainer>
 
                         <Table>
@@ -272,7 +280,7 @@ const SingleOrder = ({ match }) => {
                                         <TableCell >{(totalGroupPrices * (order.discount / 100).toFixed(2)).toFixed(2)}лв.</TableCell>
                                     </TableRow>)}
 
-                                    {order.type === 'BY_HAND' && order.discount !== 0 && (
+                                {order.type === 'BY_HAND' && order.discount !== 0 && (
                                     <TableRow className='border-t border-b font-bold text-xs' >
                                         <TableCell colspan='11'>Отстъпка:</TableCell>
                                         <TableCell >{order.discount}%</TableCell>
@@ -291,9 +299,9 @@ const SingleOrder = ({ match }) => {
                         </Table>
 
                     </TableContainer>
-                    <div className='text-right mt-4 mr-4'>{totalSqrt <= 1.5 && 
-                        (<HelperText className=' text-sm text-red-600'> 
-                        <b>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</b>
+                    <div className='text-right mt-4 mr-4'>{totalSqrt <= 1.5 &&
+                        (<HelperText className=' text-sm text-red-600'>
+                            <b>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</b>
                         </HelperText>)}</div>
                     <hr className="customeDivider mx-4 my-5" />
 
