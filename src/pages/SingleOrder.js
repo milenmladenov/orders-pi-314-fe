@@ -215,7 +215,6 @@ const SingleOrder = ({ match }) => {
                             </TableHeader>
                             <TableBody className='border'>
                                 {order.groups.map((group, j) => (
-                                    console.log(group.bothSidesLaminated),
 
                                     <TableRow className=' border-t border-b text-xs' key={j}>
                                         <TableCell>{j + 1}</TableCell>

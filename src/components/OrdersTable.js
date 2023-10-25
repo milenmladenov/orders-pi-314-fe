@@ -24,6 +24,7 @@ import ExcelJS from 'exceljs';
 import Icon from "../components/Icon";
 import { config } from '../Constants';
 import ThemedSuspense from "./ThemedSuspense";
+import Fake from "faker/lib/fake";
 
 
 
@@ -43,6 +44,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   const [selectedOrderId, setSelectedOrderId] = useState(null); // Define selectedOrderId state
   const apiBaseUrl = config.url.API_BASE_URL;
   const [isEditing, setIsEditing] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -82,8 +84,10 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(apiBaseUrl + "/api/orders/all", config);
+      const response = await axios.get(apiBaseUrl + "/api/orders/all", config)
+      console.log(response)
       const ordersData = response.data;
+      setIsLoading(false);
 
       // Apply filters if necessary
       let filteredData = ordersData;
@@ -201,9 +205,10 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   useEffect(() => {
     fetchData();
   }, [page, resultsPerPage, filter]);
-  if (!data) {
-    return <ThemedSuspense/>;
-}
+
+  if (isLoading) {
+    return <><ThemedSuspense /></>;
+  }
 
   return (
     <div>
@@ -235,138 +240,135 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           <TableBody>
 
             {data.map((order, index) => (
-              
-              
-      
-              
+
               <TableRow key={order.id}>
                 <><TableCell>
-                <div className="flex items-center text-sm">
-                  <div>
-                    <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
-                  </div>
-                </div>
-              </TableCell><TableCell>
                   <div className="flex items-center text-sm">
                     <div>
-                      <p className="font-semibold">{order.createdAt}</p>
+                      <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
                     </div>
                   </div>
-                </TableCell><TableCell key={order.id}>
-                  <Modal isOpen={isModalOpen} onClose={closeModal}>
-                    <ModalHeader className="flex items-center">
-                      <Icon icon={EditIcon} className="w-6 h-6 mr-3" />
-                      Промяна на статус
-                    </ModalHeader>
-                    <ModalBody>
-                      Сигурни ли сте, че искате да промените статуса на{" "}
-                      {/* {selectedStatus && `"${selectedStatus}"`} */}
-                      <b> {selectedStatus === "WORKING_ON" ? "Изпълнява се" : selectedStatus === "CREATED" ? "Създадена  " : selectedStatus === "SEND" ? "Изпратена" : selectedStatus === "DONE" ? "Изпълнена" : selectedStatus}</b>
-
-                    </ModalBody>
-                    <ModalFooter>
-                      <div className="hidden sm:block">
-                        <Button onClick={() => { console.log(order); handleConfirmChange(order); } }>
-                          Потвърждаване
-                        </Button>
-                      </div>
-                      <div className="hidden sm:block">
-                        <Button layout="outline" onClick={closeModal}>
-                          Отказ
-                        </Button>
-                      </div>
-                    </ModalFooter>
-                  </Modal>
-
-                  {loggedUser.data.role === '[ADMIN]' && (
-                    <div onClick={() => setIsEditing(prevState => ({ ...prevState, [order.id]: true }))} style={{ cursor: isEditing[order.id] || order.status === "DONE" ? "default" : "pointer" }}>
-                      {isEditing[order.id] ? (
-                        <Select
-                          value={selectedStatus}
-                          onChange={(event) => handleChange(event, order)}
-                          onBlur={() => setIsEditing(false)}
-                        >
-                          {order.status === "CREATED" ? (
-
-                            <>                            <option value="">--</option>
-                              <option value="WORKING_ON">Изпълнява се</option><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>
-
-
-                          ) : (
-                            <option value={selectedStatus}>
-                              {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "SEND" ? "Изпратена" : "Изпълнена"}
-                            </option>
-                          )}
-                          {order.status == "WORKING_ON" && (
-                            <><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>)}
-                          {order.status == "SEND" && (
-                            <option value="DONE">Изпълнена</option>)}
-
-                        </Select>
-                      ) : (
-                        <div className={`flex items-center text-sm ${getStatusColor(order.status)}`}>
-                          <div>
-                            <p className="font-semibold">
-                              {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}                      {order.status !== "DONE" && <p style={{ color: "blue" }}>Промяна на статус</p>}
-
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {loggedUser.data.role === '[USER]' && (
-                    <div className={`flex items-center text-sm ${getStatusColor(order.status)}`}>
+                </TableCell><TableCell>
+                    <div className="flex items-center text-sm">
                       <div>
-                        <p className="font-semibold">
-                          {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}</p>
-
+                        <p className="font-semibold">{order.createdAt}</p>
                       </div>
-                    </div>)}
-                </TableCell><TableCell>
+                    </div>
+                  </TableCell><TableCell key={order.id}>
+                    <Modal isOpen={isModalOpen} onClose={closeModal}>
+                      <ModalHeader className="flex items-center">
+                        <Icon icon={EditIcon} className="w-6 h-6 mr-3" />
+                        Промяна на статус
+                      </ModalHeader>
+                      <ModalBody>
+                        Сигурни ли сте, че искате да промените статуса на{" "}
+                        {/* {selectedStatus && `"${selectedStatus}"`} */}
+                        <b> {selectedStatus === "WORKING_ON" ? "Изпълнява се" : selectedStatus === "CREATED" ? "Създадена  " : selectedStatus === "SEND" ? "Изпратена" : selectedStatus === "DONE" ? "Изпълнена" : selectedStatus}</b>
 
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <p className="font-semibold">{order.user.companyName}</p>
-                    </div>
-                  </div>
-                </TableCell><TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <span className="font-semibold">{order.totalPrice}</span><span>лв.</span>
-                    </div>
-                  </div>
-                </TableCell><TableCell>
-                  {order.type === "BY_HAND" ? "Ръчно - от Администратор" : "От клиент"}
-                </TableCell><TableCell>
-                  <div className="flex items-center text-sm">
-                    <div> {order.type === 'BY_USER' && order.discount !== 0 && (
-                      <span className="font-semibold">{order.discount}% </span>)}
+                      </ModalBody>
+                      <ModalFooter>
+                        <div className="hidden sm:block">
+                          <Button onClick={() => { console.log(order); handleConfirmChange(order); }}>
+                            Потвърждаване
+                          </Button>
+                        </div>
+                        <div className="hidden sm:block">
+                          <Button layout="outline" onClick={closeModal}>
+                            Отказ
+                          </Button>
+                        </div>
+                      </ModalFooter>
+                    </Modal>
 
-                      {order.type === 'BY_USER' && order.discount === 0 && (
-                        <span className="font-semibold">5% </span>)}
-                      {order.type === 'BY_HAND' && order.discount === 0 && (
-                        <span className="font-semibold">{order.discount}% </span>)}
-                      {order.type === 'BY_HAND' && order.discount !== 0 && (
-                        <span className="font-semibold">{order.discount}% </span>)}
+                    {loggedUser.data.role === '[ADMIN]' && (
+                      <div onClick={() => setIsEditing(prevState => ({ ...prevState, [order.id]: true }))} style={{ cursor: isEditing[order.id] || order.status === "DONE" ? "default" : "pointer" }}>
+                        {isEditing[order.id] ? (
+                          <Select
+                            value={selectedStatus}
+                            onChange={(event) => handleChange(event, order)}
+                            onBlur={() => setIsEditing(false)}
+                          >
+                            {order.status === "CREATED" ? (
+
+                              <>                            <option value="">--</option>
+                                <option value="WORKING_ON">Изпълнява се</option><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>
+
+
+                            ) : (
+                              <option value={selectedStatus}>
+                                {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "SEND" ? "Изпратена" : "Изпълнена"}
+                              </option>
+                            )}
+                            {order.status == "WORKING_ON" && (
+                              <><option value="SEND">Изпратена</option><option value="DONE">Изпълнена</option></>)}
+                            {order.status == "SEND" && (
+                              <option value="DONE">Изпълнена</option>)}
+
+                          </Select>
+                        ) : (
+                          <div className={`flex items-center text-sm ${getStatusColor(order.status)}`}>
+                            <div>
+                              <p className="font-semibold">
+                                {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}                      {order.status !== "DONE" && <p style={{ color: "blue" }}>Промяна на статус</p>}
+
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {loggedUser.data.role === '[USER]' && (
+                      <div className={`flex items-center text-sm ${getStatusColor(order.status)}`}>
+                        <div>
+                          <p className="font-semibold">
+                            {order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}</p>
+
+                        </div>
+                      </div>)}
+                  </TableCell><TableCell>
+
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <p className="font-semibold">{order.user.companyName}</p>
+                      </div>
                     </div>
-                  </div>
-                </TableCell><TableCell className="w-1/12 text-center">
-                  <Link
-                    to={`orders/${order.id}`}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Детайли
-                  </Link>
-                </TableCell><TableCell className="w-1/12 text-center">
-                  {loggedUser.data.role === '[ADMIN]' || (loggedUser.data.role === '[USER]' && order.status === 'CREATED') ? (
-                    <Link to={`orders/edit/${order.id}`} className="text-indigo-600 hover:text-indigo-900">
-                      Редактиране
+                  </TableCell><TableCell>
+                    <div className="flex items-center text-sm">
+                      <div>
+                        <span className="font-semibold">{order.totalPrice}</span><span>лв.</span>
+                      </div>
+                    </div>
+                  </TableCell><TableCell>
+                    {order.type === "BY_HAND" ? "Ръчно - от Администратор" : "От клиент"}
+                  </TableCell><TableCell>
+                    <div className="flex items-center text-sm">
+                      <div> {order.type === 'BY_USER' && order.discount !== 0 && (
+                        <span className="font-semibold">{order.discount}% </span>)}
+
+                        {order.type === 'BY_USER' && order.discount === 0 && (
+                          <span className="font-semibold">5% </span>)}
+                        {order.type === 'BY_HAND' && order.discount === 0 && (
+                          <span className="font-semibold">{order.discount}% </span>)}
+                        {order.type === 'BY_HAND' && order.discount !== 0 && (
+                          <span className="font-semibold">{order.discount}% </span>)}
+                      </div>
+                    </div>
+                  </TableCell><TableCell className="w-1/12 text-center">
+                    <Link
+                      to={`orders/${order.id}`}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Детайли
                     </Link>
-                  ) : null}
-                </TableCell></>
+                  </TableCell><TableCell className="w-1/12 text-center">
+                    {loggedUser.data.role === '[ADMIN]' || (loggedUser.data.role === '[USER]' && order.status === 'CREATED') ? (
+                      <Link to={`orders/edit/${order.id}`} className="text-indigo-600 hover:text-indigo-900">
+                        Редактиране
+                      </Link>
+                    ) : null}
+                  </TableCell></>
               </TableRow>
-            ))}
+                      ))}
           </TableBody>
         </Table>
         <TableFooter>
@@ -379,7 +381,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
         </TableFooter>
       </TableContainer>
     </div>
-  );
+                    );
 };
 
 export default OrdersTable;
