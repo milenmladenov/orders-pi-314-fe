@@ -12,6 +12,7 @@ import Logo from '../assets/img/logo-white-frame.png';
 import font from '../assets/fonts/font';
 import { Tab } from 'semantic-ui-react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
+import ThemedSuspense from '../components/ThemedSuspense';
 
 
 const SingleOrder = ({ match }) => {
@@ -134,7 +135,7 @@ const SingleOrder = ({ match }) => {
     }, [orderId]);
 
     if (!order) {
-        return <div>Loading...</div>;
+        return ThemedSuspense;
     }
     const exportToExcel = async () => {
         try {
@@ -187,7 +188,7 @@ const SingleOrder = ({ match }) => {
                         )}   <div className='text-right mr-3' ><Button id="pdf-button" onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div></div>
                     </PageTitle>        </div>
                 <div id="singleOrderComponent">
-                    <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.id}</p></div></div>
+                    <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.orderUuid}</p></div></div>
                     <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
                     <div className='grid grid-cols-2 mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
                     </div>

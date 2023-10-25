@@ -69,6 +69,7 @@ const NewOrderForm = () => {
     const [isTextareaVisible, setTextareaVisible] = useState(false);
     const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]);
     const [createdOrderId, setCreatedOrderId] = useState(0)
+    const [orderUuid,setOrederUuid] = useState('');
     const [createdOrderModalOpen, isCreatedOrderModalOpen] = useState(false);
 
 
@@ -218,6 +219,7 @@ const NewOrderForm = () => {
             .then((data) => {
                 console.log(data);
                 setCreatedOrderId(data.createdOrderId);
+                setOrederUuid(data.orderUuid)
                 // Get the groupTotalPrice for every group in the response
                 const groupPrices = data.groups.map((group) => group.groupTotalPrice);
                 const groupSqrt = data.groups.map((group) => {
@@ -436,7 +438,7 @@ const NewOrderForm = () => {
                                     Вашата поръчка е създадена!
                                 </ModalHeader>
                                 <ModalBody>
-                                    Създадена е поръчка с номер {createdOrderId}.
+                                    Създадена е поръчка с номер {orderUuid}.
                                 </ModalBody>
                                 <ModalFooter className="flex items-right">
                                     <div className="hidden sm:block">
