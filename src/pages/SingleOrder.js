@@ -135,7 +135,7 @@ const SingleOrder = ({ match }) => {
     }, [orderId]);
 
     if (!order) {
-        return ThemedSuspense;
+        return <ThemedSuspense/>;
     }
     const exportToExcel = async () => {
         try {

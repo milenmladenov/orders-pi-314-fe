@@ -202,8 +202,9 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
     fetchData();
   }, [page, resultsPerPage, filter]);
   if (!data) {
-    return ThemedSuspense;
+    return <ThemedSuspense/>;
 }
+
   return (
     <div>
       {loggedUser.data.role === '[ADMIN]' && (
@@ -234,22 +235,24 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           <TableBody>
 
             {data.map((order, index) => (
+              
+              
+      
+              
               <TableRow key={order.id}>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <div>
-                      <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
-                    </div>
+                <><TableCell>
+                <div className="flex items-center text-sm">
+                  <div>
+                    <p className="font-semibold">{formatDateWithoutDashes(order.createdAt) + order.id}</p>
                   </div>
-                </TableCell>
-                <TableCell>
+                </div>
+              </TableCell><TableCell>
                   <div className="flex items-center text-sm">
                     <div>
                       <p className="font-semibold">{order.createdAt}</p>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell key={order.id} >
+                </TableCell><TableCell key={order.id}>
                   <Modal isOpen={isModalOpen} onClose={closeModal}>
                     <ModalHeader className="flex items-center">
                       <Icon icon={EditIcon} className="w-6 h-6 mr-3" />
@@ -263,7 +266,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
                     </ModalBody>
                     <ModalFooter>
                       <div className="hidden sm:block">
-                        <Button onClick={() => { console.log(order); handleConfirmChange(order) }}>
+                        <Button onClick={() => { console.log(order); handleConfirmChange(order); } }>
                           Потвърждаване
                         </Button>
                       </div>
@@ -320,58 +323,48 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
 
                       </div>
                     </div>)}
-                </TableCell>
-                <TableCell>
+                </TableCell><TableCell>
 
                   <div className="flex items-center text-sm">
                     <div>
                       <p className="font-semibold">{order.user.companyName}</p>
                     </div>
                   </div>
-                </TableCell>
-
-                <TableCell>
+                </TableCell><TableCell>
                   <div className="flex items-center text-sm">
                     <div>
                       <span className="font-semibold">{order.totalPrice}</span><span>лв.</span>
                     </div>
                   </div>
-                </TableCell>
-
-
-                <TableCell>
+                </TableCell><TableCell>
                   {order.type === "BY_HAND" ? "Ръчно - от Администратор" : "От клиент"}
-                </TableCell>
-                <TableCell>
+                </TableCell><TableCell>
                   <div className="flex items-center text-sm">
                     <div> {order.type === 'BY_USER' && order.discount !== 0 && (
                       <span className="font-semibold">{order.discount}% </span>)}
 
                       {order.type === 'BY_USER' && order.discount === 0 && (
                         <span className="font-semibold">5% </span>)}
-                        {order.type === 'BY_HAND' && order.discount === 0 && (
+                      {order.type === 'BY_HAND' && order.discount === 0 && (
                         <span className="font-semibold">{order.discount}% </span>)}
-                        {order.type === 'BY_HAND' && order.discount !== 0 && (
+                      {order.type === 'BY_HAND' && order.discount !== 0 && (
                         <span className="font-semibold">{order.discount}% </span>)}
                     </div>
                   </div>
-                </TableCell>
-                <TableCell className="w-1/12 text-center">
+                </TableCell><TableCell className="w-1/12 text-center">
                   <Link
                     to={`orders/${order.id}`}
                     className="text-indigo-600 hover:text-indigo-900"
                   >
                     Детайли
                   </Link>
-                </TableCell>
-
-                <TableCell className="w-1/12 text-center">
+                </TableCell><TableCell className="w-1/12 text-center">
                   {loggedUser.data.role === '[ADMIN]' || (loggedUser.data.role === '[USER]' && order.status === 'CREATED') ? (
                     <Link to={`orders/edit/${order.id}`} className="text-indigo-600 hover:text-indigo-900">
                       Редактиране
                     </Link>
                   ) : null}
-                </TableCell>
+                </TableCell></>
               </TableRow>
             ))}
           </TableBody>
