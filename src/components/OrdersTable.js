@@ -23,6 +23,7 @@ import { saveAs } from "file-saver"; // Import saveAs function
 import ExcelJS from 'exceljs';
 import Icon from "../components/Icon";
 import { config } from '../Constants';
+import ThemedSuspense from "./ThemedSuspense";
 
 
 
@@ -200,6 +201,9 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
   useEffect(() => {
     fetchData();
   }, [page, resultsPerPage, filter]);
+  if (!data) {
+    return ThemedSuspense;
+}
   return (
     <div>
       {loggedUser.data.role === '[ADMIN]' && (
