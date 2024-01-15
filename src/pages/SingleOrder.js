@@ -238,7 +238,7 @@ const SingleOrder = ({ match }) => {
 
                                     <TableRow className='border border-black text-l' key={j}>
                                         <TableCell className='border-r   border-black'>{j + 1}</TableCell>
-                                        <TableCell className='border-r border-black'>4-1</TableCell>
+                                        <TableCell className='border-r border-black'>{order.id}-{j+1}</TableCell>
                                         <TableCell className='border-r border-black'>{group.model.name}</TableCell>
                                         <TableCell className='border-r border-black'>
                                             {group.detailType.material}{' '}

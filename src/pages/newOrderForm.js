@@ -128,7 +128,9 @@
         const handleTypeChange = (event, index) => {
             const updatedGroupForms = groupForms.map((formData, i) => {
                 if (i === index) {
+                
                     return {
+                    
                         ...formData,
                         detailType: {
                             ...formData.detailType, // Keep the existing material
@@ -331,8 +333,8 @@
                         (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
                         (formData.detailType.material === 'Чекмедже' && formData.height < 60) ||
                         (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
-                        (formData.height > 2400) || (formData.detailType.material !== '' && formData.detailType.type === '') ||
-                        ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60))
+                        (formData.height > 2400) || 
+                        ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) || (formData.detailType.type === '')
 
                     ));
                     console.log(isButtonDisabled);
@@ -1003,9 +1005,13 @@
                                                             ? "Едностранно ламиниране"
                                                             : "Двустранно ламиниране"}
                                                     </div>
-                                                    <div className="">
+                                                    <div>{selectedDoor  === "Двустранно грундиран МДФ" || selectedDoor  === "Фурнирован МДФ"  ? (<HelperText valid={false}>Не се предлага за този материал</HelperText> ): (
+                                    
+                                    <div className="">
                                                         <b>{groupSqrt[index]} кв.м</b>
-                                                    </div>
+                                                    </div>)
+                                }</div>
+                                                    
                                                 </div>
                                                 <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
                                             </div>
