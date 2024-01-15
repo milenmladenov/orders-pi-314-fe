@@ -7,6 +7,7 @@ import { saveAs } from "file-saver"; // Import saveAs function
 import ExcelJS from 'exceljs';
 import { config } from '../Constants';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'
 import html2canvas from 'html2canvas';
 import Logo from '../assets/img/logo-white-frame.png';
 import font from '../assets/fonts/font';
@@ -54,22 +55,23 @@ const SingleOrder = ({ match }) => {
     };
 
     const captureScreenshotAndConvertToPDF = () => {
+        const pdf = new jsPDF('p', 'pt', 'letter');
         // Select the component or container to capture
         const componentToCapture = document.getElementById('singleOrderComponent');
         // Use html2canvas to capture the component as an image
-        html2canvas(componentToCapture).then(canvas => {
-            const pdf = new jsPDF('p', 'pt', 'letter');
+    html2canvas(componentToCapture).then(canvas => {
+        
             const imgData = canvas.toDataURL('image/png');
             pdf.addFileToVFS('PTSans-Regular-normal.ttf', font);
             pdf.addFont('PTSans-Regular-normal.ttf', 'PTSans-Regular', 'normal');
-            // Create a new jsPDF instance
-            // Add the captured image to the PDF
-            pdf.addImage(Logo, 'PNG', 0, 0, 100, 90);
-            pdf.addImage(imgData, 'PNG', 0, 90, 610, 400);
-            // Save the PDF
-            pdf.save('single_order.pdf');
-        })
+        pdf.addImage(Logo, 'PNG', 0, 0, 100, 66);
+            pdf.addImage(imgData, 'PNG', 0, 90, 615, 410);
+            pdf.save(order.orderUuid + '.pdf');
 
+        
+            
+        })
+        
     };
 
     const isHashFromUrl = () => {
@@ -77,6 +79,22 @@ const SingleOrder = ({ match }) => {
         if (hashFromUrl === '#pdf-button') {
             captureScreenshotAndConvertToPDF();
         }
+    }
+
+    const savePdf = () => {
+        const doc = new jsPDF()
+        doc.setFont('Roboto-Regular','normal')
+        autoTable(doc, {
+            head: [['nomer', 'etiket', 'model','Vid', 'folio', 'profil','drujka', 'visochina', 'shirina','duljina', 'broi', 'dryjka stojnost','dwustr lam','stoinost']],
+            body: [
+              ['1', '4-2', 'Sweden','1', '4-2', 'Sweden','1', '4-2', 'Sweden','1', '4-2', 'Sweden', '4-2', 'Sweden']
+              
+              // ...
+            ],
+          })
+          
+          doc.save('table.pdf')
+
     }
     useEffect(() => {
         const fetchOrder = async () => {
@@ -135,7 +153,7 @@ const SingleOrder = ({ match }) => {
     }, [orderId]);
 
     if (!order) {
-        return <ThemedSuspense/>;
+        return <ThemedSuspense />;
     }
     const exportToExcel = async () => {
         try {
@@ -171,126 +189,128 @@ const SingleOrder = ({ match }) => {
         console.log(order),
 
         <>
-            <div className='border mr-10 w-full' >
+            <div className='border border-black mr-10 w-full'  >
 
-                <div className='text-center border' >
+                <div className='text-center border border-black' >
                     <PageTitle>Статус на поръчката: <span className={getStatusColor(order.status)}>{order.status === "WORKING_ON" ? "Изпълнява се" : order.status === "CREATED" ? "Създадена" : order.status === "SEND" ? "Изпратена" : order.status === "DONE" ? "Изпълнена" : order.status}</span>
-                        <div> {loggedUser.data.role === '[ADMIN]' && (
+                        <div className='text-right mr-3'> {loggedUser.data.role === '[ADMIN]' && (
                             <>
-                                <div className='text-right mr-3 mb-4'>
-                                    <Button onClick={exportToExcel} className="">
-                                        Генериране на етикети
-                                    </Button>
+
+                                <Button onClick={exportToExcel} className="">
+                                    Генериране на етикети
+                                </Button>
 
 
-                                </div>
+
                             </>
-                        )}   <div className='text-right mr-3' ><Button id="pdf-button" onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div></div>
+                        )}   <Button id="pdf-button" onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div>
                     </PageTitle>        </div>
                 <div id="singleOrderComponent">
-                    <div className='grid grid-cols-2 h-10 mb-4 '><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border'><p className='ml-3'>Номер: {order.orderUuid}</p></div></div>
-                    <div className='grid grid-cols-2 border mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
-                    <div className='grid grid-cols-2 mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
+                    <div id= 'header-1' className='grid grid-cols-2 h-10 mb-4 border-black  border'><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border-l border-black'><p className='ml-3'>Номер: {order.orderUuid}</p></div></div>
+
+                    <div id= 'header-1' className='grid grid-cols-2 border border-black mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
+                    <div id= 'header-1' className='grid grid-cols-2 border-l border-r border-black mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
                     </div>
                     <TableContainer>
 
-                        <Table>
+                        <Table id="my-table" className='border border-black' >
                             <TableHeader >
-                                <tr className='text-xs'>
-                                    <TableCell>Номер</TableCell>
-                                    <TableCell>Модел</TableCell>
-                                    <TableCell>Вид</TableCell>
-                                    <TableCell>Фолио</TableCell>
-                                    <TableCell>Профил</TableCell>
-                                    <TableCell>Дръжка</TableCell>
-                                    <TableCell>Вис.,мм</TableCell>
-                                    <TableCell>Шир., мм</TableCell>
-                                    <TableCell>Дъл.,мм</TableCell>
-                                    <TableCell>Брой</TableCell>
-                                    <TableCell>Дръжка бр./лв.</TableCell>
-                                    <TableCell>Двустр. лам.</TableCell>
+                                <tr className='text-m'>
+                                    <TableCell className='border-r border-black'>Номер</TableCell>
+                                    <TableCell className='border-r border-black'>Етикет</TableCell>
+                                    <TableCell className='border-r border-black'>Модел</TableCell>
+                                    <TableCell className='border-r border-black'>Вид</TableCell>
+                                    <TableCell className='border-r border-black'>Фолио</TableCell>
+                                    <TableCell className='border-r border-black'>Профил</TableCell>
+                                    <TableCell className='border-r border-black'>Дръжка</TableCell>
+                                    <TableCell className='border-r border-black'>Вис.,мм</TableCell>
+                                    <TableCell className='border-r border-black'>Шир., мм</TableCell>
+                                    <TableCell className='border-r border-black'>Дъл.,мм</TableCell>
+                                    <TableCell className='border-r border-black'>Брой</TableCell>
+                                    <TableCell className='border-r border-black'>Дръжка бр./лв.</TableCell>
+                                    <TableCell className='border-r border-black'>Двустр. лам.</TableCell>
                                     <TableCell>Ст-ст</TableCell>
 
                                 </tr>
                             </TableHeader>
-                            <TableBody className='border'>
+                            <TableBody className='border border-black   font-bold'>
                                 {order.groups.map((group, j) => (
 
-                                    <TableRow className=' border-t border-b text-xs' key={j}>
-                                        <TableCell>{j + 1}</TableCell>
-
-                                        <TableCell>{group.model.name}</TableCell>
-                                        <TableCell>
+                                    <TableRow className='border border-black text-l' key={j}>
+                                        <TableCell className='border-r   border-black'>{j + 1}</TableCell>
+                                        <TableCell className='border-r border-black'>4-1</TableCell>
+                                        <TableCell className='border-r border-black'>{group.model.name}</TableCell>
+                                        <TableCell className='border-r border-black'>
                                             {group.detailType.material}{' '}
                                             {group.detailType.type !== null ? <><hr /><span> ({group.detailType.type})</span></> : ''}
                                         </TableCell>
-                                        <TableCell>{group.folio.name}</TableCell>
-                                        <TableCell>{group.profil.name}</TableCell>
-                                        <TableCell>{group.handle.name}</TableCell>
+                                        <TableCell className='border-r border-black'>{group.folio.name}</TableCell>
+                                        <TableCell className='border-r border-black'>{group.profil.name}</TableCell>
+                                        <TableCell className='border-r border-black'>{group.handle.name}</TableCell>
                                         {group.detailType.material === 'Корниз' ? (
                                             <>
-                                                <TableCell>{group.length}</TableCell>
-                                                <TableCell></TableCell>
-                                                <TableCell></TableCell>  {/* Leave this cell empty */}
+                                                <TableCell className='border-r border-black'>{group.length}</TableCell>
+                                                <TableCell className='border-r border-black'></TableCell>
+                                                <TableCell className='border-r border-black'></TableCell>  {/* Leave this cell empty */}
                                             </>
                                         ) : (
-                                            <> <TableCell></TableCell>
-                                                <TableCell>{group.height}</TableCell>
-                                                <TableCell>{group.width}</TableCell>
+                                            <> <TableCell className='border-r border-black'></TableCell>
+                                                <TableCell className='border-r border-black'>{group.height}</TableCell>
+                                                <TableCell className='border-r border-black'>{group.width}</TableCell>
                                             </>
                                         )}
-                                        <TableCell>{group.number}</TableCell>
+                                        <TableCell className='border-r border-black'>{group.number}</TableCell>
 
-                                        <TableCell>{group.handle.price} лв.</TableCell>
-                                        <TableCell>{group.bothSidesLaminated === true ? ("Да") : ("Не")}</TableCell>
-                                        <TableCell>{group.groupTotalPrice}лв.</TableCell>
+                                        <TableCell className='border-r border-black'>{group.handle.price} лв.</TableCell>
+                                        <TableCell className='border-r border-black'>{group.bothSidesLaminated === true ? ("Да") : ("Не")}</TableCell>
+                                        <TableCell className='border-r border-black'>{group.groupTotalPrice}лв.</TableCell>
                                     </TableRow>
                                 ))}
                                 {/* <TableRow ><hr className="customeDivider mx-4 my-5" /></TableRow> */}
 
 
-                                <TableRow className='border-t border-b font-bold text-xs' >
-                                    <TableCell colspan='8'>Общо:</TableCell>
-                                    <TableCell>Oбщо кв.м. <hr />{totalSqrt} кв.м.</TableCell>
-                                    <TableCell className='border-t border-b'>
+                                <TableRow className='border-t border-b font-bold text-l' >
+                                    <TableCell colspan='9'>Общо:</TableCell>
+                                    <TableCell className='border-r border-l  border-black'>Oбщо кв.м. <hr />{totalSqrt} кв.м.</TableCell>
+                                    <TableCell className='border-r border-l  border-black'>
                                         {elementNumber}бр.</TableCell>
-                                    <TableCell colspan='2' className='border-t border-b'>{handleNumber}бр. /{handlePrice}лв.</TableCell>
+                                    <TableCell colspan='2' className='border-r border-l border-black'>{handleNumber}бр. /{handlePrice}лв.</TableCell>
 
-                                    <TableCell >{totalGroupPrices}лв.</TableCell>
+                                    <TableCell className='border-r border-l  border-black'>{totalGroupPrices}лв.</TableCell>
 
 
                                 </TableRow>
-                                <TableRow className='border-t border-b font-bold text-xs' >
-                                    <TableCell colspan='12'>Всичко:</TableCell>
+                                <TableRow className='border-t border-b border-black font-bold text-m' >
+                                    <TableCell colspan='13'>Всичко:</TableCell>
 
-                                    <TableCell >{totalGroupPrices}лв.</TableCell>
+                                    <TableCell className='border border-black  '>{totalGroupPrices}лв.</TableCell>
 
 
                                 </TableRow>
                                 {order.type === 'BY_USER' && order.discount === 0 && (
-                                    <TableRow className='border-t border-b font-bold text-xs' >
+                                    <TableRow className='border-t border-b font-bold text-m' >
                                         <TableCell colspan='11'>Отстъпка при онлайн поръчка:</TableCell>
                                         <TableCell >5%</TableCell>
                                         <TableCell >{(totalGroupPrices * 0.05).toFixed(2)}лв.</TableCell>
                                     </TableRow>)}
                                 {order.type === 'BY_USER' && order.discount !== 0 && (
-                                    <TableRow className='border-t border-b font-bold text-xs' >
+                                    <TableRow className='border-t border-b font-bold text-m' >
                                         <TableCell colspan='11'>Отстъпка:</TableCell>
                                         <TableCell >{order.discount}%</TableCell>
                                         <TableCell >{(totalGroupPrices * (order.discount / 100).toFixed(2)).toFixed(2)}лв.</TableCell>
                                     </TableRow>)}
 
                                 {order.type === 'BY_HAND' && order.discount !== 0 && (
-                                    <TableRow className='border-t border-b font-bold text-xs' >
-                                        <TableCell colspan='11'>Отстъпка:</TableCell>
+                                    <TableRow className='border-t border-b font-bold text-m' >
+                                        <TableCell colspan='12'>Отстъпка:</TableCell>
                                         <TableCell >{order.discount}%</TableCell>
                                         <TableCell >{(totalGroupPrices * (order.discount / 100).toFixed(2)).toFixed(2)}лв.</TableCell>
                                     </TableRow>)}
 
-                                <TableRow className='border-t border-b font-bold text-xs' >
-                                    <TableCell colspan='12'>За Плащане:</TableCell>
+                                <TableRow className='border-t border-b font-bold text-m' >
+                                    <TableCell colspan='13' className='border border-black  '>За Плащане:</TableCell>
 
-                                    <TableCell >{order.totalPrice}лв.</TableCell>
+                                    <TableCell className='border border-black  '>{order.totalPrice}лв.</TableCell>
 
 
                                 </TableRow>
@@ -303,7 +323,6 @@ const SingleOrder = ({ match }) => {
                         (<HelperText className=' text-sm text-red-600'>
                             <b>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</b>
                         </HelperText>)}</div>
-                    <hr className="customeDivider mx-4 my-5" />
 
                     <TableContainer>
                         <Table>
@@ -316,10 +335,12 @@ const SingleOrder = ({ match }) => {
                         <Table>
 
                         </Table>
-                        <div><div><p className=' ml-3  content-end text-left mr-3 grid '><span className=' font-semibold content-end text-left mr-3 mt-3 mb-3'>Забележка :</span> <span>{order.note}</span></p> </div></div>
+                        <div id='notes'><div><p className=' ml-3  content-end text-left mr-3 grid '><span className=' font-semibold content-end text-left mr-3 mt-3 mb-3'>Забележка :</span> <span>{order.note}</span></p> </div></div>
 
                     </TableContainer>
+                    <div></div>
                 </div>
+                
             </div></>
     );
 };

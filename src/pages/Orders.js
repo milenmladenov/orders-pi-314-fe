@@ -25,9 +25,6 @@ const Orders = () => {
     if (filter_name === "Изпълнява се") {
       setFilter("изпълнява се");
     }
-    if (filter_name === "Изпратена") {
-      setFilter("изпратена");
-    }
     if (filter_name === "Изпълнена") {
       setFilter("изпълнена");
     }
@@ -65,7 +62,6 @@ const Orders = () => {
                 <option>Всички</option>
                 <option>Създадена</option>
                 <option>Изпълнява се</option>
-                <option>Изпратена</option>
                 <option>Изпълнена</option>
 
               </Select>
