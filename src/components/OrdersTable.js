@@ -215,8 +215,8 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
       {loggedUser.data.role === '[ADMIN]' && (
         <>
           <div className="mt-4 ">
-            <Button layout="outline" onClick={exportToExcel} className="btn btn-primary">
-              Експорт на справка
+            <Button layout="outline" onClick={exportToExcel} className="btn btn-primary bg-blue-300">
+             <b> Експорт на справка</b>
             </Button>
           </div>
           <hr className="customeDivider mx-4 my-5" />
