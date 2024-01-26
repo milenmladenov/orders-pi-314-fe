@@ -4,7 +4,7 @@ import {
     Select, Input, Label, HelperText, Button, Modal,
     ModalHeader,
     ModalBody,
-    ModalFooter
+    ModalFooter, Textarea
 } from "@windmill/react-ui";
 import PageTitle from "../components/Typography/PageTitle";
 import { config } from '../Constants';
@@ -12,6 +12,8 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import "../assets/css/groups-in-rows.css"
 import modelOptions from '../components/modelOptions';
 import FolioOptions from '../components/FolioOptions';
+import { Link } from 'react-router-dom'
+
 
 
 
@@ -19,7 +21,9 @@ import FolioOptions from '../components/FolioOptions';
 
 const EditOrder = ({ match }) => {
     const apiBaseUrl = config.url.API_BASE_URL;
-//
+    const [mainDropdownValue, setMainDropdownValue] = useState();
+    const [note, setNote] = useState('');
+
     const [order, setOrder] = useState(null);
     const orderId = match.params.id; // Get the orderId from the route parameter
     const token = localStorage.getItem('accessToken')
@@ -33,6 +37,10 @@ const EditOrder = ({ match }) => {
     const [orderPreflightUrl, setOrderPreflightUrl] = useState();
     const [orderUrl, setOrderUrl] = useState();
     const [isDataLoadModalOpen, setIsDataLoadModalOpen] = useState(false);
+    const [elementNumber, setElementNumber] = useState(0);
+    const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]);
+    const [selectedDoor, setSelectedDoor] = useState('');
+    const [successfulEditModalOpen,setSuccessfulEditModalOpen] = useState(false)
 
 
     const [handleNumber, setHandleNumber] = useState(0);
@@ -55,11 +63,15 @@ const EditOrder = ({ match }) => {
         setOrderUrl(apiBaseUrl + `/api/orders/${orderId}`);
     }, []);
 
+    useEffect(() => {
+        handlePreflight();
+    }, [groupForms]);
+
     const handlePreflight = async () => {
         try {
             const groupsArray = groupForms.map((formData) => ({
                 door: {
-                    name: doorName,
+                    name: mainDropdownValue,
                 },
                 model: {
                     name: formData.modelName,
@@ -104,6 +116,8 @@ const EditOrder = ({ match }) => {
             const data = await response.json();
             console.log(loggedUser.data.role);
             console.log(data);
+            setElementNumber(data.totalElements);
+            setSelectedDoor(data.doorName)
 
             let totalSqrt = 0;
             let totalGroupPrices = 0;
@@ -136,15 +150,18 @@ const EditOrder = ({ match }) => {
             setGroupPrices(groupPrices);
             setGroupSqrt(groupSqrt);
 
-            const isButtonDisabled = preflightGroupForms.some((formData) => (
-                (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) ||
-                (formData.width > 1160) ||
-                (formData.width < 60) ||
+            const isButtonDisabled = groupForms.some((formData) => (
+                ((formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811' || formData.modelName === 'Без модел А100') && (formData.width < 200)) && (formData.detailType.material === 'Пиластър' && formData.width < 40)) ||
+                (formData.width > 1160) || (formData.doorName === '') ||
+                (formData.detailType.material === 'Пиластър' && formData.width > 300) ||
                 (formData.detailType.material === 'Чекмедже' && formData.width < 60) ||
+                (formData.detailType.material === 'Чекмедже' && formData.height < 60) ||
                 (formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200)) ||
                 (formData.height > 2400) ||
-                ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) ||
-                (formData.detailType.material === 'Чекмедже' && formData.height < 60)
+                ((formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60)) || (formData.detailType.material !== "" && formData.detailType.type === "") || (formData.detailType.material !== "Вратичка") && (formData.detailType.type !== "P1" && formData.detailType.type !== "P2" && formData.detailType.type !== "P3") &&
+                (formData.detailType.type !== "Обща фрезовка" && formData.detailType.type !== "Изчистен детайл" && formData.detailType.type !== "Корекция на рамка") &&
+                (formData.detailType.type !== "К1 – 68мм височина" && formData.detailType.type !== "К2 – 70мм височина" && formData.detailType.type !== "К3 – 80мм височина")
+
             ));
 
             setSubmitButtonDisabled(isButtonDisabled);
@@ -170,6 +187,8 @@ const EditOrder = ({ match }) => {
                 setOrderData(orderData);
                 setHandlePrice(orderData.handlePrice);
                 setTotalPrice(orderData.totalPrice + ' лв. с ДДС')
+                setMainDropdownValue(orderData.groups[0].door.name);
+                setNote(orderData.note)
                 const initialFormState = orderData.groups.map((group) => ({
                     doorName: group.door.name,
                     modelName: group.model.name,
@@ -187,7 +206,7 @@ const EditOrder = ({ match }) => {
                     },
                     deliveryAddress: orderData.deliveryAddress,
                     discount: orderData.discount,
-                    note: orderData.note
+                    note: note
                 }));
                 setGroupForms(initialFormState)
                 let handleNumber = 0;
@@ -232,13 +251,31 @@ const EditOrder = ({ match }) => {
     function openModal() {
         setIsDataLoadModalOpen(true)        // window.location.reload();
     }
+    const handleMainDropdownChange = (event) => {
 
-    const handleSubmit = async () => {
+        const selectedValue = event.target.value;
+        setMainDropdownValue(selectedValue);
+        const updatedGroupForms = groupForms.map((formData) => ({
+            ...formData,
+            door: {
+                name: selectedValue
+            },
+        }));
+        setGroupForms(updatedGroupForms);
+    };
+
+    const handleNote = (event) => {
+
+        const selectedValue = event.target.value;
+        setNote(selectedValue);
+        
+    };
+    const handleSubmit = () => {
         try {
             const token = localStorage.getItem('accessToken');
             const updatedGroups = groupForms.map((formData) => ({
                 door: {
-                    name: formData.doorName,
+                    name: mainDropdownValue,
                 },
                 model: {
                     name: formData.modelName,
@@ -267,26 +304,19 @@ const EditOrder = ({ match }) => {
 
 
             // Send the updated order to the server using a PUT request
-            const response = await fetch(apiBaseUrl + '/api/orders/edit-order/' + orderId, {
+            const response = fetch(apiBaseUrl + '/api/orders/edit-order/' + orderId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    groups: updatedGroups
+                groups: updatedGroups,
+                note: note
                 }
                 ),
             });
-
-            if (response.ok) {
-                window.location.reload();
-
-                // Handle success, e.g., show a success message or redirect to another page
-            } else {
-                // Handle errors, e.g., show an error message
-                console.error('Failed to update order');
-            }
+        setSuccessfulEditModalOpen(true);   
         } catch (error) {
             console.error('Error:', error);
         }
@@ -305,7 +335,7 @@ const EditOrder = ({ match }) => {
             }
             return orderData;
         });
-        setOrder(updatedGroupForms);
+        setGroupForms(updatedGroupForms);
     };
     const handleMaterialChange = (event, index) => {
         const updatedGroupForms = groupForms.map((formData, i) => {
@@ -317,7 +347,8 @@ const EditOrder = ({ match }) => {
         setGroupForms(updatedGroupForms);
     };
     function closeModal() {
-        setIsDataLoadModalOpen(false)        // window.location.reload();
+        setIsDataLoadModalOpen(false);
+        setModalOpen(false); 
     }
 
     const handleChange = (event, index) => {
@@ -332,7 +363,10 @@ const EditOrder = ({ match }) => {
 
     };
 
+
+
     const handleAddGroup = (event) => {
+        setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
         setGroupForms((prevGroupForms) => [
             ...prevGroupForms,
             {
@@ -378,18 +412,21 @@ const EditOrder = ({ match }) => {
                     <div>
 
                         <div className="grid md:grid-cols-1 ml-20 ">
-                            <div className='grid md:grid-cols-4'>
+                            <div className='grid md:grid-cols-5'>
                                 <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
+                                <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. детайли</div><div className=''> <b>{elementNumber}</b></div> </div>
+
                                 <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
                                 </div> </div>
 
-                                <div className="grid md:grid-rows-2 text-center border">
-                                    <div>
-                                        Общо ламиниране
-                                    </div>
-                                    <div className="">
-                                        <b>{totalSqrt} кв.м</b>
-                                    </div>
+                                <div className="grid md:grid-rows-2 text-center border">Общо ламиниране
+
+                                    <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
+
+                                        <div className="">
+                                            <b>{totalSqrt} кв.м</b>
+                                        </div>)
+                                    }</div>
                                 </div>
                                 <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
 
@@ -400,15 +437,38 @@ const EditOrder = ({ match }) => {
                                 </ModalHeader>
                                 <ModalBody>
 
-                                    Ще редактирате поръчка с номер {orderData.id}, създадена на {orderData.createdAt} ! 
+                                    Ще редактирате поръчка с номер {orderData.id}, създадена на {orderData.createdAt} !
                                 </ModalBody>
                                 <ModalFooter>
                                     <div className="hidden sm:block">
-                                        <Button onClick={() => { handlePreflight() ; closeModal()}}>
+                                        <Button onClick={() => { handlePreflight(); closeModal() ;}}>
                                             Зареждане на Данни
                                         </Button>
                                     </div>
-                                   
+
+                                </ModalFooter>
+                            </Modal>
+                            <Modal isOpen={successfulEditModalOpen}>
+                                <ModalHeader className="flex items-center">
+                                    Редактирането на поръчката е успешно!
+                                </ModalHeader>
+                                <ModalBody>
+
+                                </ModalBody>
+                                <ModalFooter>
+                                    <div className="hidden sm:block">
+                                         <Button className='mr-3'>
+                                            <Link
+                                                to={`/app/orders`}
+                                            >
+                                                Назад към всички поръчки</Link>
+                                        </Button>
+                                        <Button
+                                        onClick={() => { window.location.reload(); setSuccessfulEditModalOpen(false) }}>
+                                            Повторно редактиране
+                                        </Button>
+                                    </div>
+
                                 </ModalFooter>
                             </Modal>
 
@@ -418,6 +478,7 @@ const EditOrder = ({ match }) => {
                                         className="w-full px-4 py-2 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
                                         onClick={(event) => handleAddGroup(event)}
                                         style={{ width: '150px', margin: '10px' }}
+                                        disabled={(submitButtonDisabled)}
                                         layout="outline"
                                     >
                                         Добави Детайл
@@ -435,11 +496,28 @@ const EditOrder = ({ match }) => {
 
                                 </div>
 
-                                <ConfirmationModal
+                                <Modal isOpen={modalOpen}>
+                                    <ModalHeader className="flex items-center">
+                                    Потвърждавате ли направените промени?  
+                                    </ModalHeader>
+                                    <ModalBody>
+
+                                                                       </ModalBody>
+                                    <ModalFooter>
+                                        <div className="hidden sm:block">
+                                            <Button onClick={() => { handleSubmit(); closeModal() }}>
+                                                Потвърждаване                          </Button>
+                                            <Button className='ml-3' layout="outline" onClick={() => { closeModal() }}>
+                                                Отказ                                        </Button>
+                                        </div>
+
+                                    </ModalFooter>
+                                </Modal>
+                                {/* <ConfirmationModal
                                     isOpen={modalOpen}
                                     onClose={() => setModalOpen(false)}
                                     onConfirm={handleSubmit}
-                                />
+                                /> */}
                             </div>
                             {totalSqrt <= 1.5 && (<div className='text-center '>
                                 <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
@@ -447,400 +525,450 @@ const EditOrder = ({ match }) => {
                             {loggedUser.data.role === '[USER]' && orderData.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {orderData.appliedDiscount + 5}% </u></b></HelperText></div>)}
                         </div>
                     </div>
-                    <hr className="customeDivider mx-4 my-5" />
 
+                    <hr className="customeDivider mx-4 my-5" />
+                    <div className='grid md:grid-cols-2 gap-10'>
+                        <div className='  h-15 border-r pr-5 ml-3 border-black '>
+                            <Label htmlFor="doorName" className="  mr-3 font-medium"><b>Материал на поръчката:</b></Label>
+                            <Select className="text-center  mr-3 rounded shadow-sm w-24 "
+                                id="mainDropdown"
+                                name="mainDropdown"
+                                value={mainDropdownValue}
+                                onChange={(event) => handleMainDropdownChange(event)}
+                                required
+
+                            >
+                                <option value="">-Изберете Материал-</option>
+                                <option value="Мембранна вратичка">Мембранна вратичка</option>
+                                <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
+                                <option value="Фурнирован МДФ">Фурнирован МДФ</option>
+                            </Select>
+                            <HelperText className='text-s text-center text-yellow-500'> <b><u>Промямата ще бъде отразена за всички групи !</u></b></HelperText>
+
+                        </div>
+                        <div className=''>
+                            <div className='border-l'></div>
+
+                            <Label htmlFor="note" className="font-medium text-center   "><span><b>Забележка:</b></span></Label>
+                            <Textarea
+                                className="mt-1 border w-full"
+                                type="text"
+                                id={`note`}
+                                name="note"
+                                value={note}
+                                onChange={(event) => { handleNote(event) }}
+                                 />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid  md:grid-cols-1 gap-10">
 
                     {groupForms.map((formData, index) => (
-                        <div className='' >
+                        <div className=''>
                             <div>
-                                <div></div>                                            
-
+                                <div></div>
                             </div>
-                            <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3" >
+                            <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3 pl-5 ">
+                                <div>
 
-                                <form
+                                    <form
 
-                                    id={`orderForm${index}`}
-                                    className="grid grid-cols-4 gap-4  hover:border"
-                                    style={{ padding: '20px', width: '1230px' }}
-                                >
-                                    
-                                    <div></div>
-                                    <div className='text-right'><PageTitle >{index + 1}</PageTitle></div>
-                                    <div></div>
-                                    <div className=''>
-                                        <div className='ml-20'>
-                                            <button type='button' onClick={(event) => handleAddGroup(event)}
-                                                className="text-center w-10 h-10 bg-green-400 hover:bg-green-600"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    strokeWidth={1.5}
-                                                    stroke="currentColor"
-                                                    className="w-10 h-10"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                </svg>
-                                            </button>
-
-
-                                            {index > 0 && (
-
-                                                <button
-                                                    onClick={(event) => handleDeleteGroup(index)}
-                                                    className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800"
-                                                    type="button"
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        strokeWidth={1.5}
-                                                        stroke="currentColor"
-                                                        className="w-10 h-10"
-                                                    >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                                                    </svg>
-                                                </button>
-                                            )}</div>
-
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="doorName" className="block font-medium">Материал:</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            id="doorName"
-                                            name="doorName"
-                                            value={formData.doorName}
-                                            onChange={(event) => { handleChange(event, index); setDoorName(event.target.value) }}
-                                            disabled={index > 0}
-                                            required
-
-                                        >
-                                            <option value="">-Изберете Материал-</option>
-                                            <option value="Мембранна вратичка">Мембранна вратичка</option>
-                                            <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
-                                            <option value="Фурнирован МДФ">Фурнирован МДФ</option>
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        <Label htmlFor={`materialName${index}`} className="block font-medium">Вид:</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            id={`materialName${index}`}
-                                            name={`materialName${index}`}
-                                            value={formData.detailType.material !== '' ? formData.detailType.material : formData.detailType.material}
-                                            onChange={(event) => handleMaterialChange(event, index)}
-                                            required
-                                            disabled={(doorName === '')}
-
-                                        >
-                                            <option value="">-Изберете Вид-</option>
-                                            <option value="Вратичка">Вратичка</option>
-                                            <option value="Страница">Страница</option>
-                                            <option value="Чекмедже">Чекмедже</option>
-                                            <option value="Пиластър">Пиластър</option>
-                                            <option value="Корниз">Корниз</option>
-
-                                        </Select>
-                                        {formData.detailType.material === 'Пиластър' && (
-                                            <div>
-                                                <Label htmlFor={`typeName${index}`}>Пиластър:</Label>
-                                                <Select
-                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                    id={`typeName${index}`}
-                                                    name={`typeName${index}`}
-                                                    value={formData.detailType.type !== '' ? formData.detailType.type : formData.detailType.type}
-                                                    onChange={(event) => { handleTypeChange(event, index) }}
-                                                    required
-                                                >
-                                                    <option value="">-Изберете Пиластър-</option>
-                                                    <option value="P1">P1</option>
-                                                    <option value="P2">P2</option>
-                                                    <option value="P3">P3</option>
-                                                    {/* Add more options here */}
-                                                </Select>
-                                            </div>
-                                        )}
-                                        {formData.detailType.material === 'Чекмедже' && (
-                                            <><div>
-                                                <Select
-                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                    id={`typeName${index}`}
-                                                    name={`typeName${index}`}
-                                                    value={formData.detailType.type !== '' ? formData.detailType.type : formData.detailType.type}
-                                                    onChange={(event) => { handleTypeChange(event, index) }}
-                                                    required
-                                                >
-                                                    <option value="">----------</option>
-                                                    <option value="Обща фрезовка">Обща фрезовка</option>
-                                                    <option value="Изчистен детайл">Изчистен детайл</option>
-                                                    <option value="Корекция на рамка">Корекция на рамка</option>
-                                                    {/* Add more options here */}
-                                                </Select>
-                                            </div></>
-                                        )}
-                                        {formData.detailType.material === 'Корниз' && (
-                                            <><div>
-                                                <Label htmlFor={`typeName${index}`}>Корниз:</Label>
-                                                <Select
-                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                    id={`typeName${index}`}
-                                                    name={`typeName${index}`}
-                                                    value={formData.detailType.type !== '' ? formData.detailType.type : formData.detailType.type}
-
-                                                    onChange={(event) => handleTypeChange(event, index)}
-                                                    required
-                                                >
-                                                    <option value="">-Изберете Корниз-</option>
-                                                    <option value="К1 – 68мм височина">К1 – 68мм височина</option>
-                                                    <option value="К2 – 70мм височина">К2 – 70мм височина</option>
-                                                    <option value="К3 – 80мм височина">К3 – 80мм височина</option>
-                                                    {/* Add more options here */}
-                                                </Select>
-                                            </div></>
-                                        )}
-                                    </div>
-
-                                    {/* Model Name */}
-                                    <div>
-                                        <Label htmlFor="modelName" className="block font-medium">Модел:</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            id="modelName"
-                                            name="modelName"
-                                            value={formData.modelName}
-                                            onChange={(event) => { handleChange(event, index); }}
-                                            disabled={(doorName === '' || formData.detailType.material === "Пиластър" || formData.detailType.material === "Корниз")}
-                                            required
-                                        >
-
-                                            <option value="" selected="selected">-Изберете Модел-</option>
-                                            {modelOptions.map((option, index) => (
-                                                <option key={index} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        {/* Folio Name s
-*/}
-                                        <Label htmlFor="folioName" className="block font-medium">Фолио :</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            id="folioName"
-                                            name="folioName"
-                                            value={formData.folioName}
-                                            onChange={(event) => { handleChange(event, index) }}
-                                            disabled={formData.modelName === '' || doorName === 'Двустранно грундиран МДФ' || doorName === 'Фурнирован МДФ'}
-                                            required
-                                        >
-                                            <option value="" selected="selected">-Изберете Фолио-</option>
-                                            {FolioOptions.map((option, index) => (
-                                                <option key={index} value={option}>
-                                                    {option}
-                                                </option>))}
-                                        </Select>
-                                    </div><div>
-                                        {/* Handle Name */}
-                                        <Label htmlFor="handleName" className="block font-medium">Дръжка</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            type="text"
-                                            id="handleName"
-                                            name="handleName"
-                                            value={formData.handleName !== '' ? formData.handleName : order.handle.name}
-                                            onChange={(event) => { handleChange(event, index) }}
-                                            disabled={formData.modelName === '' || formData.detailType.material === 'Корниз'}
-                                        >
-                                            <option value="Без Дръжка">Без дръжка</option>
-                                            <option value="дръжка H1">дръжка H1</option></Select></div>
-                                    <div>
-                                        {/* Profil Name */}
-                                        <Label htmlFor="profilName" className="block font-medium">Профил:</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            type="text"
-                                            id="profilName"
-                                            name="profilName"
-                                            value={formData.profilName !== '' ? formData.profilName : order.profil.name}
-                                            onChange={(event) => { handleChange(event, index) }}
-                                            required
-                                            disabled={formData.modelName === '' || doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Корниз'}
-                                        >
-                                            <option value="R1">Профил R1</option>
-                                            <option value="R2">Профил R2</option>
-                                            <option value="R3">Профил R3</option>
-                                            <option value="R4">Профил R4</option>
-                                            <option value="R5">Профил R5</option></Select>
-
-
-
-
-
-                                    </div>
-                                    {formData.detailType.material === 'Корниз' ? (
-                                        <>
-                                            <div>
-                                                <Label htmlFor="length" className="block font-medium">Дължина, мм:</Label>
-                                                <Select
-                                                    className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                                    id="length"
-                                                    name="length"
-                                                    value={formData.length !== '' ? formData.length : order.length}
-                                                    onChange={(event) => { handleChange(event, index) }}
-                                                    required
-                                                >
-                                                    <option value="2360">2360мм / 1бр.</option>
-                                                    <option value="1160">1160мм / 0.5бр.</option>
-                                                </Select>
-                                            </div>
-                                        </>
-                                    ) : formData.detailType.material === 'Пиластър' ? (
+                                        id={`orderForm${index}`}
+                                        className="grid grid-cols-4 gap-4  hover:border"
+                                        style={{ padding: '20px', width: '1230px' }}
+                                    >
 
                                         <div>
-                                            {/* Height */}
-                                            <div>
-                                                <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
-                                                <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                                    type="number"
-                                                    id="height"
-                                                    name="height"
-                                                    value={formData.height !== '' ? formData.height : order.height}
-                                                    onChange={(event) => { handleChange(event, index) }}
-                                                    required />
-                                            </div>
+                                            <Label htmlFor="doorName" className=" font-medium">Материал:</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                id="doorName"
+                                                name="doorName"
+                                                value={mainDropdownValue}
+                                                onChange={(event) => { handleMainDropdownChange(event) }}
+                                                disabled
+                                                required
+
+                                            >
+                                                <option value="">-Изберете Материал-</option>
+                                                <option value="Мембранна вратичка">Мембранна вратичка</option>
+                                                <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
+                                                <option value="Фурнирован МДФ">Фурнирован МДФ</option>
+                                            </Select>
+
+                                            {formData.doorName === "" && (<HelperText valid={false}>Моля изберете материал, за да продължите с поръчката!</HelperText>)}
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor={`materialName${index}`} className="block font-medium">Вид:</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                id={`materialName${index}`}
+                                                name={`materialName${index}`}
+                                                value={formData.detailType.material}
+                                                onChange={(event) => handleMaterialChange(event, index)}
+                                                required
+                                                disabled={(formData.doorName === '')}
+
+                                            >
+                                                <option disabled value="">-Изберете Вид-</option>
+                                                <option value="Вратичка">Вратичка</option>
+                                                <option value="Чекмедже">Чекмедже</option>
+                                                <option value="Пиластър">Пиластър</option>
+                                                <option value="Корниз">Корниз</option>
+
+                                            </Select>
                                             {formData.detailType.material === 'Пиластър' && (
                                                 <div>
-                                                    <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                    <Label htmlFor={`typeName${index}`}>Пиластър:</Label>
                                                     <Select
                                                         className="mt-1 w-full p-2 border rounded-md shadow-sm"
                                                         id={`typeName${index}`}
                                                         name={`typeName${index}`}
-                                                        value={formData.width !== '' ? formData.width : order.width}
-                                                        onChange={(event) => { handleChange(event, index) }}
+                                                        value={formData.detailType.type}
+                                                        onChange={(event) => handleTypeChange(event, index)}
                                                         required
                                                     >
-                                                        <option value="50">50</option>
-                                                        <option value="60">60</option>
-                                                        <option value="70">70</option>
-                                                        <option value="80">80</option>
-                                                        <option value="90">90</option>
-                                                        <option value="100">100</option>
-                                                        <option value="110">110</option>
+                                                        <option value="">-Изберете Пиластър-</option>
+                                                        <option value="P1">P1</option>
+                                                        <option value="P2">P2</option>
+                                                        <option value="P3">P3</option>
                                                     </Select>
+                                                    {(formData.detailType.type !== "P1" && formData.detailType.type !== "P2" && formData.detailType.type !== "P3") && (<HelperText valid={false}>Моля изберете пиластър, за да продължите с поръчката!</HelperText>)}
+
                                                 </div>
                                             )}
+                                            {formData.detailType.material === 'Чекмедже' && (
+                                                <><div>
+                                                    <Select
+                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                        id={`typeName${index}`}
+                                                        name={`typeName${index}`}
+                                                        value={formData.detailType.type}
+                                                        onChange={(event) => handleTypeChange(event, index)}
+                                                        required
+                                                        disabled={formData.doorName === ''}
+                                                    >
+                                                        <option disabled selected value="">----------</option>
+                                                        <option value="Обща фрезовка">Обща фрезовка</option>
+                                                        <option value="Изчистен детайл">Изчистен детайл</option>
+                                                        <option value="Корекция на рамка">Корекция на рамка</option>
+                                                    </Select>
+                                                    {(formData.detailType.type !== "Обща фрезовка" && formData.detailType.type !== "Изчистен детайл" && formData.detailType.type !== "Корекция на рамка") && (<HelperText valid={false}>Моля изберете Чекмедже, за да продължите с поръчката!</HelperText>)}
+
+                                                </div></>
+                                            )}
+                                            {formData.detailType.material === 'Корниз' && (
+                                                <><div>
+                                                    <Label htmlFor={`typeName${index}`}>Корниз:</Label>
+                                                    <Select
+                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                        id={`typeName${index}`}
+                                                        name={`typeName${index}`}
+                                                        value={formData.detailType.type}
+                                                        onChange={(event) => handleTypeChange(event, index)}
+                                                        required
+                                                        disabled={formData.doorName === ''}
+                                                    >
+                                                        <option value="">-Изберете Корниз-</option>
+                                                        <option value="К1 – 68мм височина">К1 – 68мм височина</option>
+                                                        <option value="К2 – 70мм височина">К2 – 70мм височина</option>
+                                                        <option value="К3 – 80мм височина">К3 – 80мм височина</option>
+                                                        {/* Add more options here */}
+                                                    </Select>
+                                                    {(formData.detailType.type !== "К1 – 68мм височина" && formData.detailType.type !== "К2 – 70мм височина" && formData.detailType.type !== "К3 – 80мм височина") && (<HelperText valid={false}>Моля изберете Корниз, за да продължите с поръчката!</HelperText>)}
+
+                                                </div></>
+                                            )}
+
                                         </div>
 
-                                    ) : (
-                                        <>
+
+                                        {/* Model Name */}
+                                        <div>
+                                            <Label htmlFor="modelName" className="block font-medium">Модел:</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                id="modelName"
+                                                name="modelName"
+                                                value={formData.modelName}
+                                                onChange={(event) => handleChange(event, index)}
+                                                disabled={(formData.doorName === '' || formData.detailType.material === "Пиластър" || formData.detailType.material === "Корниз")}
+                                                required
+                                            >
+
+                                                <option value="" selected="selected">-Изберете Модел-</option>
+                                                {modelOptions.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            {/* Folio Name s
+*/}
+                                            <Label htmlFor="folioName" className="block font-medium">Фолио :</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                id="folioName"
+                                                name="folioName"
+                                                value={formData.folioName}
+                                                onChange={(event) => handleChange(event, index)}
+                                                disabled={formData.modelName === '' || formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ'}
+                                                required
+                                            >
+                                                <option value="" selected="selected">-Изберете Фолио-</option>
+                                                {FolioOptions.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))}   </Select>
+                                        </div><div>
+                                            {/* Handle Name */}
+                                            <Label htmlFor="handleName" className="block font-medium">Дръжка</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                type="text"
+                                                id="handleName"
+                                                name="handleName"
+                                                value={formData.handleName}
+                                                onChange={(event) => handleChange(event, index)}
+                                                disabled={formData.modelName === '' || formData.detailType.material === 'Корниз'}
+                                            >
+                                                <option value="Без Дръжка">Без дръжка</option>
+                                                <option value="дръжка H1">дръжка H1</option></Select></div>
+                                        <div>
+                                            {/* Profil Name */}
+                                            <Label htmlFor="profilName" className="block font-medium">Профил:</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                type="text"
+                                                id="profilName"
+                                                name="profilName"
+                                                value={formData.profilName}
+                                                onChange={(event) => handleChange(event, index)}
+                                                required
+                                                disabled={formData.modelName === '' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Корниз'}
+                                            >
+                                                <option value="R1">Профил R1</option>
+                                                <option value="R2">Профил R2</option>
+                                                <option value="R3">Профил R3</option>
+                                                <option value="R4">Профил R4</option>
+                                                <option value="R5">Профил R5</option></Select>
+
+
+
+
+
+                                        </div>
+                                        {formData.detailType.material === 'Корниз' ? (
+                                            <>
+                                                <div>
+                                                    <Label htmlFor="length" className="block font-medium">Дължина, мм:</Label>
+                                                    <Select
+                                                        className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                        id="length"
+                                                        name="length"
+                                                        value={formData.length}
+                                                        onChange={(event) => handleChange(event, index)}
+                                                        required
+                                                    >
+                                                        <option value="2360">2360мм / 1бр.</option>
+                                                        <option value="1160">1160мм / 0.5бр.</option>
+                                                    </Select>
+                                                </div>
+                                            </>
+                                        ) : formData.detailType.material === 'Пиластър' ? (
+
                                             <div>
                                                 {/* Height */}
-                                                <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
-                                                <Input className="mt-1 p-2 border rounded-md shadow-sm"
-                                                    type="number"
-                                                    id="height"
-                                                    name="height"
-                                                    value={formData.height}
-                                                    onChange={(event) => handleChange(event, index)}
-                                                    required />
-                                                {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
-                                                    <HelperText valid={false}>минимум 200мм</HelperText>)}
-                                                {formData.height > 2400 && (
-                                                    <HelperText valid={false}>макс 2400мм</HelperText>)}
-                                                {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
-                                                    <HelperText valid={false}>минимум 60мм</HelperText>)}
-                                                {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
-                                                    <HelperText valid={false}>минимум 60мм</HelperText>
+                                                <div>
+                                                    <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                    <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                        type="number"
+                                                        id="height"
+                                                        name="height"
+                                                        value={formData.height}
+                                                        onChange={(event) => handleChange(event, index)}
+                                                        required />
+                                                    {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 200мм</HelperText>)}
+                                                    {formData.height > 2400 && (
+                                                        <HelperText valid={false}>Максималният допустим размер е 2400мм</HelperText>)}
+                                                    {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 60мм</HelperText>)}
+                                                    {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 60мм</HelperText>
+                                                    )}
+
+                                                </div>
+                                                {formData.detailType.material === 'Пиластър' && (
+                                                    <div>
+                                                        <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                        <Select
+                                                            className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                            id='width'
+                                                            name='width'
+                                                            value={formData.width}
+                                                            onChange={(event) => handleChange(event, index)}
+                                                            required
+                                                        >   <option
+                                                            selected value="0">--Изберете Широчина--</option>
+                                                            <option value="50">50</option>
+                                                            <option value="60">60</option>
+                                                            <option value="70">70</option>
+                                                            <option value="80">80</option>
+                                                            <option value="90">90</option>
+                                                            <option value="100">100</option>
+                                                            <option value="110">110</option>
+                                                        </Select>
+                                                        {(formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200)) || (formData.detailType.material === 'Пиластър' && formData.width < 40) && (
+                                                            <HelperText valid={false}>Минималният допустим размер е 200мм</HelperText>)}
+                                                        {formData.width > 1160 && (
+                                                            <HelperText valid={false}>Максималният допустим размер е 1160мм</HelperText>)}
+                                                        {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
+                                                            <HelperText valid={false}>Минималният допустим размер е  60мм</HelperText>)}
+                                                        {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
+                                                            <HelperText valid={false}>Минималният допустим размер е  60мм</HelperText>
+                                                        )}
+                                                        {formData.detailType.material === 'Пиластър' && formData.width < 40 && (
+                                                            <HelperText valid={false}>Минималният допустим размер е 50мм</HelperText>
+                                                        )}
+                                                    </div>
                                                 )}
-
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
-                                                <Input
-                                                    className="mt-1 p-2 border rounded-md shadow-sm"
-                                                    type="number"
-                                                    id="width"
-                                                    name="width"
-                                                    value={formData.width}
-                                                    onChange={(event) => { handleChange(event, index) }}
-                                                    required />
-                                                {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200) && (
-                                                    <HelperText valid={false}>минимум 200мм</HelperText>)}
-                                                {formData.width > 1160 && (
-                                                    <HelperText valid={false}>макс 1160мм</HelperText>)}
-                                                {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
-                                                    <HelperText valid={false}>минимум 60мм</HelperText>)}
-                                                {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
-                                                    <HelperText valid={false}>минимум 60мм</HelperText>
-                                                )}
                                             </div>
 
-                                        </>
-                                    )}
+                                        ) : (
+                                            <>
+                                                <div>
+                                                    {/* Height */}
+                                                    <Label htmlFor="height" className="block font-medium">Височина, мм:</Label>
+                                                    <Input className="mt-1 p-2 border rounded-md shadow-sm"
+                                                        type="number"
+                                                        id="height"
+                                                        name="height"
+                                                        value={formData.height}
+                                                        onChange={(event) => handleChange(event, index)}
+                                                        required />
+                                                    {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 200) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е  200мм</HelperText>)}
+                                                    {formData.height > 2400 && (
+                                                        <HelperText valid={false}>Максималният допустим размер е  2400мм</HelperText>)}
+                                                    {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.height < 60) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е  60мм</HelperText>)}
+                                                    {formData.detailType.material === 'Чекмедже' && formData.height < 60 && (
+                                                        <HelperText valid={false}>Минималният допустим размер е  60мм</HelperText>
+                                                    )}
 
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="width" className="block font-medium">Широчина, мм:</Label>
+                                                    <Input
+                                                        className="mt-1 p-2 border rounded-md shadow-sm"
+                                                        type="number"
+                                                        id="width"
+                                                        name="width"
+                                                        value={formData.width}
+                                                        onChange={(event) => handleChange(event, index)}
+                                                        required />
+                                                    {formData.detailType.material !== 'Чекмедже' && !(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 200) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 200мм</HelperText>)}
+                                                    {formData.width > 1160 && (
+                                                        <HelperText valid={false}>Максималният допустим размер е  1160мм</HelperText>)}
+                                                    {(formData.modelName === 'Без модел A100' || formData.modelName === 'B503' || formData.modelName === 'B505' || formData.modelName === 'B810' || formData.modelName === 'A811') && (formData.width < 60) && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 60мм</HelperText>)}
+                                                    {formData.detailType.material === 'Чекмедже' && formData.width < 60 && (
+                                                        <HelperText valid={false}>Минималният допустим размер е 60мм</HelperText>
+                                                    )}
+                                                </div>
 
-                                    <div>
-                                        {/* Number */}
-                                        <Label htmlFor="number" className="block font-medium">Брой:</Label>
-                                        <Input
-                                            className="mt-1 p-2 border rounded-md shadow-sm"
-                                            type="number"
-                                            id={`number${index}`}
-                                            name="number"
-                                            value={formData.number}
-                                            onChange={(event) => { handleChange(event, index) }}
-                                            required disabled={formData.detailType.material == 'Пиластър'}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Ламиниране:</Label>
-                                        <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
-                                            type="boolean"
-                                            id={`bothSidesLaminated${index}`}
-                                            name="bothSidesLaminated"
-                                            value={formData.bothSidesLaminated}
-                                            onChange={(event) => { handleChange(event, index) }}
-                                            disabled={doorName === 'Двустранно грундиран МДФ' || doorName === 'Фурнирован МДФ'}
-                                        >
-                                            <option value="false">Едностранно ламиниране</option>
-                                            <option value="true">Двустранно ламиниране</option>
-                                        </Select>
-
-
-
-
-
-                                    </div>
-
-
-                                </form>
-                                <div className='grid md:grid-cols-4'>
-                                    <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
-                                    <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
-                                        ? `1бр. / ${handlePrice}лв.`
-                                        : `0бр. / ${handlePrice}лв.`} </b></div> </div>
-
-                                    <div className="grid md:grid-rows-2 text-center border">
+                                            </>
+                                        )}
                                         <div>
-                                            {formData.bothSidesLaminated === "false"
-                                                ? "Едностранно ламиниране"
-                                                : "Двустранно ламиниране"}
+                                            {/* Number */}
+                                            <Label htmlFor="number" className="block font-medium">Брой:</Label>
+                                            <Input
+                                                className="mt-1 p-2 border rounded-md shadow-sm"
+                                                type="number"
+                                                id={`number${index}`}
+                                                name="number"
+                                                value={formData.number}
+                                                onChange={(event) => handleChange(event, index)}
+                                                required />
                                         </div>
-                                        <div className="">
-                                            <b>{groupSqrt[index]} кв.м</b>
+                                        <div className=''>
+                                            <Label>Ламиниране:</Label>
+                                            <Select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                                                type="boolean"
+                                                id={`bothSidesLaminated${index}`}
+                                                name="bothSidesLaminated"
+                                                value={formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз' ? false : formData.bothSidesLaminated}
+                                                onChange={(event) => handleChange(event, index)}
+                                                disabled={formData.doorName === 'Двустранно грундиран МДФ' || formData.doorName === 'Фурнирован МДФ' || formData.detailType.material === 'Пиластър' || formData.detailType.material === 'Корниз'}
+                                            >
+                                                <option value="false">Едностранно ламиниране</option>
+                                                <option value="true">Двустранно ламиниране</option>
+                                            </Select>
                                         </div>
-                                    </div>
-                                    <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
+                                        <div><div className='text-center border-l border-r border-black'><PageTitle >Група № {index + 1}</PageTitle>
+                                        </div></div>
+                                        <div className='mt-5'>
+                                            <div className='ml-20 '>
 
+                                                <Button
+                                                    onClick={(event, index) => handleAddGroup(event, index)}
+                                                    className="text-center w-10 h-10 bg-green-400 hover:bg-green-600 rounded-md"
+                                                    disabled={(submitButtonDisabled)}
+                                                    layout="outline"
+                                                >
+                                                    +
+                                                </Button>
+
+
+
+
+
+                                                {index > 0 && (
+
+                                                    <Button
+                                                        onClick={(event) => handleDeleteGroup(index)}
+                                                        className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800 rounded-md
+
+                                                    "
+                                                        type="button"
+                                                        layout="outline"
+                                                    >
+                                                        -
+                                                    </Button>
+                                                )}</div>
+
+                                        </div>
+                                    </form>
+                                    <div className='grid md:grid-cols-4 h-100 pb-5'>
+                                        <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
+                                        <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
+                                            ? `1бр. / ${handlePrice}лв.`
+                                            : "0бр./ 0лв."} </b></div> </div>
+
+                                        <div className="grid md:grid-rows-2 text-center border">
+                                            <div>
+                                                {formData.bothSidesLaminated === "false"
+                                                    ? "Едностранно ламиниране"
+                                                    : "Двустранно ламиниране"}
+                                            </div>
+                                            <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
+
+                                                <div className="">
+                                                    <b>{groupSqrt[index]} кв.м</b>
+                                                </div>)
+                                            }</div>
+
+                                        </div>
+                                        <div className='border grid md:grid-rows-2 text-center'><div>Цена на групата :</div> <div> <b>{groupPrices[index]}лв. с ДДС</b></div></div>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
 
+
                     ))}
+
                 </div></div ></>)
 }
 

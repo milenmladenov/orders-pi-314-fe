@@ -5,6 +5,12 @@ import PageTitle from "../components/Typography/PageTitle";
 import "../assets/css/groups-in-rows.css"
 import ConfirmationModal from '../components/ConfirmationModal';
 import { config } from '../Constants';
+import {
+    Select, Input, Label, HelperText, Button, Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter, Textarea
+} from "@windmill/react-ui";
 
 
 
@@ -222,9 +228,9 @@ const NewExcelOrderForm = () => {
                     className="mt-1"
                 />
 
-                <div>
+                <div className='w-1/5'>
                     <label htmlFor="doorName" className="block font-medium">Материал:</label>
-                    <select className="mt-1 w-full p-2 border rounded-md shadow-sm"
+                    <Select className="mt-1 p-2 rounded shadow-sm"
                         id="mainDropdown"
                         name="mainDropdown"
                         value={mainDropdownValue}
@@ -236,7 +242,7 @@ const NewExcelOrderForm = () => {
                         <option value="Мембранна вратичка">Мембранна вратичка</option>
                         <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
                         <option value="Фурнирован МДФ">Фурнирован МДФ</option>
-                    </select>
+                    </Select>
                 </div>
             </div>
 
