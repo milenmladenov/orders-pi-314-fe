@@ -12,7 +12,9 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import "../assets/css/groups-in-rows.css"
 import modelOptions from '../components/modelOptions';
 import FolioOptions from '../components/FolioOptions';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import ThemedSuspense from "../components/ThemedSuspense";
+
 
 
 
@@ -34,13 +36,15 @@ const EditOrder = ({ match }) => {
     const [groupSqrt, setGroupSqrt] = useState(0);
     const [totalSqrt, setTotalSqrt] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
-    const [orderPreflightUrl, setOrderPreflightUrl] = useState();
+    const [orderPreflightUrl, setOrderPreflightUrl] = useState(apiBaseUrl + '/api/orders/new-order/preflight');
     const [orderUrl, setOrderUrl] = useState();
     const [isDataLoadModalOpen, setIsDataLoadModalOpen] = useState(false);
     const [elementNumber, setElementNumber] = useState(0);
     const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]);
     const [selectedDoor, setSelectedDoor] = useState('');
     const [successfulEditModalOpen, setSuccessfulEditModalOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true);
+
 
 
     const [handleNumber, setHandleNumber] = useState(0);
@@ -227,7 +231,7 @@ const EditOrder = ({ match }) => {
                 });
 
                 setGroupPrices(groupPrices)
-
+                setIsLoading(false);
 
 
             } catch (error) {
@@ -247,7 +251,7 @@ const EditOrder = ({ match }) => {
     }, [groupForms]);
 
     function openModal() {
-        setIsDataLoadModalOpen(true)        // window.location.reload();
+        setIsDataLoadModalOpen(false)        // window.location.reload();
     }
     const handleMainDropdownChange = (event) => {
 
@@ -405,8 +409,8 @@ const EditOrder = ({ match }) => {
 
 
 
-    if (!orderData) {
-        return <div>Loading...</div>;
+    if (isLoading) {
+        return <><ThemedSuspense /></>;
     }
 
     return (
