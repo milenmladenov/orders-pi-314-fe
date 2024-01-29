@@ -193,7 +193,7 @@ const SingleOrder = ({ match }) => {
     return (
         console.log(order),
 
-        <>
+        <><br></br>
             <div className='border border-black mr-10 w-full'  >
 
                 <div className='text-center border border-black' >
@@ -340,13 +340,14 @@ const SingleOrder = ({ match }) => {
                         <Table>
 
                         </Table>
-                        <div id='notes'><div><p className=' ml-3  content-end text-left mr-3 grid '><span className=' font-semibold content-end text-left mr-3 mt-3 mb-3'>Забележка :</span> <span>{order.note}</span></p> </div></div>
+                        <div id='notes'><div><p className=' ml-3  content-end text-left mr-3 grid '><span className=' font-semibold content-end text-left mr-3 mt-3 mb-3'>Забележка : <span className='font-normal'>{order.note}</span></span> </p> </div></div>
 
                     </TableContainer>
                     <div></div>
                 </div>
 
-            </div></>
+            </div><div><br></br></div></>
+            
     );
 };
 
