@@ -318,11 +318,15 @@ const EditOrder = ({ match }) => {
                 }
                 ),
             }).then(response => {
+                setIsLoading(true)
                 if (response.ok) {
+                    setIsLoading(false)
                     setSuccessfulEditModalOpen(true)
                 }
                 
-            }).catch(error => {setErrorModalOpen(true);
+            }).catch(error => {
+                setIsLoading(false)
+                setErrorModalOpen(true);
             console.log("Greshka:" + error)})
            
 
