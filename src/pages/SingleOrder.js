@@ -55,23 +55,28 @@ const SingleOrder = ({ match }) => {
     };
 
     const captureScreenshotAndConvertToPDF = () => {
-        const pdf = new jsPDF('p', 'pt', 'letter');
+
+        const pdf = new jsPDF('p', 'mm', [297, 210]);
         // Select the component or container to capture
         const componentToCapture = document.getElementById('singleOrderComponent');
+        let width = pdf.internal.pageSize.getWidth();
+        let height = pdf.internal.pageSize.getHeight();
         // Use html2canvas to capture the component as an image
-    html2canvas(componentToCapture).then(canvas => {
-        
+        html2canvas(componentToCapture).then(canvas => {
+
             const imgData = canvas.toDataURL('image/png');
             pdf.addFileToVFS('PTSans-Regular-normal.ttf', font);
             pdf.addFont('PTSans-Regular-normal.ttf', 'PTSans-Regular', 'normal');
-        pdf.addImage(Logo, 'PNG', 0, 0, 100, 66);
-            pdf.addImage(imgData, 'PNG', 0, 90, 615, 410);
-            pdf.save(order.orderUuid + '.pdf');
+            pdf.margin = {
+                horiz: 5,
+                vert: 20  
+            };
+            pdf.addImage(Logo, 'PNG', 5, 0, 20, 20)
+            pdf.addImage(imgData, 'JPEG', 0, 20, width , height - 20);
+            pdf.save(order.orderUuid + '.pdf')
 
-        
-            
         })
-        
+
     };
 
     const isHashFromUrl = () => {
@@ -83,17 +88,17 @@ const SingleOrder = ({ match }) => {
 
     const savePdf = () => {
         const doc = new jsPDF()
-        doc.setFont('Roboto-Regular','normal')
+        doc.setFont('Roboto-Regular', 'normal')
         autoTable(doc, {
-            head: [['nomer', 'etiket', 'model','Vid', 'folio', 'profil','drujka', 'visochina', 'shirina','duljina', 'broi', 'dryjka stojnost','dwustr lam','stoinost']],
+            head: [['nomer', 'etiket', 'model', 'Vid', 'folio', 'profil', 'drujka', 'visochina', 'shirina', 'duljina', 'broi', 'dryjka stojnost', 'dwustr lam', 'stoinost']],
             body: [
-              ['1', '4-2', 'Sweden','1', '4-2', 'Sweden','1', '4-2', 'Sweden','1', '4-2', 'Sweden', '4-2', 'Sweden']
-              
-              // ...
+                ['1', '4-2', 'Sweden', '1', '4-2', 'Sweden', '1', '4-2', 'Sweden', '1', '4-2', 'Sweden', '4-2', 'Sweden']
+
+                // ...
             ],
-          })
-          
-          doc.save('table.pdf')
+        })
+
+        doc.save('table.pdf')
 
     }
     useEffect(() => {
@@ -205,11 +210,11 @@ const SingleOrder = ({ match }) => {
                             </>
                         )}   <Button id="pdf-button" onClick={captureScreenshotAndConvertToPDF}>PDF</Button></div>
                     </PageTitle>        </div>
-                <div id="singleOrderComponent ">
-                    <div id= 'header-1' className='pdf-component grid grid-cols-2 h-10 mb-4 border-black  border'><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border-l border-black'><p className='ml-3'>Номер: {order.orderUuid}</p></div></div>
+                <div id="singleOrderComponent">
+                    <div id='header-1' className='pdf-component grid grid-cols-2 h-10 mb-4 border-black  border'><div className='text-right border'><p className='mr-3'>От дата: {order.createdAt}</p></div><div className='  text-left border-l border-black'><p className='ml-3'>Номер: {order.orderUuid}</p></div></div>
 
-                    <div id= 'header-1' className='pdf-component grid grid-cols-2 border border-black mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
-                    <div id= 'header-1' className='pdf-component grid grid-cols-2 border-l border-r border-black mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
+                    <div id='header-1' className='pdf-component grid grid-cols-2 border border-black mb-4 '><div className='grid grid-cols-1 ml-3 mt-3 mb-3 space-y-[5px]'><div className='mb-2'>Фирма: {order.user.companyName}</div><div className='mb-2'>Град: {order.user.city}</div><div className='mb-2'>Адрес: {order.user.companyAddress}</div><div className='mb-2'>ЕИК/ВАТ: {order.user.bulstat}</div><div>МОЛ: {order.user.mol}</div></div><div className='grid grid-cols-1 border'><div className='ml-3 mt-3'>Телефон: {order.user.phone}</div><div className='ml-3'>Адрес на доставка: {order.deliveryAddress}</div></div></div>
+                    <div id='header-1' className='pdf-component grid grid-cols-2 border-l border-r border-black mb-5'><h1 className='ml-3'>Материал: <span className='font-semibold'> {order.groups[0].door.name}</span></h1>
                     </div>
                     <TableContainer>
 
@@ -238,7 +243,7 @@ const SingleOrder = ({ match }) => {
 
                                     <TableRow className='border border-black text-l' key={j}>
                                         <TableCell className='border-r   border-black'>{j + 1}</TableCell>
-                                        <TableCell className='border-r border-black'>{order.id}-{j+1}</TableCell>
+                                        <TableCell className='border-r border-black'>{order.id}-{j + 1}</TableCell>
                                         <TableCell className='border-r border-black'>{group.model.name}</TableCell>
                                         <TableCell className='border-r border-black'>
                                             {group.detailType.material}{' '}
@@ -340,7 +345,7 @@ const SingleOrder = ({ match }) => {
                     </TableContainer>
                     <div></div>
                 </div>
-                
+
             </div></>
     );
 };

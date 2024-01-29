@@ -23,7 +23,7 @@ const EditOrder = ({ match }) => {
     const apiBaseUrl = config.url.API_BASE_URL;
     const [mainDropdownValue, setMainDropdownValue] = useState();
     const [note, setNote] = useState('');
-
+    const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [order, setOrder] = useState(null);
     const orderId = match.params.id; // Get the orderId from the route parameter
     const token = localStorage.getItem('accessToken')
@@ -40,7 +40,7 @@ const EditOrder = ({ match }) => {
     const [elementNumber, setElementNumber] = useState(0);
     const [groupButtonVisibility, setGroupButtonVisibility] = useState([true]);
     const [selectedDoor, setSelectedDoor] = useState('');
-    const [successfulEditModalOpen,setSuccessfulEditModalOpen] = useState(false)
+    const [successfulEditModalOpen, setSuccessfulEditModalOpen] = useState(false)
 
 
     const [handleNumber, setHandleNumber] = useState(0);
@@ -110,12 +110,10 @@ const EditOrder = ({ match }) => {
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Нещо се обърка! Статус на грешката :' + response.status);
             }
 
             const data = await response.json();
-            console.log(loggedUser.data.role);
-            console.log(data);
             setElementNumber(data.totalElements);
             setSelectedDoor(data.doorName)
 
@@ -268,7 +266,7 @@ const EditOrder = ({ match }) => {
 
         const selectedValue = event.target.value;
         setNote(selectedValue);
-        
+
     };
     const handleSubmit = () => {
         try {
@@ -304,21 +302,29 @@ const EditOrder = ({ match }) => {
 
 
             // Send the updated order to the server using a PUT request
-            const response = fetch(apiBaseUrl + '/api/orders/edit-order/' + orderId, {
+            fetch(apiBaseUrl + '/api/orders/edit-order/' + orderId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                groups: updatedGroups,
-                note: note
+                    groups: updatedGroups,
+                    note: note
                 }
                 ),
-            });
-        setSuccessfulEditModalOpen(true);   
+            }).then(response => {
+                if (response.ok) {
+                    setSuccessfulEditModalOpen(true)
+                }
+                
+            }).catch(error => {setErrorModalOpen(true);
+            console.log("Greshka:" + error)})
+           
+
         } catch (error) {
-            console.error('Error:', error);
+
+            console.error("329" + error)
         }
     }
 
@@ -348,7 +354,7 @@ const EditOrder = ({ match }) => {
     };
     function closeModal() {
         setIsDataLoadModalOpen(false);
-        setModalOpen(false); 
+        setModalOpen(false);
     }
 
     const handleChange = (event, index) => {
@@ -441,8 +447,23 @@ const EditOrder = ({ match }) => {
                                 </ModalBody>
                                 <ModalFooter>
                                     <div className="hidden sm:block">
-                                        <Button onClick={() => { handlePreflight(); closeModal() ;}}>
+                                        <Button onClick={() => { handlePreflight(); closeModal(); }}>
                                             Зареждане на Данни
+                                        </Button>
+                                    </div>
+
+                                </ModalFooter>
+                            </Modal>
+                            <Modal isOpen={errorModalOpen}>
+                                <ModalHeader className="flex items-center">
+                                    Възникна сървърна грешка при опит за редактиране. Моля презаредете страницата и опитайте отново.
+                                </ModalHeader>
+                                <ModalBody>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <div className="hidden sm:block">
+                                        <Button onClick={() => { window.location.reload() }}>
+                                            Презареждане на страницата!
                                         </Button>
                                     </div>
 
@@ -457,14 +478,14 @@ const EditOrder = ({ match }) => {
                                 </ModalBody>
                                 <ModalFooter>
                                     <div className="hidden sm:block">
-                                         <Button className='mr-3'>
+                                        <Button className='mr-3'>
                                             <Link
                                                 to={`/app/orders`}
                                             >
                                                 Назад към всички поръчки</Link>
                                         </Button>
                                         <Button
-                                        onClick={() => { window.location.reload(); setSuccessfulEditModalOpen(false) }}>
+                                            onClick={() => { window.location.reload(); setSuccessfulEditModalOpen(false) }}>
                                             Повторно редактиране
                                         </Button>
                                     </div>
@@ -498,11 +519,11 @@ const EditOrder = ({ match }) => {
 
                                 <Modal isOpen={modalOpen}>
                                     <ModalHeader className="flex items-center">
-                                    Потвърждавате ли направените промени?  
+                                        Потвърждавате ли направените промени?
                                     </ModalHeader>
                                     <ModalBody>
 
-                                                                       </ModalBody>
+                                    </ModalBody>
                                     <ModalFooter>
                                         <div className="hidden sm:block">
                                             <Button onClick={() => { handleSubmit(); closeModal() }}>
@@ -557,7 +578,7 @@ const EditOrder = ({ match }) => {
                                 name="note"
                                 value={note}
                                 onChange={(event) => { handleNote(event) }}
-                                 />
+                            />
                         </div>
                     </div>
                 </div>
