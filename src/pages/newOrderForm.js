@@ -404,76 +404,9 @@ const NewOrderForm = () => {
 
 
         <>
-            <div className="grid gap-2 mb-12 md:grid-cols-2">
-                <div className="col-span-12 text-center sticky-top ">
-                    <PageTitle>Създаване на нова поръчка</PageTitle>
-                    <div className="grid md:grid-cols-1 ml-20 ">
-                        <div className='grid md:grid-cols-5'>
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. детайли</div><div className=''> <b>{elementNumber}</b></div> </div>
-
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
-                            </div> </div>
-
-                            <div className="grid md:grid-rows-2 text-center border">Общо ламиниране
-
-                                <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
-
-                                    <div className="">
-                                        <b>{totalSqrt} кв.м</b>
-                                    </div>)
-                                }</div>
-                            </div>
-                            <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
-
-                        </div>
-
-
-                        <div className='grid md:grid-cols-2 '>
-                            <div className='text-right'>
-                                <Button
-                                    className="w-full px-4 py-2 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
-                                    onClick={(event, index) => handleAddGroup(event, index + 1)}
-                                    style={{ width: '150px', margin: '10px' }}
-                                    disabled={(submitButtonDisabled)}
-                                    layout="outline"
-                                >
-                                    Добави Детайл
-                                </Button></div>
-                            <div className='text-left'>
-                                <Button
-                                    type="button"
-                                    style={{ width: '150px', margin: '10px' }}
-                                    className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                    disabled={(submitButtonDisabled)}
-                                    onClick={() => setIsModalOpen(true)}
-                                >
-                                    Завърши
-                                </Button>
-
-                            </div>
-
-                            <ConfirmationModal
-                                isOpen={modalOpen}
-                                onClose={() => setModalOpen(false)}
-                                onConfirm={handleSubmit}
-
-                            />
-                        </div>
-                        {totalSqrt <= 1.5 && (<div className='text-center '>
-
-                            <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
-
-                        {loggedUser.data.role === '[USER]' && data.appliedDiscount === null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от 5% </u></b></HelperText></div>)}
-                        {loggedUser.data.role === '[USER]' && data.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {data.appliedDiscount}% </u></b></HelperText></div>)}
-                    </div>
-
-                    <hr className="customeDivider mx-4 my-5" />
-
-                </div>
-
-                <div className="grid  md:grid-cols-1 gap-10">
-
+            <div className="">
+                <div className="grid md:grid-cols-1 gap-10 justify-center">
+                <div className="text-center "><PageTitle >Създаване на нова поръчка</PageTitle></div>
                     {groupForms.map((formData, index) => (
 
                         <>
@@ -509,7 +442,7 @@ const NewOrderForm = () => {
 
                                 </ModalFooter>
                             </Modal><><Modal isOpen={isModalOpen} onClose={closeModal}>
-                                <ModalHeader className="flex items-center">
+                                <ModalHeader className="grid items-center">
                                     Допълнителна информация
                                 </ModalHeader>
                                 <ModalBody>
@@ -612,7 +545,7 @@ const NewOrderForm = () => {
 
                                                 <Label htmlFor="deliveryAddress" className="font-medium mt-3 mb-3"><span>Адрес:</span></Label>
                                                 <Textarea
-                                                    className="mt-1  w-full"
+                                                    className="mt-1 w-full"
                                                     type="text"
                                                     id={`deliveryAddress${index}`}
                                                     name="deliveryAddress"
@@ -653,14 +586,13 @@ const NewOrderForm = () => {
                                     <div>
                                         <div></div>
                                     </div>
-                                    <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3 pl-5 ">
-                                        <div>
+                                    <div key={index} className=" ">
+                                        <div className=''> 
 
                                             <form
 
                                                 id={`orderForm${index}`}
-                                                className="grid grid-cols-4 gap-4  hover:border"
-                                                style={{ padding: '20px', width: '1230px' }}
+                                                className="grid grid-cols-4 gap-4 p-5 w-full h-1/4"
                                             >
 
                                                 <div>
@@ -993,7 +925,7 @@ const NewOrderForm = () => {
                                                 <div><div className='text-center border-l border-r border-black'><PageTitle >Група № {index + 1}</PageTitle>
                                                 </div></div>
                                                 <div className='mt-5'>
-                                                    <div className='ml-20 '>
+                                                    <div className=''>
                                                         {groupButtonVisibility[index] && (
                                                             <Button
                                                                 onClick={(event,index) => handleAddGroup(event, index)}
@@ -1012,7 +944,7 @@ const NewOrderForm = () => {
 
                                                             <Button
                                                                 onClick={(event) => handleDeleteGroup(index)}
-                                                                className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800 rounded-md
+                                                                className="border w-10 h-10 ml-5 bg-red-500 hover:bg-red-800 rounded-md
 
                                                                 "
                                                                 type="button"
@@ -1024,7 +956,7 @@ const NewOrderForm = () => {
 
                                                 </div>
                                             </form>
-                                            <div className='grid md:grid-cols-4 h-100 pb-5'>
+                                            <div className='grid md:grid-cols-4 h-100 pb-5 border p-3'>
                                                 <div className='grid md:grid-rows-2 text-center border'><div>Вратичка на кв.м.</div><div className=''> <b>{groupSqrt[index]} кв.м/ {groupPrices[index]}лв. с ДДС</b></div> </div>
                                                 <div className='grid md:grid-rows-2 text-center border'><div>Дръжка, бр.</div><div className=''> <b>{formData.handleName !== "Без Дръжка"
                                                     ? `1бр. / ${handlePrice}лв.`
@@ -1050,6 +982,73 @@ const NewOrderForm = () => {
                                     </div>
                                 </div></></>
                     ))}
+                                                        
+                                                       
+                </div> <div className="col-span-12 text-center  ">
+                    
+                    <div className="grid md:grid-cols-1 border-t border-black p-5">
+                        <div className='grid md:grid-cols-5'>
+                            <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
+                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. детайли</div><div className=''> <b>{elementNumber}</b></div> </div>
+
+                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
+                            </div> </div>
+
+                            <div className="grid md:grid-rows-2 text-center border">Общо ламиниране
+
+                                <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
+
+                                    <div className="">
+                                        <b>{totalSqrt} кв.м</b>
+                                    </div>)
+                                }</div>
+                            </div>
+                            <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
+
+                        </div>
+
+
+                        <div className='grid md:grid-cols-2 '>
+                            <div className=''>
+                                <Button
+                                    className="w-1/3 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
+                                    onClick={(event, index) => handleAddGroup(event, index + 1)}
+                                 
+                                    disabled={(submitButtonDisabled)}
+                                    layout="outline"
+                                >
+                                    Добави Детайл
+                                </Button></div>
+                            <div className=''>
+                                <Button
+                                    type="button"
+                                    
+                                    className="w-1/3  text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
+                                    disabled={(submitButtonDisabled)}
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    Завърши
+                                </Button>
+
+                            </div>
+
+                            <ConfirmationModal
+                                isOpen={modalOpen}
+                                onClose={() => setModalOpen(false)}
+                                onConfirm={handleSubmit}
+
+                            />
+                        </div>
+                        {totalSqrt <= 1.5 && (<div className='text-center '>
+
+                            <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
+
+                        {loggedUser.data.role === '[USER]' && data.appliedDiscount === null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от 5% </u></b></HelperText></div>)}
+                        {loggedUser.data.role === '[USER]' && data.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {data.appliedDiscount}% </u></b></HelperText></div>)}
+                    </div>
+
+                    <hr className="customeDivider mx-4 my-5" />
+
                 </div></div ></>)
 }
 export default NewOrderForm;

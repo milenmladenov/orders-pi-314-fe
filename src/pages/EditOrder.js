@@ -416,193 +416,22 @@ if (isLoading) {
 
 return (
     <>
-        <div className="grid gap-2 mb-12 md:grid-cols-2">
-            <div className="col-span-12 text-center sticky-top ">
-                <PageTitle>Редактиране на поръчка</PageTitle>
-
-                <div>
-
-                    <div className="grid md:grid-cols-1 ml-20 ">
-                        <div className='grid md:grid-cols-5'>
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. детайли</div><div className=''> <b>{elementNumber}</b></div> </div>
-
-                            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
-                            </div> </div>
-
-                            <div className="grid md:grid-rows-2 text-center border">Общо ламиниране
-
-                                <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
-
-                                    <div className="">
-                                        <b>{totalSqrt} кв.м</b>
-                                    </div>)
-                                }</div>
-                            </div>
-                            <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
-
-                        </div>
-                        <Modal isOpen={isDataLoadModalOpen}>
-                            <ModalHeader className="flex items-center">
-                                Редактиране на поръчка !
-                            </ModalHeader>
-                            <ModalBody>
-
-                                Ще редактирате поръчка с номер {orderData.id}, създадена на {orderData.createdAt} !
-                            </ModalBody>
-                            <ModalFooter>
-                                <div className="hidden sm:block">
-                                    <Button onClick={() => { handlePreflight(); closeModal(); }}>
-                                        Зареждане на Данни
-                                    </Button>
-                                </div>
-
-                            </ModalFooter>
-                        </Modal>
-                        <Modal isOpen={errorModalOpen}>
-                            <ModalHeader className="flex items-center">
-                                Възникна сървърна грешка при опит за редактиране. Моля презаредете страницата и опитайте отново.
-                            </ModalHeader>
-                            <ModalBody>
-                            </ModalBody>
-                            <ModalFooter>
-                                <div className="hidden sm:block">
-                                    <Button onClick={() => { window.location.reload() }}>
-                                        Презареждане на страницата!
-                                    </Button>
-                                </div>
-
-                            </ModalFooter>
-                        </Modal>
-                        <Modal isOpen={successfulEditModalOpen}>
-                            <ModalHeader className="flex items-center">
-                                Редактирането на поръчката е успешно!
-                            </ModalHeader>
-                            <ModalBody>
-
-                            </ModalBody>
-                            <ModalFooter>
-                                <div className="hidden sm:block">
-                                    <Button className='mr-3'>
-                                        <Link
-                                            to={`/app/orders`}
-                                        >
-                                            Назад към всички поръчки</Link>
-                                    </Button>
-                                    <Button
-                                        onClick={() => { window.location.reload(); setSuccessfulEditModalOpen(false) }}>
-                                        Повторно редактиране
-                                    </Button>
-                                </div>
-
-                            </ModalFooter>
-                        </Modal>
-
-                        <div className='grid md:grid-cols-2 '>
-                            <div className='text-right'>
-                                <Button
-                                    className="w-full px-4 py-2 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
-                                    onClick={(event) => handleAddGroup(event)}
-                                    style={{ width: '150px', margin: '10px' }}
-                                    disabled={(submitButtonDisabled)}
-                                    layout="outline"
-                                >
-                                    Добави Детайл
-                                </Button></div>
-                            <div className='text-left'>
-                                <Button
-                                    type="button"
-                                    style={{ width: '150px', margin: '10px' }}
-                                    className="w-full py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
-                                    disabled={submitButtonDisabled}
-                                    onClick={() => setModalOpen(true)}
-                                >
-                                    Завърши
-                                </Button>
-
-                            </div>
-
-                            <Modal isOpen={modalOpen}>
-                                <ModalHeader className="flex items-center">
-                                    Потвърждавате ли направените промени?
-                                </ModalHeader>
-                                <ModalBody>
-
-                                </ModalBody>
-                                <ModalFooter>
-                                    <div className="hidden sm:block">
-                                        <Button onClick={() => { handleSubmit(); closeModal() }}>
-                                            Потвърждаване                          </Button>
-                                        <Button className='ml-3' layout="outline" onClick={() => { closeModal() }}>
-                                            Отказ                                        </Button>
-                                    </div>
-
-                                </ModalFooter>
-                            </Modal>
-                            {/* <ConfirmationModal
-                                    isOpen={modalOpen}
-                                    onClose={() => setModalOpen(false)}
-                                    onConfirm={handleSubmit}
-                                /> */}
-                        </div>
-                        {totalSqrt <= 1.5 && (<div className='text-center '>
-                            <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
-                        {loggedUser.data.role === '[USER]' && orderData.appliedDiscount === null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от 5% </u></b></HelperText></div>)}
-                        {loggedUser.data.role === '[USER]' && orderData.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {orderData.appliedDiscount + 5}% </u></b></HelperText></div>)}
-                    </div>
-                </div>
-
-                <hr className="customeDivider mx-4 my-5" />
-                <div className='grid md:grid-cols-2 gap-10'>
-                    <div className='  h-15 border-r pr-5 ml-3 border-black '>
-                        <Label htmlFor="doorName" className="  mr-3 font-medium"><b>Материал на поръчката:</b></Label>
-                        <Select className="text-center  mr-3 rounded shadow-sm w-24 "
-                            id="mainDropdown"
-                            name="mainDropdown"
-                            value={mainDropdownValue}
-                            onChange={(event) => handleMainDropdownChange(event)}
-                            required
-
-                        >
-                            <option value="">-Изберете Материал-</option>
-                            <option value="Мембранна вратичка">Мембранна вратичка</option>
-                            <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
-                            <option value="Фурнирован МДФ">Фурнирован МДФ</option>
-                        </Select>
-                        <HelperText className='text-s text-center text-yellow-500'> <b><u>Промямата ще бъде отразена за всички групи !</u></b></HelperText>
-
-                    </div>
-                    <div className=''>
-                        <div className='border-l'></div>
-
-                        <Label htmlFor="note" className="font-medium text-center   "><span><b>Забележка:</b></span></Label>
-                        <Textarea
-                            className="mt-1 border w-full"
-                            type="text"
-                            id={`note`}
-                            name="note"
-                            value={note}
-                            onChange={(event) => { handleNote(event) }}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid  md:grid-cols-1 gap-10">
+        <div className="grid ">
+            <div className="grid  md:grid-cols-1 gap-10 justify-center">
+            <div className="text-center"><PageTitle >Редактиране на поръчка</PageTitle></div>
 
                 {groupForms.map((formData, index) => (
                     <div className=''>
                         <div>
                             <div></div>
                         </div>
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-1 gap-2 cols-span-3 pl-5 ">
+                        <div key={index} className="">
                             <div>
 
                                 <form
-
                                     id={`orderForm${index}`}
-                                    className="grid grid-cols-4 gap-4  hover:border"
-                                    style={{ padding: '20px', width: '1230px' }}
+                                    className="grid grid-cols-4 gap-4 p-5 w-full "
+                                   
                                 >
 
                                     <div>
@@ -934,12 +763,12 @@ return (
                                     </div>
                                     <div><div className='text-center border-l border-r border-black'><PageTitle >Група № {index + 1}</PageTitle>
                                     </div></div>
-                                    <div className='mt-5'>
-                                        <div className='ml-20 '>
+                                    <div className='mt-5 justify-center'>
+                                        <div className='w-full  content-center	'>
 
                                             <Button
                                                 onClick={(event, index) => handleAddGroup(event, index)}
-                                                className="text-center w-10 h-10 bg-green-400 hover:bg-green-600 rounded-md"
+                                                className="text-center w-10 h-10 mr-1/2 bg-green-400 hover:bg-green-600 rounded-md"
                                                 disabled={(submitButtonDisabled)}
                                                 layout="outline"
                                             >
@@ -954,7 +783,7 @@ return (
 
                                                 <Button
                                                     onClick={(event) => handleDeleteGroup(index)}
-                                                    className="border w-10 h-10 ml-10 bg-red-500 hover:bg-red-800 rounded-md
+                                                    className="border w-10 h-10 ml-1/2 bg-red-500 hover:bg-red-800 rounded-md
 
                                                     "
                                                     type="button"
@@ -994,8 +823,173 @@ return (
 
 
                 ))}
+            </div></div ><div className="col-span-12 text-center  ">
 
-            </div></div ></>)
+<div>
+
+    <div className="grid md:grid-cols-1 border-t border-black p-5 ">
+        <div className='grid md:grid-cols-5'>
+            <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
+            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. детайли</div><div className=''> <b>{elementNumber}</b></div> </div>
+
+            <div className='grid md:grid-rows-2 text-center border'><div>Общо бр. дръжки.</div><div className=''><b> {handleNumber} бр./ {handlePrice}лв.</b>
+            </div> </div>
+
+            <div className="grid md:grid-rows-2 text-center border">Общо ламиниране
+
+                <div>{selectedDoor === "Двустранно грундиран МДФ" || selectedDoor === "Фурнирован МДФ" ? (<HelperText valid={false}>Не се предлага за този материал</HelperText>) : (
+
+                    <div className="">
+                        <b>{totalSqrt} кв.м</b>
+                    </div>)
+                }</div>
+            </div>
+            <div className='border grid md:grid-rows-2 text-center'><div>Обща цена :</div> <div> <b>{totalPrice}</b></div></div>
+
+        </div>
+        <Modal isOpen={isDataLoadModalOpen}>
+            <ModalHeader className="flex items-center">
+                Редактиране на поръчка !
+            </ModalHeader>
+            <ModalBody>
+
+                Ще редактирате поръчка с номер {orderData.id}, създадена на {orderData.createdAt} !
+            </ModalBody>
+            <ModalFooter>
+                <div className="hidden sm:block">
+                    <Button onClick={() => { handlePreflight(); closeModal(); }}>
+                        Зареждане на Данни
+                    </Button>
+                </div>
+
+            </ModalFooter>
+        </Modal>
+        <Modal isOpen={errorModalOpen}>
+            <ModalHeader className="flex items-center">
+                Възникна сървърна грешка при опит за редактиране. Моля презаредете страницата и опитайте отново.
+            </ModalHeader>
+            <ModalBody>
+            </ModalBody>
+            <ModalFooter>
+                <div className="hidden sm:block">
+                    <Button onClick={() => { window.location.reload() }}>
+                        Презареждане на страницата!
+                    </Button>
+                </div>
+
+            </ModalFooter>
+        </Modal>
+        <Modal isOpen={successfulEditModalOpen}>
+            <ModalHeader className="flex items-center">
+                Редактирането на поръчката е успешно!
+            </ModalHeader>
+            <ModalBody>
+
+            </ModalBody>
+            <ModalFooter>
+                <div className="hidden sm:block">
+                    <Button className='mr-3'>
+                        <Link
+                            to={`/app/orders`}
+                        >
+                            Назад към всички поръчки</Link>
+                    </Button>
+                    <Button
+                        onClick={() => { window.location.reload(); setSuccessfulEditModalOpen(false) }}>
+                        Повторно редактиране
+                    </Button>
+                </div>
+
+            </ModalFooter>
+        </Modal>
+
+        <div className='grid md:grid-cols-2 '>
+            <div className=''>
+                <Button
+                    className="w-1/3 px-4 py-2 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
+                    onClick={(event) => handleAddGroup(event)}
+                    disabled={(submitButtonDisabled)}
+                    layout="outline"
+                >
+                    Добави Детайл
+                </Button></div>
+            <div className=''>
+                <Button
+                    type="button"
+                    className="w-1/3 py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
+                    disabled={submitButtonDisabled}
+                    onClick={() => setModalOpen(true)}
+                >
+                    Завърши
+                </Button>
+
+            </div>
+
+            <Modal isOpen={modalOpen}>
+                <ModalHeader className="flex items-center">
+                    Потвърждавате ли направените промени?
+                </ModalHeader>
+                <ModalBody>
+
+                </ModalBody>
+                <ModalFooter>
+                    <div className="hidden sm:block">
+                        <Button onClick={() => { handleSubmit(); closeModal() }}>
+                            Потвърждаване                          </Button>
+                        <Button className='ml-3' layout="outline" onClick={() => { closeModal() }}>
+                            Отказ                                        </Button>
+                    </div>
+
+                </ModalFooter>
+            </Modal>
+            {/* <ConfirmationModal
+                    isOpen={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    onConfirm={handleSubmit}
+                /> */}
+        </div>
+        {totalSqrt <= 1.5 && (<div className='text-center '>
+            <HelperText className='text-lg text-yellow-600'> <b><u>Общата квадратура на поръчката е под 1.5 кв.м. Добавена е 30% надценка !</u></b></HelperText><p><HelperText className='text-lg text-red-600'> <b><u>Доставката се поема от клиента !</u></b></HelperText></p></div>)}
+        {loggedUser.data.role === '[USER]' && orderData.appliedDiscount === null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от 5% </u></b></HelperText></div>)}
+        {loggedUser.data.role === '[USER]' && orderData.appliedDiscount != null && (<div className='text-center'><HelperText className='text-lg text-green-600'> <b><u>Добавена е отстъпка от {orderData.appliedDiscount + 5}% </u></b></HelperText></div>)}
+    </div>
+</div>
+
+<hr className="customeDivider mx-4 my-5" />
+<div className='grid md:grid-cols-2 gap-10'>
+    <div className='  h-15 border-r pr-5 ml-3 border-black '>
+        <Label htmlFor="doorName" className="  mr-3 font-medium"><b>Материал на поръчката:</b></Label>
+        <Select className="text-center  mr-3 rounded shadow-sm w-24 "
+            id="mainDropdown"
+            name="mainDropdown"
+            value={mainDropdownValue}
+            onChange={(event) => handleMainDropdownChange(event)}
+            required
+
+        >
+            <option value="">-Изберете Материал-</option>
+            <option value="Мембранна вратичка">Мембранна вратичка</option>
+            <option value="Двустранно грундиран МДФ">Двустранно грундиран МДФ</option>
+            <option value="Фурнирован МДФ">Фурнирован МДФ</option>
+        </Select>
+        <HelperText className='text-s text-center text-yellow-500'> <b><u>Промямата ще бъде отразена за всички групи !</u></b></HelperText>
+
+    </div>
+    <div className=''>
+        <div className='border-l'></div>
+
+        <Label htmlFor="note" className="font-medium text-center   "><span><b>Забележка:</b></span></Label>
+        <Textarea
+            className="mt-1 border w-full"
+            type="text"
+            id={`note`}
+            name="note"
+            value={note}
+            onChange={(event) => { handleNote(event) }}
+        />
+    </div>
+</div>
+</div></>)
 }
 
 export default EditOrder;
