@@ -6,13 +6,19 @@ import { SidebarProvider } from "./context/SidebarContext";
 import ThemedSuspense from "./components/ThemedSuspense";
 import { Windmill } from "@windmill/react-ui";
 import * as serviceWorker from './serviceWorker';
+import { CacheBuster } from 'react-cache-buster';
+
 
 ReactDOM.render(
   <SidebarProvider>
     <Suspense fallback={<ThemedSuspense />}>
       <Windmill>
-        <App />
+        <CacheBuster>
+          <App />
+        </CacheBuster>
+
       </Windmill>
+
     </Suspense>
   </SidebarProvider>,
   document.getElementById("root")

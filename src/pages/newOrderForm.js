@@ -74,7 +74,9 @@ const NewOrderForm = () => {
     const [elementNumber, setElementNumber] = useState(0);
     const [selectedDoor, setSelectedDoor] = useState('');
     const [selectedMaterialType, setSelectedMaterialType] = useState('');
-
+    const [groupForms, setGroupForms] = useState([
+        { ...initialFormState }
+    ]);
 
 
 
@@ -85,9 +87,7 @@ const NewOrderForm = () => {
     }, []);
 
 
-    const [groupForms, setGroupForms] = useState([
-        { ...initialFormState }
-    ]);
+    
 
 
     function closeModal() {
