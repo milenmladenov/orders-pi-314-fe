@@ -9,7 +9,7 @@ const SingleProduct = lazy(() => import("../pages/SingleProduct"));
 const AddProduct = lazy(() => import("../pages/AddProduct"));
 const Customers = lazy(() => import("../pages/Customers"));
 const Chats = lazy(() => import("../pages/Chats"));
-const Profile = lazy(() => import("../pages/Profile"));
+const Profile = lazy(() => import("../pages/ProfilePage"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Page404 = lazy(() => import("../pages/404"));
 const Blank = lazy(() => import("../pages/Blank"));
@@ -84,7 +84,7 @@ const SuccesRegistration = lazy(() => import("../pages/SuccessRegistration"))
         component: Chats,
     },
     {
-        path: "/manage-profile",
+        path: "/profile",
         component: Profile,
     },
     {

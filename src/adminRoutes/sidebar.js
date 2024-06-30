@@ -45,7 +45,7 @@ const adminRoutes = [
   
 
   {
-    path: "/app/manage-profile",
+    path: "/app/profile",
     icon: "UserIcon",
     name: "Профил",
   },

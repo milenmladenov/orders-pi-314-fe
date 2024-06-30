@@ -33,7 +33,7 @@ import Fake from "faker/lib/fake";
 
 
 
-const OrdersTable = ({ resultsPerPage, filter }) => {
+const OrdersTable = ({ resultsPerPage, filter ,startDate,endDate}) => {
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
@@ -84,7 +84,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(apiBaseUrl + "/api/orders/all", config)
+      const response = await axios.get(`${apiBaseUrl}/api/orders/all?startDate=${startDate}&endDate=${endDate}`, config)
       console.log(response)
       const ordersData = response.data;
       setIsLoading(false);
@@ -204,7 +204,7 @@ const OrdersTable = ({ resultsPerPage, filter }) => {
 
   useEffect(() => {
     fetchData();
-  }, [page, resultsPerPage, filter]);
+  }, [page, resultsPerPage, filter,startDate,endDate]);
 
   if (isLoading) {
     return <><ThemedSuspense /></>;

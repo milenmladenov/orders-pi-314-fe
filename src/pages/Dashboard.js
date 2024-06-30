@@ -79,7 +79,7 @@ function Dashboard() {
       </>
       )}
       <PageTitle>Поръчки</PageTitle>
-      <OrdersTable resultsPerPage={10} />
+      <OrdersTable resultsPerPage={10000000} startDate={-2194445204000} endDate={64075218796000}/>
     </>
   );
 }
