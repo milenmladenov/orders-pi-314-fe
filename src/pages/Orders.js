@@ -77,7 +77,6 @@ const Orders = () => {
                 className="py-3"
                 onChange={(e) => handleFilter(e.target.value)}
               >                <option>Филтър по статус</option>
-
                 <option>Всички</option>
                 <option>Създадена</option>
                 <option>Изпълнява се</option>
