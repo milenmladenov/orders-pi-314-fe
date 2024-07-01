@@ -14,7 +14,7 @@ function Icon({ icon, ...props }) {
 
 const Orders = () => {
   // pagination setup
-  const [resultsPerPage, setResultPerPage] = useState(10);
+  const [resultsPerPage, setResultPerPage] = useState(1000);
   const [filter, setFilter] = useState("всички");
   const [startDate, setStartDate] = useState('-2194445204000');
   const [endDate, setEndDate] = useState('64075218796000');
