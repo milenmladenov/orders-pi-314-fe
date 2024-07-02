@@ -357,47 +357,27 @@ const NewOrderForm = () => {
     const handleAddGroup = (event, index) => {
         setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
         handlePreflight();
-        if (index > 0) {
-            setGroupForms((prevGroupForms) => [
-                ...prevGroupForms,
-                {
-                    doorName: groupForms[index - 1].doorName,
-                    modelName: groupForms[index - 1].modelName,
-                    folioName: groupForms[index - 1].folioName,
-                    handleName: groupForms[index - 1].handleName,
-                    profilName: groupForms[index - 1].profilName,
-                    height: 0,
-                    width: 0,
-                    length: 0,
-                    number: 1,
-                    bothSidesLaminated: groupForms[index - 1].bothSidesLaminated,
-                    detailType: {
-                        material: groupForms[index - 1].detailType.material,
-                        type: groupForms[index - 1].detailType.type,
-                    },
-                },
-            ]);
-
-        } else setGroupForms((prevGroupForms) => [
-            ...prevGroupForms,
-            {
-                doorName: groupForms[0].doorName,
-                modelName: groupForms[0].modelName,
-                folioName: groupForms[0].folioName,
-                handleName: groupForms[0].handleName,
-                profilName: groupForms[0].profilName,
-                height: 0,
-                width: 0,
-                length: 0,
-                number: 1,
-                bothSidesLaminated: groupForms[0].bothSidesLaminated,
-                detailType: {
-                    material: groupForms[0].detailType.material,
-                    type: groupForms[0].detailType.type,
-                },
+        const lastGroupForm = groupForms[groupForms.length - 1];
+        setGroupForms((prevGroupForms) => [
+         ...prevGroupForms,
+          {
+            doorName: lastGroupForm.doorName,
+            modelName: lastGroupForm.modelName,
+            folioName: lastGroupForm.folioName,
+            handleName: lastGroupForm.handleName,
+            profilName: lastGroupForm.profilName,
+            height: 0,
+            width: 0,
+            length: 0,
+            number: 1,
+            bothSidesLaminated: lastGroupForm.bothSidesLaminated,
+            detailType: {
+              material: lastGroupForm.detailType.material,
+              type: lastGroupForm.detailType.type,
             },
+          },
         ]);
-    };;
+      };
 
 
     return (

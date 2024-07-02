@@ -306,6 +306,44 @@ console.log(data);
                     </TableCell>
                   </TableRow>
                 ))}
+                <div className="ml-4 ">
+                <Label className='text-xl font-bold text-green-500	'>Фолио</Label></div>
+                {data && data.folios && data.folios.map((folio, index) => (
+                  <TableRow key={index} >
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">{folio.name}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">da</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">12</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                       
+                        <div>
+                          <p className="font-semibold">{folio.price} лв.</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
             <TableFooter>
