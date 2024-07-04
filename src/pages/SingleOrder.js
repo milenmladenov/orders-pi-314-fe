@@ -199,7 +199,7 @@ const SingleOrder = ({ match }) => {
           order.groups.forEach(group => {
             for (let i = 0; i < group.number; i++) {
               const rowData = ["",
-                order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, group.folio.folio,order.id + "-" + numberToIncrement++];
+                order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number,order.id + "-" + numberToIncrement++];
       
               const newRow = dataWorksheet.addRow(rowData)
               dataWorksheet.addRow("Произведено от Пи 314 ООД");
