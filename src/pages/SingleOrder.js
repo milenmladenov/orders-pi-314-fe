@@ -53,31 +53,57 @@ const SingleOrder = ({ match }) => {
                 return "";
         }
     };
+ 
 
     const captureScreenshotAndConvertToPDF = () => {
-
-        const pdf = new jsPDF('p', 'mm', [297, 210]);
-        // Select the component or container to capture
+        const pdf = new jsPDF('p', 'pt', [297 * 72 / 25.4, 210 * 72 / 25.4]); // Convert mm to pt
         const componentToCapture = document.getElementById('singleOrderComponent');
-        let width = pdf.internal.pageSize.getWidth();
-        let height = pdf.internal.pageSize.getHeight();
-        // Use html2canvas to capture the component as an image
-        html2canvas(componentToCapture).then(canvas => {
+      
+        // Get the component's dimensions
+        const componentWidth = componentToCapture.offsetWidth;
+        const componentHeight = componentToCapture.offsetHeight;
+      
+        // Calculate the image's dimensions based on the page size and the component's dimensions
+        const imageWidth = pdf.internal.pageSize.getWidth() * 0.8; // 90% of the page width
+        const imageAspectRatio = componentWidth / componentHeight;
+        const imageHeight = imageWidth / imageAspectRatio;
+      
+        // Convert the component to an image
+        html2canvas(componentToCapture).then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+      
+          // Check if the image height is greater than the available space on a single page
+          if (imageHeight > pdf.internal.pageSize.height ) {
+            // Calculate the number of pages needed
+            const numPages = Math.ceil(imageHeight / (pdf.internal.pageSize.height));
+      
+            // Loop through each page
+            for (let i = 0; i < numPages; i++) {
+              // Calculate the height of the current page
+              const pageHeight = (pdf.internal.pageSize.height) * (i === numPages - 1? (imageHeight % (pdf.internal.pageSize.height)) / imageHeight : 1);
+      
+              // Create a new page
+              pdf.addPage();
+      
+              // Set the image's dimensions based on the current page's height
+              const currentImageHeight = Math.min(pageHeight, imageHeight);
+              const currentImageWidth = (currentImageHeight / imageHeight) * imageWidth;
+      
+              // Add the image to the current page
+              pdf.addImage(Logo, 'JPEG', 40, 0, 50, 50);
+              pdf.addImage(imgData, 'JPEG', 40,50, currentImageWidth, currentImageHeight);
+            }
+          } else {
+            // Add the image to the PDF
+            pdf.addImage(Logo, 'JPEG', 40, 0, 50, 50);
 
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addFileToVFS('PTSans-Regular-normal.ttf', font);
-            pdf.addFont('PTSans-Regular-normal.ttf', 'PTSans-Regular', 'normal');
-            pdf.margin = {
-                horiz: 5,
-                vert: 20  
-            };
-            pdf.addImage(Logo, 'PNG', 5, 0, 20, 20)
-            pdf.addImage(imgData, 'JPEG', 0, 20, width , height - 20);
-            pdf.save(order.orderUuid + '.pdf')
-
-        })
-
-    };
+            pdf.addImage(imgData, 'JPEG' ,40,50, imageWidth, imageHeight);
+          }
+      
+          // Save the PDF
+          pdf.save(order.orderUuid + '.pdf');
+        });
+      };
 
     const isHashFromUrl = () => {
         const hashFromUrl = window.location.hash
@@ -160,6 +186,7 @@ const SingleOrder = ({ match }) => {
     if (!order) {
         return <ThemedSuspense />;
     }
+    
     const exportToExcel = async () => {
         try {
             const response = await axios.get(labelsFile, { responseType: 'arraybuffer' });

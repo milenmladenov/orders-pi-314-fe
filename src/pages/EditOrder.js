@@ -376,28 +376,30 @@ const handleChange = (event, index) => {
 
 
 
-const handleAddGroup = (event) => {
+const handleAddGroup = (event, index) => {
     setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
+    handlePreflight();
+    const lastGroupForm = groupForms[groupForms.length - 1];
     setGroupForms((prevGroupForms) => [
-        ...prevGroupForms,
-        {
-            doorName: doorName,
-            modelName: groupForms[0].modelName,
-            folioName: groupForms[0].folioName,
-            handleName: groupForms[0].handleName,
-            profilName: groupForms[0].profilName,
-            height: 0,
-            width: 0,
-            length: 0,
-            number: 1,
-            bothSidesLaminated: groupForms[0].bothSidesLaminated,
-            detailType: {
-                material: groupForms[0].detailType.material,
-                type: groupForms[0].detailType.type,
-            },
+     ...prevGroupForms,
+      {
+        doorName: lastGroupForm.doorName,
+        modelName: lastGroupForm.modelName,
+        folioName: lastGroupForm.folioName,
+        handleName: lastGroupForm.handleName,
+        profilName: lastGroupForm.profilName,
+        height: 0,
+        width: 0,
+        length: 0,
+        number: 1,
+        bothSidesLaminated: lastGroupForm.bothSidesLaminated,
+        detailType: {
+          material: lastGroupForm.detailType.material,
+          type: lastGroupForm.detailType.type,
         },
+      },
     ]);
-};
+  };
 
 
 
