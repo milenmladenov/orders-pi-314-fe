@@ -189,33 +189,33 @@ const SingleOrder = ({ match }) => {
     
     const exportToExcel = async () => {
         try {
-            const response = await axios.get(labelsFile, { responseType: 'arraybuffer' });
-            const existingWorkbook = new ExcelJS.Workbook();
-            await existingWorkbook.xlsx.load(response.data)
-
-            const dataWorksheet = existingWorkbook.getWorksheet('Data')
-            let numberToIncrement = 1;
-
-            order.groups.forEach(group => {
-
-                const rowData = ["",
-                    order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, order.id + "-" + numberToIncrement++];
-
-                const newRow = dataWorksheet.addRow(rowData);
-            })
-
-
-
-            const buffer = await existingWorkbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-            saveAs(blob, 'етикети - ' + order.id + '.xlsx');
-
-
+          const response = await axios.get(labelsFile, { responseType: 'arraybuffer' });
+          const existingWorkbook = new ExcelJS.Workbook();
+          await existingWorkbook.xlsx.load(response.data)
+      
+          const dataWorksheet = existingWorkbook.getWorksheet('Data')
+          let numberToIncrement = 1;
+      
+          order.groups.forEach(group => {
+            for (let i = 0; i < group.number; i++) {
+              const rowData = ["",
+                order.user.companyName, formatDateWithoutDashes(order.createdAt) + order.id, group.model.name, "", group.height, group.width, group.number, group.folio.folio,order.id + "-" + numberToIncrement++];
+      
+              const newRow = dataWorksheet.addRow(rowData)
+              dataWorksheet.addRow("Произведено от Пи 314 ООД");
+            }
+          })
+      
+          const buffer = await existingWorkbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+          saveAs(blob, 'етикети - ' + order.id + '.xlsx');
+      
+      
         } catch (error) {
-            console.error('Error exporting to Excel:', error);
+          console.error('Error exporting to Excel:', error);
         }
-    };
+      };
 
     return (
         console.log(order),

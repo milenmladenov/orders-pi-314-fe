@@ -19,6 +19,7 @@ const SingleOrder = lazy(() => import("../pages/SingleOrder"))
 const SingleCustomer = lazy(() => import("../pages/SingleCustomer"))
 const EditOrder = lazy(() => import("../pages/EditOrder"))
 const SuccesRegistration = lazy(() => import("../pages/SuccessRegistration"))
+const ActivateUser = lazy(() => import("../pages/ActivateUser"))
 
 // const LogoutModal = lazy(() => import("../components/LogoutModal"))
 
@@ -98,6 +99,10 @@ const SuccesRegistration = lazy(() => import("../pages/SuccessRegistration"))
     {
         path: "/404",
         component: Page404,
+    },
+    {
+        path: "/activate-user/:id",
+        component: ActivateUser,
     },
     {
         path: "/blank",
