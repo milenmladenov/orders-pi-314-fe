@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState, useEffect } from 'react';
 
 import InfoCard from "../components/Cards/InfoCard";
 import ChartCard from "../components/Chart/ChartCard";
@@ -7,6 +8,9 @@ import ChartLegend from "../components/Chart/ChartLegend";
 import PageTitle from "../components/Typography/PageTitle";
 import { CartIcon, MoneyIcon, PeopleIcon } from "../icons";
 import RoundIcon from "../components/RoundIcon";
+import { config } from '../Constants';
+
+
 
 import {
   doughnutOptions,
@@ -19,7 +23,37 @@ import OrdersTable from "../components/OrdersTable";
 
 function Dashboard() {
   const loggedUser = JSON.parse(localStorage.getItem("user"))
+  const apiBaseUrl = config.url.API_BASE_URL;
+  const [smsQuota, setSmsQuota] = useState(0);
+  const [userCount,setUserCount] = useState(0);
 
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  
+    fetch(apiBaseUrl + "/api/sms", config)
+     .then(response => response.json())
+     .then(data => setSmsQuota(data.quotaRemaining));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  
+    fetch(apiBaseUrl + "/api/customers/count", config)
+     .then(response => response.json())
+     .then(data => setUserCount(data));
+
+  }, []);
   return (
     <>
       <PageTitle>Контролен Панел</PageTitle>
@@ -28,7 +62,7 @@ function Dashboard() {
 
       {loggedUser.data.role === '[ADMIN]' && ( <>
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard title="Брой клиенти" value="765">
+        <InfoCard title="Брой клиенти" value={userCount}>
           <RoundIcon
             icon={PeopleIcon}
             iconColorClass="text-orange-500 dark:text-orange-100"
@@ -37,7 +71,7 @@ function Dashboard() {
           />
         </InfoCard>
 
-        <InfoCard title="Общa печалба" value="126,760.89 лв.">
+        <InfoCard title="Оставащи SMS-и" value={smsQuota}>
           <RoundIcon
             icon={MoneyIcon}
             iconColorClass="text-green-500 dark:text-green-100"
