@@ -87,7 +87,7 @@ const NewOrderForm = () => {
     }, []);
 
 
-    
+
 
 
     function closeModal() {
@@ -341,7 +341,6 @@ const NewOrderForm = () => {
                     (formData.detailType.type !== "К1 – 68мм височина" && formData.detailType.type !== "К2 – 70мм височина" && formData.detailType.type !== "К3 – 80мм височина")
 
                 ));
-                console.log(isButtonDisabled);
                 setSubmitButtonDisabled(isButtonDisabled)
 
 
@@ -359,34 +358,38 @@ const NewOrderForm = () => {
         handlePreflight();
         const lastGroupForm = groupForms[groupForms.length - 1];
         setGroupForms((prevGroupForms) => [
-         ...prevGroupForms,
-          {
-            doorName: lastGroupForm.doorName,
-            modelName: lastGroupForm.modelName,
-            folioName: lastGroupForm.folioName,
-            handleName: lastGroupForm.handleName,
-            profilName: lastGroupForm.profilName,
-            height: 0,
-            width: 0,
-            length: 0,
-            number: 1,
-            bothSidesLaminated: lastGroupForm.bothSidesLaminated,
-            detailType: {
-              material: lastGroupForm.detailType.material,
-              type: lastGroupForm.detailType.type,
+            ...prevGroupForms,
+            {
+                doorName: lastGroupForm.doorName,
+                modelName: lastGroupForm.modelName,
+                folioName: lastGroupForm.folioName,
+                handleName: lastGroupForm.handleName,
+                profilName: lastGroupForm.profilName,
+                height: 0,
+                width: 0,
+                length: 0,
+                number: 1,
+                bothSidesLaminated: lastGroupForm.bothSidesLaminated,
+                detailType: {
+                    material: lastGroupForm.detailType.material,
+                    type: lastGroupForm.detailType.type,
+                },
             },
-          },
         ]);
-      };
+    };
+
+    
+
 
 
     return (
 
 
         <>
+         
             <div className="">
                 <div className="grid md:grid-cols-1 gap-10 justify-center">
-                <div className="text-center "><PageTitle >Създаване на нова поръчка</PageTitle></div>
+                    <div className="text-center "><PageTitle >Създаване на нова поръчка</PageTitle></div>
                     {groupForms.map((formData, index) => (
 
                         <>
@@ -567,7 +570,7 @@ const NewOrderForm = () => {
                                         <div></div>
                                     </div>
                                     <div key={index} className=" ">
-                                        <div className=''> 
+                                        <div className=''>
 
                                             <form
 
@@ -908,7 +911,7 @@ const NewOrderForm = () => {
                                                     <div className=''>
                                                         {groupButtonVisibility[index] && (
                                                             <Button
-                                                                onClick={(event,index) => handleAddGroup(event, index)}
+                                                                onClick={(event, index) => handleAddGroup(event, index)}
                                                                 className="text-center w-10 h-10 bg-green-400 hover:bg-green-600 rounded-md"
                                                                 disabled={(submitButtonDisabled)}
                                                                 layout="outline"
@@ -962,10 +965,10 @@ const NewOrderForm = () => {
                                     </div>
                                 </div></></>
                     ))}
-                                                        
-                                                       
+
+
                 </div> <div className="col-span-12 text-center  ">
-                    
+
                     <div className="grid md:grid-cols-1 border-t border-black p-5">
                         <div className='grid md:grid-cols-5'>
                             <div className='grid md:grid-rows-2 text-center border'><div>Общо кв.м. вратички</div><div className=''> <b>{totalSqrt} кв.м/ {totalGroupPrices}лв. с ДДС</b></div> </div>
@@ -993,7 +996,7 @@ const NewOrderForm = () => {
                                 <Button
                                     className="w-1/3 text-black bg-green-400 rounded-md shadow-md hover:bg-green-700"
                                     onClick={(event, index) => handleAddGroup(event, index + 1)}
-                                 
+
                                     disabled={(submitButtonDisabled)}
                                     layout="outline"
                                 >
@@ -1002,7 +1005,7 @@ const NewOrderForm = () => {
                             <div className=''>
                                 <Button
                                     type="button"
-                                    
+
                                     className="w-1/3  text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700"
                                     disabled={(submitButtonDisabled)}
                                     onClick={() => setIsModalOpen(true)}
