@@ -14,6 +14,8 @@ import {
 import { Link } from 'react-router-dom'
 import FolioOptions from '../components/FolioOptions';
 import modelOptions from '../components/modelOptions';
+import ThemedSuspense from '../components/ThemedSuspense';
+
 
 
 
@@ -148,7 +150,7 @@ const NewExcelOrderForm = () => {
         const token = localStorage.getItem('accessToken')
         const formData = new FormData();
         formData.append('file', file);
-
+        setData(null)
         fetch(apiBaseUrl + "/api/orders/import-excel", {
             method: 'POST',
             headers: {
@@ -158,6 +160,7 @@ const NewExcelOrderForm = () => {
         })
             .then(response => response.json())
             .then(data => {
+                
                 setData(data);
                 setIsExcelImported(true);
                 setGroupButtonVisibility((prevVisibility) => [...prevVisibility, true]);
@@ -447,6 +450,10 @@ const NewExcelOrderForm = () => {
         }));
         setGroupForms(updatedGroupForms);
     };
+
+    if (!data) {
+        return <ThemedSuspense />;
+    }
 
 
     return (
