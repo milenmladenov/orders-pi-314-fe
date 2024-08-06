@@ -23,7 +23,7 @@ const routes = [
     path: "/app/orders"
   },
   {
-    path: "/app/manage-profile",
+    path: "/app/profile",
     icon: "UserIcon",
     name: "Профил",
   }

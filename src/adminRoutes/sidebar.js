@@ -48,11 +48,6 @@ const adminRoutes = [
     path: "/app/profile",
     icon: "UserIcon",
     name: "Профил",
-  },
-  {
-    path: "/app/settings",
-    icon: "OutlineCogIcon",
-    name: "Настройки",
   }
 ];
 

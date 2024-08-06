@@ -57,7 +57,7 @@ const routes = [
   },
 
   {
-    path: "/manage-profile",
+    path: "/profile",
     component: Profile,
   },
   {

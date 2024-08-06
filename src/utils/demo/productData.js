@@ -10,6 +10,7 @@ export default [
     londDescription:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Maiores ad saepe porro laudantium, assumenda eos perspiciatis. Quia repellendus\n\n eligendi exercitationem explicabo consectetur facilis vitae nemo dignissimos, totam quas in nostrum optio blanditiis amet quam consequatur illum eos minus voluptates possimus aperiam non modi voluptatem velit!\n Doloremque distinctio commodi corporis adipisci voluptatem fugit maxime error officiis dicta deleniti exercitationem provident a obcaecati, quaerat dolores dolor harum non perferendis blanditiis ipsum aliquam\n\n ducimus sapiente molestias. Atque odio inventore consequuntur delectus beatae fugit. Accusamus, aut tempora cupiditate temporibus consequuntur dolorem iusto laborum nihil!",
     price: "$120.00",
+    type: "door",
     qty: 120,
     rating: 5.0,
     reviews: [

@@ -69,7 +69,7 @@ const ActivateUser = lazy(() => import("../pages/ActivateUser"))
         component: AddProduct,
     },
     {
-        path: "/product/:id",
+        path: "/product/:type/:id",
         component: SingleProduct,
     },
     {
@@ -108,10 +108,6 @@ const ActivateUser = lazy(() => import("../pages/ActivateUser"))
         path: "/blank",
         component: Blank,
     }
-    // {
-    //     path: "/logout",
-    //     component: LogoutModal,
-    // }
 ]
 
 
