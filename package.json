@@ -5,9 +5,6 @@
     "dependencies": {
         "@headlessui/react": "^1.7.17",
         "@react-pdf/renderer": "^3.1.12",
-        "@testing-library/jest-dom": "4.2.4",
-        "@testing-library/react": "9.5.0",
-        "@testing-library/user-event": "7.2.1",
         "@windmill/react-ui": "^0.3.2",
         "axios": "^1.4.0",
         "chart.js": "4.5.1",
@@ -18,7 +15,7 @@
         "flowbite": "^1.8.1",
         "html2canvas": "^1.4.1",
         "json2xls": "^0.1.2",
-        "jspdf": "4.2.1",
+        "jspdf": "^2.5.2",
         "jspdf-autotable": "^3.8.2",
         "react": "^16.13.1",
         "react-chartjs-2": "2.9.0",
@@ -30,7 +27,7 @@
         "react-transition-group": "4.4.1",
         "semantic-ui-react": "^2.1.4",
         "xlsx": "^0.18.5"
-    },
+      },
     "devDependencies": {
         "@release-it/conventional-changelog": "1.1.4",
         "@svgr/webpack": "5.4.0",
