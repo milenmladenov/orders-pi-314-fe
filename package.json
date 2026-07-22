@@ -24,7 +24,6 @@
         "react-chartjs-2": "2.9.0",
         "react-datepicker": "^7.0.0",
         "react-dom": "^16.13.1",
-        "react-export-excel": "^0.5.3",
         "react-focus-lock": "2.4.0",
         "react-router-dom": "5.2.0",
         "react-scripts": "3.4.1",
@@ -40,6 +39,7 @@
         "cross-env": "7.0.2",
         "cssnano": "4.1.10",
         "cz-conventional-changelog": "3.2.0",
+        "gh-pages": "^6.3.0",
         "netlify-cli": "^15.7.0",
         "postcss": "^8.4.12",
         "postcss-cli": "7.1.1",
@@ -59,6 +59,12 @@
             "react-app/jest"
         ]
     },
+    
+        "homepage": "https://milenmladenov.github.io/orders-pi314-fe",
+        "scripts": {
+          "predeploy": "npm run build",
+          "deploy": "gh-pages -d build"
+        },
     "proxy": "https://orders-pi314-396621.uc.r.appspot.com",
     "homepage": "/",
     "browserslist": {
